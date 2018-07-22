@@ -32,7 +32,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <generated/utsrelease.h>
+#include <sys/param.h>
+
 #include <asm/io.h>
 #include <linux/irqflags.h>
 #include "i915_drv.h"
@@ -354,9 +355,9 @@ int i915_error_state_to_str(struct drm_i915_error_state_buf *m,
 	err_printf(m, "%s\n", error->error_msg);
 	err_printf(m, "Time: %"PRIdMAX" s %ld us\n", (intmax_t)error->time.tv_sec,
 		   (long)error->time.tv_usec);
-#ifndef __NetBSD__		/* XXX kernel version */
-	err_printf(m, "Kernel: " UTS_RELEASE "\n");
-#endif
+	err_printf(m, "Kernel: " __NetBSD_Version__ "\n");
+	err_printf(m, "Time: %ld s %ld us\n", error->time.tv_sec,
+		   error->time.tv_usec);
 	max_hangcheck_score = 0;
 	for (i = 0; i < ARRAY_SIZE(error->ring); i++) {
 		if (error->ring[i].hangcheck_score > max_hangcheck_score)
