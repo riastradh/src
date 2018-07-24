@@ -38,6 +38,7 @@
 #include <sys/systm.h>
 
 #include <lib/libkern/libkern.h>
+#include <linux/printk.h>
 
 #define	oops_in_progress	(panicstr != NULL)
 
