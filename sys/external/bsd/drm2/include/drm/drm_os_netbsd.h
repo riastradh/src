@@ -44,6 +44,11 @@
 #define	CONFIG_X86	1
 #endif
 
+#include "pci.h"
+#if NPCI > 0
+#define CONFIG_PCI
+#endif
+
 #include <drm/drm_agp_netbsd.h>
 #include <drm/drm_auth_netbsd.h>
 #include <drm/drm_copy_netbsd.h>
