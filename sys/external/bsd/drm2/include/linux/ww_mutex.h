@@ -37,6 +37,8 @@
 #include <sys/mutex.h>
 #include <sys/rbtree.h>
 
+#include <linux/mutex.h>
+
 struct ww_class {
 	volatile uint64_t	wwc_ticket;
 };

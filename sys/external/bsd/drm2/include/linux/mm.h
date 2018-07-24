@@ -35,6 +35,8 @@
 #include <uvm/uvm_extern.h>
 
 #include <asm/page.h>
+#include <linux/shrinker.h>
+
 
 struct file;
 
@@ -74,6 +76,12 @@ static inline unsigned long
 get_num_physpages(void)
 {
 	return uvmexp.npages;
+}
+
+static inline void
+kvfree(void * ptr)
+{
+	panic("Unimplemented");
 }
 
 #endif  /* _LINUX_MM_H_ */

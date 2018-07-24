@@ -77,4 +77,10 @@ typedef unsigned long long cycles_t;
 /* XXX Not sure this is correct.  */
 typedef off_t loff_t;
 
+struct rcu_head {
+
+};
+
+#define DECLARE_BITMAP(name,size) size_t name[size/sizeof(size_t)]
+
 #endif  /* _LINUX_TYPES_H_ */

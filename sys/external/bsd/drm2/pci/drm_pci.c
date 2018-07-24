@@ -53,7 +53,6 @@ static void	drm_pci_irq_uninstall(struct drm_device *,
 		    struct drm_bus_irq_cookie *);
 static const char *
 		drm_pci_get_name(struct drm_device *);
-static int	drm_pci_set_busid(struct drm_device *, struct drm_master *);
 static int	drm_pci_set_unique(struct drm_device *, struct drm_master *,
 		    struct drm_unique *);
 static int	drm_pci_irq_by_busid(struct drm_device *,
@@ -320,7 +319,7 @@ drm_pci_format_devname(struct drm_device *dev, const char *unique,
 	    unique);
 }
 
-static int
+int
 drm_pci_set_busid(struct drm_device *dev, struct drm_master *master)
 {
 	int n;

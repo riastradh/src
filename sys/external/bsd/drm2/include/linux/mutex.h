@@ -35,6 +35,7 @@
 #include <sys/mutex.h>
 
 #include <lib/libkern/libkern.h> /* KASSERT */
+#include <linux/list.h>
 
 #define	__acquires(lock)	/* XXX lockdep stuff */
 #define	__releases(lock)	/* XXX lockdep stuff */

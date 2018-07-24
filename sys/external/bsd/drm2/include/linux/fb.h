@@ -32,6 +32,9 @@
 #ifndef _LINUX_FB_H_
 #define _LINUX_FB_H_
 
+#include <linux/kgdb.h>
+#include <linux/notifier.h>
+
 #define	PICOS2KHZ(PICOS)	(1000000000ul / (PICOS))
 #define	KHZ2PICOS(KHZ)		(1000000000ul / (KHZ))
 
