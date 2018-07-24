@@ -966,9 +966,15 @@ int i915_gem_context_setparam_ioctl(struct drm_device *dev, void *data,
 	case I915_CONTEXT_PARAM_BAN_PERIOD:
 		if (args->size)
 			ret = -EINVAL;
+#ifdef __NetBSD__
+		else if (args->value < ctx->hang_stats.ban_period_seconds &&
+			 !DRM_SUSER())
+			ret = -EPERM;
+#else
 		else if (args->value < ctx->hang_stats.ban_period_seconds &&
 			 !capable(CAP_SYS_ADMIN))
 			ret = -EPERM;
+#endif
 		else
 			ctx->hang_stats.ban_period_seconds = args->value;
 		break;
