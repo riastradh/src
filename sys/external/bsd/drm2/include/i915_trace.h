@@ -115,8 +115,7 @@ trace_i915_gem_object_unbind(struct drm_i915_gem_object *obj __unused)
 }
 
 static inline void
-trace_i915_gem_request_add(struct intel_ring_buffer *ring __unused,
-    uint32_t seqno __unused)
+trace_i915_gem_request_add(struct drm_i915_gem_request *request)
 {
 }
 
@@ -126,8 +125,7 @@ trace_i915_gem_request_complete(struct intel_ring_buffer *ring __unused)
 }
 
 static inline void
-trace_i915_gem_request_retire(struct intel_ring_buffer *ring __unused,
-    uint32_t seqno __unused)
+trace_i915_gem_request_retire(struct drm_i915_gem_request *request __unused)
 {
 }
 
