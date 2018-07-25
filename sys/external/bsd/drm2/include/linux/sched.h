@@ -36,6 +36,9 @@
 #include <sys/kernel.h>
 #include <sys/proc.h>
 
+#include <asm/param.h>
+#include <linux/errno.h>
+
 #define	TASK_COMM_LEN	MAXCOMLEN
 
 #define	current	curproc
