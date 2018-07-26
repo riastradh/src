@@ -214,7 +214,6 @@ static int intelfb_create(struct drm_fb_helper *helper,
 	bool prealloc = false;
 
 	mutex_lock(&dev->struct_mutex);
-
 	if (intel_fb &&
 	    (sizes->fb_width > intel_fb->base.width ||
 	     sizes->fb_height > intel_fb->base.height)) {
@@ -722,11 +721,13 @@ out:
 
 static void intel_fbdev_suspend_worker(struct work_struct *work)
 {
+#ifndef __NetBSD__		/* XXX fb suspend */
 	intel_fbdev_set_suspend(container_of(work,
 					     struct drm_i915_private,
 					     fbdev_suspend_work)->dev,
 				FBINFO_STATE_RUNNING,
 				true);
+#endif
 }
 
 int intel_fbdev_init(struct drm_device *dev)

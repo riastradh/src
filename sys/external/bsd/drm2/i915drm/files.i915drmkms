@@ -19,6 +19,7 @@ makeoptions 	i915drmkms 	"CWARNFLAGS.intel_pm.c"+="-Wno-shadow"
 # XXX x86 kludge.
 makeoptions	i915drmkms	CPPFLAGS+="-DCONFIG_DRM_I915_FBDEV=1"
 makeoptions	i915drmkms	CPPFLAGS+="-DCONFIG_DRM_I915_PRELIMINARY_HW_SUPPORT=0"
+makeoptions	i915drmkms	CPPFLAGS+="-DCONFIG_DRM_FBDEV_EMULATION=1"
 
 file	external/bsd/drm2/i915drm/i915_module.c		i915drmkms
 file	external/bsd/drm2/i915drm/i915_pci.c		i915drmkms
