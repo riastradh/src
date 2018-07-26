@@ -38,6 +38,7 @@
 #include <sys/systm.h>
 
 #include <lib/libkern/libkern.h>
+#include <linux/bitops.h>
 #include <linux/printk.h>
 
 #define U16_MAX UINT16_MAX
