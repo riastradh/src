@@ -34,8 +34,10 @@
 
 typedef int irqreturn_t;
 
-#define	IRQ_NONE	0
-#define	IRQ_HANDLED	1
+enum irqreturn {
+	IRQ_NONE = 0x0,
+	IRQ_HANDLED = 0x1,
+};
 
 #define	DRM_IRQ_ARGS	void *arg
 

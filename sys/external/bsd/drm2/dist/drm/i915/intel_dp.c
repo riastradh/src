@@ -579,6 +579,9 @@ static u32 _pp_stat_reg(struct intel_dp *intel_dp)
 static int edp_notify_handler(struct notifier_block *this, unsigned long code,
 			      void *unused)
 {
+#ifdef __NetBSD__
+	panic("XXX");
+#else
 	struct intel_dp *intel_dp = container_of(this, typeof(* intel_dp),
 						 edp_notifier);
 	struct drm_device *dev = intel_dp_to_dev(intel_dp);
@@ -608,6 +611,7 @@ static int edp_notify_handler(struct notifier_block *this, unsigned long code,
 	pps_unlock(intel_dp);
 
 	return 0;
+#endif
 }
 
 static bool edp_have_panel_power(struct intel_dp *intel_dp)

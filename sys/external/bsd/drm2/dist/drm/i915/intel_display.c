@@ -14770,7 +14770,11 @@ static void intel_init_display(struct drm_device *dev)
 		dev_priv->display.queue_flip = intel_default_queue_flip;
 	}
 
+#ifdef __NetBSD__
+	linux_mutex_init(&dev_priv->pps_mutex);
+#else
 	mutex_init(&dev_priv->pps_mutex);
+#endif
 }
 
 /*
@@ -14978,6 +14982,7 @@ void i915_disable_vga(struct drm_device *dev)
 	vga_put(dev->pdev, VGA_RSRC_LEGACY_IO);
 #endif
 	udelay(300);
+#endif
 
 	I915_WRITE(vga_reg, VGA_DISP_DISABLE);
 	POSTING_READ(vga_reg);
