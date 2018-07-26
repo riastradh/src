@@ -58,8 +58,4 @@ __hash_empty(struct list_head *table, u_int size)
 	for (i = 0; i < nitems(table); i++)		\
 	       list_for_each_entry_safe(obj, tmp, &table[i], member)
 
-#define DECLARE_HASHTABLE(__a,__b) \
-	uint64_t __a /* XXX */
-
-
 #endif /*_LINUX_HASHTABLE_H_*/

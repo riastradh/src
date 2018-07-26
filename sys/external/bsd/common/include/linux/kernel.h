@@ -40,6 +40,10 @@
 #include <lib/libkern/libkern.h>
 #include <linux/printk.h>
 
+#define U16_MAX UINT16_MAX
+#define U32_MAX UINT32_MAX
+#define U64_MAX UINT64_MAX
+
 #define	oops_in_progress	(panicstr != NULL)
 
 #define	IS_ENABLED(option)	(option)

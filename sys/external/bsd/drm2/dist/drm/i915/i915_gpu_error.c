@@ -355,7 +355,7 @@ int i915_error_state_to_str(struct drm_i915_error_state_buf *m,
 	err_printf(m, "%s\n", error->error_msg);
 	err_printf(m, "Time: %"PRIdMAX" s %ld us\n", (intmax_t)error->time.tv_sec,
 		   (long)error->time.tv_usec);
-	err_printf(m, "Kernel: " __NetBSD_Version__ "\n");
+	err_printf(m, "Kernel: %d\n", __NetBSD_Version__);
 	err_printf(m, "Time: %ld s %ld us\n", error->time.tv_sec,
 		   error->time.tv_usec);
 	max_hangcheck_score = 0;
