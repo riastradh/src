@@ -33,6 +33,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/i2c.h>
 #include <linux/slab.h>
 #include <linux/delay.h>
+#include <linux/module.h>
 #include <linux/export.h>
 #include <linux/bitops.h>
 #include <linux/module.h>

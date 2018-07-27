@@ -89,11 +89,12 @@ del_timer(struct timer_list *timer)
 	callout_stop(&timer->tl_callout);
 }
 
-static inline void
+static inline bool
 del_timer_sync(struct timer_list *timer)
 {
 
-	callout_halt(&timer->tl_callout, NULL);
+	/* XXX return values? */
+	return callout_halt(&timer->tl_callout, NULL);
 }
 
 static inline bool

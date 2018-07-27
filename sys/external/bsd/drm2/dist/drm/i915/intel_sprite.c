@@ -90,8 +90,12 @@ void intel_pipe_update_start(struct intel_crtc *crtc)
 	enum pipe pipe = crtc->pipe;
 	long timeout = msecs_to_jiffies_timeout(1);
 	int scanline, min, max, vblank_start;
+#ifdef __NetBSD__
+	drm_waitqueue_t *wq = drm_crtc_vblank_waitqueue(&crtc->base);
+#else
 	wait_queue_head_t *wq = drm_crtc_vblank_waitqueue(&crtc->base);
 	DEFINE_WAIT(wait);
+#endif
 
 	vblank_start = adjusted_mode->crtc_vblank_start;
 	if (adjusted_mode->flags & DRM_MODE_FLAG_INTERLACE)
@@ -113,6 +117,9 @@ void intel_pipe_update_start(struct intel_crtc *crtc)
 	crtc->debug.max_vbl = max;
 	trace_i915_pipe_update_start(crtc);
 
+#ifdef __NetBSD__
+	panic("XXX");
+#else
 	for (;;) {
 		/*
 		 * prepare_to_wait() has a memory barrier, which guarantees
@@ -139,6 +146,7 @@ void intel_pipe_update_start(struct intel_crtc *crtc)
 	}
 
 	finish_wait(wq, &wait);
+#endif
 
 	drm_crtc_vblank_put(&crtc->base);
 

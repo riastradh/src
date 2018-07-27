@@ -862,8 +862,10 @@ void intel_panel_disable_backlight(struct intel_connector *connector)
 
 	mutex_lock(&dev_priv->backlight_lock);
 
+#ifndef __NetBSD__		/* XXX backlight */
 	if (panel->backlight.device)
 		panel->backlight.device->props.power = FB_BLANK_POWERDOWN;
+#endif
 	panel->backlight.enabled = false;
 	panel->backlight.disable(connector);
 
@@ -1141,8 +1143,10 @@ void intel_panel_enable_backlight(struct intel_connector *connector)
 
 	panel->backlight.enable(connector);
 	panel->backlight.enabled = true;
+#ifndef __NetBSD__		/* XXX backlight */
 	if (panel->backlight.device)
 		panel->backlight.device->props.power = FB_BLANK_UNBLANK;
+#endif
 
 	mutex_unlock(&dev_priv->backlight_lock);
 }

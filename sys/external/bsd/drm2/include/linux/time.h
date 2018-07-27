@@ -34,6 +34,8 @@
 
 #include <sys/time.h>
 
+#define NSEC_PER_MSEC	1000000L
+
 /*
  * XXX get_seconds as implemented by Linux is a Y2038 bug waiting to
  * happen on 32-bit systems because it returns unsigned long.  Some
