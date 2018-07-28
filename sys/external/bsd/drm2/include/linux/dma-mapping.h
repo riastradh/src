@@ -34,8 +34,6 @@
 
 #include <sys/bus.h>
 
-#include <linux/bug.h>
-
 typedef bus_addr_t dma_addr_t;
 
 static inline uintmax_t
