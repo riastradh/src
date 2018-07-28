@@ -84,6 +84,7 @@ hweight32(uint16_t n)
 	roundup2((n), (sizeof(unsigned long) * CHAR_BIT))
 
 #define	BIT(n)	((uintmax_t)1 << (n))
+#define	GENMASK(h,l)	__BITS(h,l)
 
 static inline int
 test_bit(unsigned int n, const volatile unsigned long *p)
