@@ -96,6 +96,7 @@ struct drm_local_map;
 struct drm_device_dma;
 struct drm_dma_handle;
 struct drm_gem_object;
+struct drm_bus_irq_cookie;
 
 struct device_node;
 struct videomode;

@@ -37,8 +37,9 @@
 #include <lib/libkern/libkern.h> /* KASSERT */
 #include <linux/list.h>
 
-#define	__acquires(lock)	/* XXX lockdep stuff */
-#define	__releases(lock)	/* XXX lockdep stuff */
+#define	__acquires(lock)			/* XXX lockdep stuff */
+#define	__releases(lock)			/* XXX lockdep stuff */
+#define might_lock(lock) do {} while(0) 	/* XXX lockdep stuff */
 
 struct mutex {
 	kmutex_t mtx_lock;
