@@ -27,6 +27,7 @@
 #define DRM_MODESET_LOCK_H_
 
 #include <linux/ww_mutex.h>
+#include <asm/bug.h>
 
 struct drm_modeset_lock;
 

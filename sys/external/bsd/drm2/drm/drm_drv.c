@@ -58,6 +58,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_drv.c,v 1.20 2017/12/05 19:13:52 jmcneill Exp $"
 #include <linux/pm.h>
 
 #include <drm/drmP.h>
+#include "../dist/drm/drm_legacy.h"
 
 static dev_type_open(drm_open);
 
