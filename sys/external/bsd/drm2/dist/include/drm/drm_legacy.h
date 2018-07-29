@@ -36,6 +36,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <drm/drm_hashtab.h>
+
+struct drm_lock_data;
 
 /*
  * Legacy Support for palateontologic DRM drivers
