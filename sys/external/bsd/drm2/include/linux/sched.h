@@ -38,6 +38,7 @@
 
 #include <asm/param.h>
 #include <asm/barrier.h>
+#include <asm/processor.h>
 #include <linux/errno.h>
 
 #define	TASK_COMM_LEN	MAXCOMLEN

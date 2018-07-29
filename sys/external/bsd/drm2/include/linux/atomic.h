@@ -108,6 +108,12 @@ atomic_dec_and_test(atomic_t *atomic)
 }
 
 static inline void
+atomic_or(int value, atomic_t *atomic)
+{
+	atomic_or_uint(&atomic->a_u.au_uint, value);
+}
+
+static inline void
 atomic_set_mask(unsigned long mask, atomic_t *atomic)
 {
 	atomic_or_uint(&atomic->a_u.au_uint, mask);
