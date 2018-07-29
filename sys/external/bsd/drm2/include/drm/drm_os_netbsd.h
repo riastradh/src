@@ -49,6 +49,14 @@
 #define CONFIG_PCI
 #endif
 
+#if defined(__i386__)
+#include "pnpbios.h"
+#endif
+
+#if NPNPBIOS > 0
+#define CONFIG_PNP
+#endif
+
 #include <drm/drm_agp_netbsd.h>
 #include <drm/drm_auth_netbsd.h>
 #include <drm/drm_copy_netbsd.h>
