@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /**
  * \file drm_os_linux.h
  * OS abstraction macros.

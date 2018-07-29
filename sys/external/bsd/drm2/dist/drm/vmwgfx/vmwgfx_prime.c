@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /**************************************************************************
  *
  * Copyright © 2013 VMware, Inc., Palo Alto, CA., USA
@@ -29,6 +31,9 @@
  *     Thomas Hellstrom <thellstrom@vmware.com>
  *
  */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "vmwgfx_drv.h"
 #include <linux/dma-buf.h>

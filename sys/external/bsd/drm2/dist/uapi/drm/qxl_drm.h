@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright 2013 Red Hat
  * All Rights Reserved.

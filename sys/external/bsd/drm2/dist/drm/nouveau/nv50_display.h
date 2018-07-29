@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright (C) 2008 Maarten Maathuis.
  * All Rights Reserved.

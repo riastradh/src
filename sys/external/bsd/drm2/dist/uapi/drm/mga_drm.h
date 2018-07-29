@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /* mga_drm.h -- Public header for the Matrox g200/g400 driver -*- linux-c -*-
  * Created: Tue Jan 25 01:50:01 1999 by jhartmann@precisioninsight.com
  *

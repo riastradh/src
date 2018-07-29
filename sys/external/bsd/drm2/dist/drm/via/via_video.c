@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright 2005 Thomas Hellstrom. All Rights Reserved.
  *
@@ -24,6 +26,9 @@
  *
  * Video and XvMC related functions.
  */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/via_drm.h>
