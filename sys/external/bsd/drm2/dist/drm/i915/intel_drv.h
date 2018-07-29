@@ -28,6 +28,7 @@
 #define __INTEL_DRV_H__
 
 #include <linux/async.h>
+#include <linux/err.h>
 #include <linux/i2c.h>
 #include <linux/hdmi.h>
 #include <asm/processor.h>

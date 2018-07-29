@@ -41,6 +41,12 @@
 /* XXX Er, what?  */
 #define	MAX_JIFFY_OFFSET	((INT_MAX >> 1) - 1)
 
+static inline uint64_t
+nsecs_to_jiffies64(unsigned int msec)
+{
+	return 1000000*mstohz(msec);
+}
+
 static inline unsigned int
 msecs_to_jiffies(unsigned int msec)
 {

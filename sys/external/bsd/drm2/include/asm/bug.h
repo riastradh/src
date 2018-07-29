@@ -38,6 +38,7 @@
 #define	BUG()			panic("%s:%d: BUG!", __FILE__, __LINE__)
 #define	BUG_ON(CONDITION)	KASSERT(!(CONDITION))
 
+#define	BUILD_BUG()		do {} while (0)
 #define	BUILD_BUG_ON(CONDITION)	CTASSERT(!(CONDITION))
 
 /* XXX Rate limit?  */

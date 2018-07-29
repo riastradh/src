@@ -2026,10 +2026,12 @@ static inline struct drm_i915_private *to_i915(const struct drm_device *dev)
 	return dev->dev_private;
 }
 
+#ifndef __NetBSD__
 static inline struct drm_i915_private *dev_to_i915(struct device *dev)
 {
 	return to_i915(dev_get_drvdata(dev));
 }
+#endif
 
 static inline struct drm_i915_private *guc_to_i915(struct intel_guc *guc)
 {

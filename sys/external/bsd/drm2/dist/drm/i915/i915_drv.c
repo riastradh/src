@@ -1031,6 +1031,7 @@ i915_pci_remove(struct pci_dev *pdev)
 	drm_put_dev(dev);
 }
 
+#ifndef __NetBSD__
 static int i915_pm_suspend(struct device *dev)
 {
 	struct pci_dev *pdev = to_pci_dev(dev);
@@ -1095,6 +1096,7 @@ static int i915_pm_resume(struct device *dev)
 
 	return i915_drm_resume(drm_dev);
 }
+#endif
 
 static int skl_suspend_complete(struct drm_i915_private *dev_priv)
 {
