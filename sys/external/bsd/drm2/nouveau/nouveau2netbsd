@@ -12,6 +12,8 @@
 
 set -Ceu
 
+: ${MV:=mv}
+
 # Location of the Nouveau sources relative to $NETBSDSRCDIR.
 nouveau_top=external/bsd/drm2/dist/drm/nouveau
 
@@ -78,7 +80,7 @@ cat Makefile								\
 
 while read from to; do
 	if [ "x$from" != "x$to" ]; then
-		mv -f -- "$from" "$to"
+		${MV} -f -- "$from" "$to"
 	fi
         # Probably not necessary -- Linux tends not to have RCS ids --
         # but a precaution out of paranoia.
