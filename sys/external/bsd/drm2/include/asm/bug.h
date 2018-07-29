@@ -40,6 +40,8 @@
 
 #define	BUILD_BUG()		do {} while (0)
 #define	BUILD_BUG_ON(CONDITION)	CTASSERT(!(CONDITION))
+#define	BUILD_BUG_ON_MSG(CONDITION,MSG)	CTASSERT(!(CONDITION))
+
 
 /* XXX Rate limit?  */
 #define WARN(CONDITION, FMT, ...)					\
