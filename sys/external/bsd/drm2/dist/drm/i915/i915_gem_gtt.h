@@ -253,7 +253,11 @@ struct i915_page_dma {
 
 #define px_base(px) (&(px)->base)
 #define px_page(px) (px_base(px)->page)
+#ifdef __NetBSD__
+#define px_dma(x) (px_base(px)->map->dm_seg[0].ds_addr)
+#else
 #define px_dma(px) (px_base(px)->daddr)
+#endif
 
 struct i915_page_scratch {
 	struct i915_page_dma base;
