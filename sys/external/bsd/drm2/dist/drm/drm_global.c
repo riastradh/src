@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /**************************************************************************
  *
  * Copyright 2008-2009 VMware, Inc., Palo Alto, CA., USA
@@ -27,6 +29,9 @@
 /*
  * Authors: Thomas Hellstrom <thellstrom-at-vmware-dot-com>
  */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/mutex.h>
 #include <linux/slab.h>

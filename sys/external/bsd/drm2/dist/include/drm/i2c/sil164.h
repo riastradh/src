@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright (C) 2010 Francisco Jerez.
  * All Rights Reserved.

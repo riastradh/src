@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 #ifndef __NOUVEAU_TTM_H__
 #define __NOUVEAU_TTM_H__
 

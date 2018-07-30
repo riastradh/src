@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright 2004 Jon Smirl <jonsmirl@gmail.com>
  *

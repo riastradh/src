@@ -1,9 +1,14 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright © 2009 Intel Corporation
  *
  * Authors:
  *    Chris Wilson <chris@chris-wilson.co.uk>
  */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "i915_drv.h"
 

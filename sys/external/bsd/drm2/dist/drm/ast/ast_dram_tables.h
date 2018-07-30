@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 #ifndef AST_DRAM_TABLES_H
 #define AST_DRAM_TABLES_H
 

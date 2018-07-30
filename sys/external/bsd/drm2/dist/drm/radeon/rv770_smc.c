@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright 2011 Advanced Micro Devices, Inc.
  *
@@ -21,6 +23,9 @@
  *
  * Authors: Alex Deucher
  */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
 #include "drmP.h"

@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright 2013 Red Hat Inc.
  *
@@ -22,6 +24,9 @@
  * Authors: Dave Airlie
  *          Alon Levy
  */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "qxl_drv.h"
 #include "qxl_object.h"

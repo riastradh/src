@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /* tdfx.h -- 3dfx DRM template customization -*- linux-c -*-
  * Created: Wed Feb 14 12:32:32 2001 by gareth@valinux.com
  */

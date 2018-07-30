@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /*
  * Copyright 2005 Nicolai Haehnle et al.
  * Copyright 2008 Advanced Micro Devices, Inc.

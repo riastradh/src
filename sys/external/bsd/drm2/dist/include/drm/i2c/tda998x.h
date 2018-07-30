@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 #ifndef __DRM_I2C_TDA998X_H__
 #define __DRM_I2C_TDA998X_H__
 

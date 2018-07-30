@@ -1,3 +1,5 @@
+/*	$NetBSD$	*/
+
 /**************************************************************************
  *
  * Copyright (c) 2006-2009 VMware, Inc., Palo Alto, CA., USA
@@ -28,6 +30,9 @@
  * Authors: Thomas Hellstrom <thellstrom-at-vmware-dot-com>
  *          Keith Packard.
  */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define pr_fmt(fmt) "[TTM] " fmt
 
