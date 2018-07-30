@@ -439,6 +439,12 @@ CFLAGS+=	${COPTS.${.IMPSRC:T}} ${CPUFLAGS.${.IMPSRC:T}}
 CPPFLAGS+=	${CPPFLAGS.${.IMPSRC:T}}
 CWARNFLAGS+=	${CWARNFLAGS.${.IMPSRC:T}}
 
+.for _v in CFLAGS CPPFLAGS CWARNFLAGS
+.for _c in ${CSRCS}
+${_v}.${_c:T}+=${OPT.${_c:T}:@.o.@${${_v}.${.o.}}@}
+.endfor
+.endfor
+
 .MAIN: all
 all: .gdbinit
 .for k in ${KERNELS}
