@@ -1035,7 +1035,9 @@ EXPORT_SYMBOL(drm_connector_index);
  */
 int drm_connector_register(struct drm_connector *connector)
 {
+#ifndef __NetBSD__		/* XXX sysfs, debugfs */
 	int ret;
+#endif
 
 	drm_mode_object_register(connector->dev, &connector->base);
 
@@ -3061,6 +3063,7 @@ int drm_mode_addfb(struct drm_device *dev,
 	struct drm_mode_fb_cmd *or = data;
 	static const struct drm_mode_fb_cmd2 zero_fbcmd;
 	struct drm_mode_fb_cmd2 r = zero_fbcmd;
+	int ret;
 
 	/* convert to new format and call new ioctl */
 	r.fb_id = or->fb_id;
@@ -3199,7 +3202,7 @@ static int framebuffer_check(const struct drm_mode_fb_cmd2 *r)
 		}
 
 		if (r->modifier[i] && !(r->flags & DRM_MODE_FB_MODIFIERS)) {
-			DRM_DEBUG_KMS("bad fb modifier %llu for plane %d\n",
+			DRM_DEBUG_KMS("bad fb modifier %"PRIu64" for plane %d\n",
 				      r->modifier[i], i);
 			return -EINVAL;
 		}
