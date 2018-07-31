@@ -72,7 +72,8 @@ drm_atomic_state_init(struct drm_device *dev, struct drm_atomic_state *state)
 	 */
 	state->allow_modeset = true;
 
-	state->num_connector = ACCESS_ONCE(dev->mode_config.num_connector);
+	state->num_connector = dev->mode_config.num_connector;
+	__insn_barrier();
 
 	state->crtcs = kcalloc(dev->mode_config.num_crtc,
 			       sizeof(*state->crtcs), GFP_KERNEL);
