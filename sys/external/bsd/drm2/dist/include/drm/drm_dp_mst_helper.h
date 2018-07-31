@@ -24,7 +24,11 @@
 #ifndef _DRM_DP_MST_HELPER_H_
 #define _DRM_DP_MST_HELPER_H_
 
+#include <linux/kref.h>
+#include <linux/list.h>
+#include <linux/mutex.h>
 #include <linux/types.h>
+#include <linux/workqueue.h>
 #include <drm/drm_dp_helper.h>
 
 struct drm_dp_mst_branch;
