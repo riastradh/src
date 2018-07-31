@@ -75,8 +75,8 @@ interval_tree_compare_key(void *cookie, const void *vn, const void *vk)
 }
 
 static const rb_tree_ops_t interval_tree_ops = {
-	.rbto_compare_nodes_fn = interval_tree_compare_nodes,
-	.rbto_compare_key_fn = interval_tree_compare_key,
+	.rbto_compare_nodes = interval_tree_compare_nodes,
+	.rbto_compare_key = interval_tree_compare_key,
 	.rbto_node_offset = offsetof(struct interval_tree_node, itn_node),
 };
 
