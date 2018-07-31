@@ -151,7 +151,7 @@ drm_open(dev_t d, int flags, int fmt, struct lwp *l)
 
 	if (firstopen) {
 		/* XXX errno Linux->NetBSD */
-		error = drm_firstopen(dev);
+		error = -drm_firstopen(dev);
 		if (error)
 			goto fail2;
 	}
