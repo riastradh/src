@@ -72,7 +72,7 @@ struct work_struct {
 		WORK_DELAYED_CANCELLED,
 	}			w_state;
 	struct workqueue_struct	*w_wq;
-	void			(*w_fn)(struct work_struct *);
+	void			(*func)(struct work_struct *);
 };
 
 struct delayed_work {
