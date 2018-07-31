@@ -35,7 +35,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_gem_cma_helper.c,v 1.1 2017/12/26 14:53:12 jmcne
 #include <uvm/uvm.h>
 
 struct drm_gem_cma_object *
-drm_gem_cma_create(struct drm_device *ddev, unsigned int size)
+drm_gem_cma_create(struct drm_device *ddev, size_t size)
 {
 	struct drm_gem_cma_object *obj;
 	int error, nsegs;
