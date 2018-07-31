@@ -15705,6 +15705,12 @@ void intel_modeset_cleanup(struct drm_device *dev)
 	mutex_unlock(&dev->struct_mutex);
 
 	intel_teardown_gmbus(dev);
+
+#ifdef __NetBSD__
+	linux_mutex_destroy(&dev_priv->pps_mutex);
+#else
+	mutex_destroy(&dev_priv->pps_mutex);
+#endif
 }
 
 /*
