@@ -85,7 +85,7 @@ static drm_ioctl_t	drm_version;
 		.cmd = (IOCTL),						\
 		.flags = (FLAGS),					\
 		.func = (FUNC),						\
-		.cmd_drv = 0,						\
+		.name = #IOCTL,						\
 	}
 
 #if __OS_HAS_AGP
