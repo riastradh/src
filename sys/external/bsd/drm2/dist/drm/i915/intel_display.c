@@ -14982,7 +14982,6 @@ void i915_disable_vga(struct drm_device *dev)
 	vga_put(dev->pdev, VGA_RSRC_LEGACY_IO);
 #endif
 	udelay(300);
-#endif
 
 	I915_WRITE(vga_reg, VGA_DISP_DISABLE);
 	POSTING_READ(vga_reg);
