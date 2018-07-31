@@ -144,7 +144,7 @@ drm_pci_attach(device_t self, const struct pci_attach_args *pa,
 			continue;
 		}
 
-		/* Inquire about it.  We'll map it in drm_core_ioremap.  */
+		/* Inquire about it.  We'll map it in drm_legacy_ioremap.  */
 		if (pci_mapreg_info(pa->pa_pc, pa->pa_tag, reg, type,
 			&bm->bm_base, &bm->bm_size, &bm->bm_flags) != 0) {
 			aprint_debug_dev(self, "map %u failed\n", unit);

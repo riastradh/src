@@ -94,7 +94,7 @@ drm_bus_borrow(bus_addr_t base, bus_size_t size, bus_space_handle_t *handlep)
 }
 
 void
-drm_core_ioremap(struct drm_local_map *map, struct drm_device *dev)
+drm_legacy_ioremap(struct drm_local_map *map, struct drm_device *dev)
 {
 	const bus_space_tag_t bst = dev->bst;
 	unsigned int unit;
@@ -151,7 +151,7 @@ win:	map->lm_data.bus_space.bst = bst;
 }
 
 void
-drm_core_ioremapfree(struct drm_local_map *map, struct drm_device *dev)
+drm_legacy_ioremapfree(struct drm_local_map *map, struct drm_device *dev)
 {
 	if (map->lm_data.bus_space.bus_map != NULL) {
 		bus_space_unmap(map->lm_data.bus_space.bst,
