@@ -2959,8 +2959,7 @@ i915_gem_object_get_page(struct drm_i915_gem_object *obj, int n)
 		 */
 		KASSERT(obj->pages != NULL);
 		mutex_enter(obj->base.gemo_shm_uao->vmobjlock);
-		struct vm_page *const page =
-		    uvm_pagelookup(obj->base.gemo_shm_uao, ptoa(n));
+		page = uvm_pagelookup(obj->base.gemo_shm_uao, ptoa(n));
 		mutex_exit(obj->base.gemo_shm_uao->vmobjlock);
 	}
 	KASSERT(page != NULL);
