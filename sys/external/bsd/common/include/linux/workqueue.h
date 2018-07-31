@@ -88,6 +88,7 @@ to_delayed_work(struct work_struct *work)
 }
 
 extern struct workqueue_struct	*system_wq;
+extern struct workqueue_struct	*system_long_wq;
 
 int	linux_workqueue_init(void);
 void	linux_workqueue_fini(void);
