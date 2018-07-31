@@ -84,4 +84,13 @@ kstrndup(const char *src, size_t maxlen, gfp_t gfp)
 	return dst;
 }
 
+static inline char *
+kstrdup(const char *src, gfp_t gfp)
+{
+
+	if (src == NULL)
+		return NULL;
+	return kstrndup(src, strlen(src), gfp);
+}
+
 #endif  /* _LINUX_STRING_H_ */
