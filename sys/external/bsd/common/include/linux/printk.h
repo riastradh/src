@@ -44,6 +44,7 @@
 #define	pr_info_once	printf	/* XXX */
 #define	pr_warn_once	printf	/* XXX */
 #define	pr_notice	printf	/* XXX */
+#define	pr_debug	printf	/* XXX */
 #define	KERN_DEBUG	"drm kern debug: "
 #define	KERN_INFO	"drm kern info: "
 #define	KERN_WARNING	"drm kern warning: "
