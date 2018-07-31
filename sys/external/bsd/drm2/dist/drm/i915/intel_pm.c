@@ -7002,17 +7002,7 @@ static void g4x_init_clock_gating(struct drm_device *dev)
 
 static void crestline_init_clock_gating(struct drm_device *dev)
 {
-<<<<<<< HEAD
-	struct i915_power_domains *power_domains = &dev_priv->power_domains;
-
-#ifdef __NetBSD__
-	linux_mutex_init(&power_domains->lock);
-#else
-	mutex_init(&power_domains->lock);
-#endif
-=======
 	struct drm_i915_private *dev_priv = dev->dev_private;
->>>>>>> vendor/linux-drm-v4.4.143
 
 	I915_WRITE(RENCLK_GATE_D1, I965_RCC_CLOCK_GATE_DISABLE);
 	I915_WRITE(RENCLK_GATE_D2, 0);
