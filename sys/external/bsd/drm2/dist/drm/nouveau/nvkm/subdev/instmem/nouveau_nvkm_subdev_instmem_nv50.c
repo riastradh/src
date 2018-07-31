@@ -119,7 +119,7 @@ nv50_instobj_boot(struct nvkm_memory *memory, struct nvkm_vm *vm)
 			nvkm_warn(subdev, "PRAMIN ioremap failed\n");
 			nvkm_vm_put(&iobj->bar);
 		}
-#endf
+#endif
 	} else {
 		nvkm_warn(subdev, "PRAMIN exhausted\n");
 	}
