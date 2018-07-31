@@ -72,6 +72,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_memory.c,v 1.10 2016/03/06 10:59:56 mlelstv Exp 
 #endif
 
 #include <drm/drmP.h>
+#include <drm/drm_legacy.h>
 
 /*
  * XXX drm_bus_borrow is a horrible kludge!

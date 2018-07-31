@@ -39,6 +39,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_vm.c,v 1.7 2014/12/31 08:55:18 mrg Exp $");
 #include <uvm/uvm_device.h>
 
 #include <drm/drmP.h>
+#include <drm/drm_legacy.h>
 
 static paddr_t	drm_mmap_paddr_locked(struct drm_device *, off_t, int);
 static paddr_t	drm_mmap_dma_paddr(struct drm_device *, off_t, int);
