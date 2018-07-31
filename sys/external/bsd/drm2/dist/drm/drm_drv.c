@@ -75,11 +75,11 @@ void drm_err(const char *format, ...)
 	va_list args;
 
 	va_start(args, format);
-	printf("DRM error in %s: ", func);
+	/* XXX Convert this to a symbol name...  */
+	printf(KERN_ERR "[" DRM_NAME ":%p] *ERROR* ",
+	    __builtin_return_address(0));
 	vprintf(format, args);
 	va_end(args);
-
-	return 0;
 #else
 	struct va_format vaf;
 	va_list args;
