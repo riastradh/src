@@ -38,6 +38,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_gem_vm.c,v 1.6 2015/03/09 01:29:40 riastradh Exp
 
 #include <drm/drmP.h>
 #include <drm/drm_gem.h>
+#include <drm/drm_legacy.h>
 #include <drm/drm_vma_manager.h>
 
 static int	drm_gem_mmap_object_locked(struct drm_device *, off_t, size_t,
