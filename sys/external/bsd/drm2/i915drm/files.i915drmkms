@@ -20,6 +20,12 @@ makeoptions 	i915drmkms 	"CWARNFLAGS.intel_pm.c"+="-Wno-shadow"
 makeoptions	i915drmkms	CPPFLAGS+="-DCONFIG_DRM_I915_FBDEV=1"
 makeoptions	i915drmkms	CPPFLAGS+="-DCONFIG_DRM_I915_PRELIMINARY_HW_SUPPORT=0"
 
+file	external/bsd/drm2/i915drm/i915_module.c		i915drmkms
+file	external/bsd/drm2/i915drm/i915_pci.c		i915drmkms
+file	external/bsd/drm2/i915drm/intel_gtt.c		i915drmkms
+
+file	external/bsd/drm2/i915drm/intelfb.c		intelfb
+
 file	external/bsd/drm2/dist/drm/i915/dvo_ch7017.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/dvo_ch7xxx.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/dvo_ivch.c	i915drmkms
@@ -71,9 +77,3 @@ file	external/bsd/drm2/dist/drm/i915/intel_sideband.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_sprite.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_tv.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_uncore.c	i915drmkms
-
-file	external/bsd/drm2/i915drm/i915_module.c		i915drmkms
-file	external/bsd/drm2/i915drm/i915_pci.c		i915drmkms
-file	external/bsd/drm2/i915drm/intel_gtt.c		i915drmkms
-
-file	external/bsd/drm2/i915drm/intelfb.c		intelfb
