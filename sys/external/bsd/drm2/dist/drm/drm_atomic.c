@@ -35,6 +35,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_atomic.h>
+#include <drm/drm_crtc_internal.h>
 #include <drm/drm_plane_helper.h>
 
 /**
