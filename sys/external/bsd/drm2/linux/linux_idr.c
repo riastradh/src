@@ -151,6 +151,25 @@ idr_find(struct idr *idr, int id)
 }
 
 void *
+idr_get_next(struct idr *idr, int *idp)
+{
+	const struct idr_node *node;
+	void *data;
+
+	mutex_spin_enter(&idr->idr_lock);
+	node = rb_tree_find_node_geq(&idr->idr_tree, idp);
+	if (node == NULL) {
+		data = NULL;
+	} else {
+		data = node->in_data;
+		*idp = node->in_index;
+	}
+	mutex_spin_exit(&idr->idr_lock);
+
+	return data;
+}
+
+void *
 idr_replace(struct idr *idr, void *replacement, int id)
 {
 	struct idr_node *node;
