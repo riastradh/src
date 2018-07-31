@@ -74,6 +74,12 @@ hweight32(uint32_t n)
 	return popcount32(n);
 }
 
+static inline unsigned int
+hweight64(uint64_t n)
+{
+	return popcount64(n);
+}
+
 /*
  * XXX Don't define BITS_PER_LONG as sizeof(unsigned long)*CHAR_BIT
  * because that won't work in preprocessor conditionals, where it often
