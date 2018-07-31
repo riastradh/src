@@ -42,6 +42,13 @@
 #define	MAX_JIFFY_OFFSET	((INT_MAX >> 1) - 1)
 
 static inline uint64_t
+get_jiffies_64(void)
+{
+
+	return (uint64_t)(unsigned)hardclock_ticks;
+}
+
+static inline uint64_t
 nsecs_to_jiffies64(uint64_t nsec)
 {
 
