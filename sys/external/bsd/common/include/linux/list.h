@@ -199,6 +199,8 @@ list_del_init(struct list_head *node)
 #define	list_entry(PTR, TYPE, FIELD)	container_of(PTR, TYPE, FIELD)
 #define	list_first_entry(PTR, TYPE, FIELD)				\
 	list_entry(list_first((PTR)), TYPE, FIELD)
+#define	list_first_entry_or_null(PTR, TYPE, FIELD)			\
+	(list_empty((PTR)) ? NULL : list_entry(list_first((PTR)), TYPE, FIELD))
 #define	list_last_entry(PTR, TYPE, FIELD)				\
 	list_entry(list_last((PTR)), TYPE, FIELD)
 #define	list_next_entry(ENTRY, FIELD)					\
