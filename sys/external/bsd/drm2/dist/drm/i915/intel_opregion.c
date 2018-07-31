@@ -62,27 +62,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #define MBOX_ASLE      (1<<2)
 #define MBOX_ASLE_EXT  (1<<4)
 
-#ifdef __NetBSD__		/* XXX acpi iomem */
-#  define	__iomem	__acpi_iomem
-
-static inline uint32_t
-ioread32(const uint32_t __acpi_iomem *ptr)
-{
-	const uint32_t value = *ptr;
-
-	__insn_barrier();
-	return value;
-}
-
-static inline void
-iowrite32(uint32_t value, uint32_t __acpi_iomem *ptr)
-{
-
-	__insn_barrier();
-	*ptr = value;
-}
-#endif
-
 struct opregion_header {
 	u8 signature[16];
 	u32 size;
@@ -632,11 +611,11 @@ intel_opregion_video_event(ACPI_HANDLE hdl, uint32_t notify, void *opaque)
 
 	if (notify != 0x80) {
 		aprint_error_dev(self, "unknown notify 0x%02x\n", notify);
-	} else if ((ioread32(&acpi->cevt) & 1) == 0) {
+	} else if ((acpi->cevt & 1) == 0) {
 		aprint_error_dev(self, "bad notify\n");
 	}
 
-	iowrite32(0, &acpi->csts);
+	acpi->csts = 0;
 }
 #else	/* !__NetBSD__ */
 static int intel_opregion_video_event(struct notifier_block *nb,
