@@ -650,7 +650,6 @@ static int intel_opregion_video_event(struct notifier_block *nb,
 static struct notifier_block intel_opregion_notifier = {
 	.notifier_call = intel_opregion_video_event,
 };
-#endif	/* __NetBSD__ */
 
 /*
  * Initialise the DIDL field in opregion. This passes a list of devices to
