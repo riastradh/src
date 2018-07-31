@@ -36,6 +36,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <drm/drmP.h>
 #include <drm/drm_hashtab.h>
 
 struct drm_lock_data;
