@@ -51,8 +51,7 @@ drm_open_file(struct drm_file *file, void *fp, struct drm_minor *minor)
 	struct drm_device *const dev = minor->dev;
 	int ret;
 
-	file->always_authenticated = DRM_SUSER(); /* XXX */
-	file->always_authenticated = file->always_authenticated;
+	file->authenticated = DRM_SUSER(); /* XXX */
 	file->is_master = false;
 	file->stereo_allowed = false;
 	file->universal_planes = false;
