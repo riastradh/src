@@ -1756,6 +1756,7 @@ static int ci_set_overdrive_target_tdp(struct radeon_device *rdev,
 		return -EINVAL;
 	return 0;
 }
+#endif
 
 #if 0
 static int ci_set_boot_state(struct radeon_device *rdev)
