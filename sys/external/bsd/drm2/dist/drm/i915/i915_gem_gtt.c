@@ -2168,7 +2168,6 @@ static void gen6_scratch_va_range(struct i915_hw_ppgtt *ppgtt,
 	gen6_for_each_pde(unused, &ppgtt->pd, start, length, temp, pde)
 		ppgtt->pd.page_table[pde] = ppgtt->base.scratch_pt;
 }
-#endif
 
 static int gen6_ppgtt_init(struct i915_hw_ppgtt *ppgtt)
 {
