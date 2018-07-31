@@ -718,4 +718,12 @@ pci_dma_supported(struct pci_dev *pdev, uintmax_t mask)
 		return true;
 }
 
+static inline bool
+pci_is_root_bus(struct pci_bus *bus)
+{
+
+	/* XXX Cop-out. */
+	return false;
+}
+
 #endif  /* _LINUX_PCI_H_ */
