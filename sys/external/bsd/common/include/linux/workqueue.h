@@ -117,4 +117,11 @@ bool	mod_delayed_work(struct workqueue_struct *, struct delayed_work *,
 bool	cancel_delayed_work(struct delayed_work *);
 bool	cancel_delayed_work_sync(struct delayed_work *);
 
+#define	INIT_WORK_ONSTACK		INIT_WORK
+
+static inline void
+destroy_work_on_stack(struct work_struct *work)
+{
+}
+
 #endif  /* _LINUX_WORKQUEUE_H_ */
