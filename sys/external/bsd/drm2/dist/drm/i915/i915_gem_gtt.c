@@ -1606,7 +1606,6 @@ free_scratch:
 	gen8_free_scratch(&ppgtt->base);
 	return ret;
 }
-#endif
 
 #ifndef __NetBSD__
 static void gen6_dump_ppgtt(struct i915_hw_ppgtt *ppgtt, struct seq_file *m)

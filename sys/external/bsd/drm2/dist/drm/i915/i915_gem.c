@@ -5740,7 +5740,6 @@ void i915_gem_track_fb(struct drm_i915_gem_object *old,
 		new->frontbuffer_bits |= frontbuffer_bits;
 	}
 }
-#endif
 
 /* All the new VM stuff */
 u64 i915_gem_obj_offset(struct drm_i915_gem_object *o,
