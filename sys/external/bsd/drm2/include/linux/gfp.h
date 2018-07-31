@@ -63,6 +63,12 @@ typedef int gfp_t;
 #define	__GFP_WAIT		__BIT(11)
 #define	__GFP_ZERO		__BIT(12)
 
+/*
+ * XXX Linux sez nobody should be using this in new code.  We never
+ * fail in the wait case anyway, so the point is moot.
+ */
+#define	__GFP_NOFAIL		0
+
 struct page;
 
 #endif	/* _LINUX_GFP_H_ */
