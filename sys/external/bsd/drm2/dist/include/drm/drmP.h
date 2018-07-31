@@ -1079,7 +1079,11 @@ extern void drm_calc_timestamping_constants(struct drm_crtc *crtc,
  * This function returns a pointer to the vblank waitqueue for the CRTC.
  * Drivers can use this to implement vblank waits using wait_event() & co.
  */
+#ifdef __NetBSD__
+static inline drm_waitqueue_t *drm_crtc_vblank_waitqueue(struct drm_crtc *crtc)
+#else
 static inline wait_queue_head_t *drm_crtc_vblank_waitqueue(struct drm_crtc *crtc)
+#endif
 {
 	return &crtc->dev->vblank[drm_crtc_index(crtc)].queue;
 }
