@@ -723,7 +723,6 @@ err_free:
 	linux_mutex_destroy(&dev->ctxlist_mutex);
 	linux_mutex_destroy(&dev->master_mutex);
 	spin_lock_destroy(&dev->event_lock);
-	spin_lock_destroy(&dev->count_lock);
 #else
 	mutex_destroy(&dev->master_mutex);
 #endif
@@ -752,7 +751,6 @@ static void drm_dev_release(struct kref *ref)
 	linux_mutex_destroy(&dev->ctxlist_mutex);
 	linux_mutex_destroy(&dev->master_mutex);
 	spin_lock_destroy(&dev->event_lock);
-	spin_lock_destroy(&dev->count_lock);
 #else
 	mutex_destroy(&dev->master_mutex);
 #endif
