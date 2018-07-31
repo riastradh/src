@@ -40,6 +40,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/file.h>
 #include <linux/fs.h>
+#include <linux/err.h>
 #include <linux/highmem.h>
 #include <linux/idr.h>
 #include <linux/init.h>

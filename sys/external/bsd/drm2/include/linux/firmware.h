@@ -42,7 +42,7 @@
 struct device;
 
 struct firmware {
-	void			*data;
+	char			*data;
 	size_t			size;
 };
 
