@@ -258,7 +258,13 @@ drm_lastclose(struct drm_device *dev)
 	drm_legacy_dma_takedown(dev);
 	mutex_unlock(&dev->struct_mutex);
 
-	drm_legacy_dev_reinit(dev);
+	/* XXX Synchronize with drm_legacy_dev_reinit.  */
+	if (!drm_core_check_feature(dev, DRIVER_MODESET)) {
+		dev->sigdata.lock = NULL;
+		dev->context_flag = 0;
+		dev->last_context = 0;
+		dev->if_version = 0;
+	}
 
 	return 0;
 }
