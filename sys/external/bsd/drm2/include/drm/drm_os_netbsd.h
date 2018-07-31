@@ -46,7 +46,7 @@
 
 #include "pci.h"
 #if NPCI > 0
-#define CONFIG_PCI
+#define	CONFIG_PCI	1
 #endif
 
 #if defined(__i386__)
