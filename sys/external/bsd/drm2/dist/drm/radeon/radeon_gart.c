@@ -484,6 +484,7 @@ int radeon_gart_bind(struct radeon_device *rdev, unsigned offset,
 	}
 	return 0;
 }
+#endif
 
 /**
  * radeon_gart_init - init the driver info for managing the gart
