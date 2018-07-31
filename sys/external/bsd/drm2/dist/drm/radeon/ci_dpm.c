@@ -1671,7 +1671,6 @@ static PPSMC_Result ci_send_msg_to_smc_with_parameter(struct radeon_device *rdev
 	return ci_send_msg_to_smc(rdev, msg);
 }
 
-#ifndef __NetBSD__		/* XXX unused? */
 static PPSMC_Result ci_send_msg_to_smc_return_parameter(struct radeon_device *rdev,
 							PPSMC_Msg msg, u32 *parameter)
 {
@@ -1684,7 +1683,6 @@ static PPSMC_Result ci_send_msg_to_smc_return_parameter(struct radeon_device *rd
 
 	return smc_result;
 }
-#endif
 
 static int ci_dpm_force_state_sclk(struct radeon_device *rdev, u32 n)
 {

@@ -32,4 +32,13 @@
 #ifndef	_LINUX_FENCE_H_
 #define	_LINUX_FENCE_H_
 
+struct fence_ops {
+
+};
+
+struct fence {
+	const struct fence_ops	*ops;
+};
+
+
 #endif	/* _LINUX_FENCE_H_ */

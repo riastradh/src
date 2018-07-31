@@ -69,5 +69,6 @@ struct dmi_system_id {
 #define DMI_EXACT_MATCH(a, b)	{(a), (b)}
 
 int dmi_check_system(const struct dmi_system_id *list);
+bool dmi_match(enum dmi_field, const char[]);
 
 #endif  /* _LINUX_DMI_H_ */
