@@ -666,7 +666,7 @@ static int drm_dp_i2c_drain_msg(struct drm_dp_aux *aux, struct drm_dp_aux_msg *o
 		}
 
 		msg.size -= err;
-		msg.buffer += err;
+		msg.buffer = (void *)((char *)msg.buffer + err);
 	}
 
 	return ret;
