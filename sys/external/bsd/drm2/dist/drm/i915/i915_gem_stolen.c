@@ -292,6 +292,12 @@ void i915_gem_cleanup_stolen(struct drm_device *dev)
 	if (!drm_mm_initialized(&dev_priv->mm.stolen))
 		return;
 
+#ifdef __NetBSD__
+	linux_mutex_destroy(&dev_priv->mm.stolen_lock);
+#else
+	mutex_destroy(&dev_priv->mm.stolen_lock);
+#endif
+
 	drm_mm_takedown(&dev_priv->mm.stolen);
 }
 
