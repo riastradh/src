@@ -314,7 +314,7 @@ hlist_del_init(struct hlist_node *node)
 	        (VAR) = (NEXT))
 
 #define	hlist_add_behind_rcu(n, p)	pslist_writer_insert_after(p, n)
-#define	hlist_add_head_rcu		pslist_writer_insert_head
+#define	hlist_add_head_rcu(n, h)	pslist_writer_insert_head(h, n)
 #define	hlist_del_init_rcu		hlist_del_init /* no special needs */
 
 #define	hlist_first_rcu		pslist_reader_first
