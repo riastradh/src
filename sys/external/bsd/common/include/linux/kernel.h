@@ -40,6 +40,7 @@
 #include <lib/libkern/libkern.h>
 #include <linux/bitops.h>
 #include <linux/printk.h>
+#include <linux/slab.h>
 
 #define U16_MAX UINT16_MAX
 #define U32_MAX UINT32_MAX
@@ -174,6 +175,30 @@ kstrtol(const char *s, unsigned base, long *vp)
 		return -ERANGE;
 	*vp = v;
 	return 0;
+}
+
+static inline char * __printflike(2,3)
+kasprintf(gfp_t gfp, const char *fmt, ...)
+{
+	va_list va;
+	char *str;
+	int len, len1 __diagused;
+
+	va_start(va, fmt);
+	len = vsnprintf(NULL, 0, fmt, va);
+	va_end(va);
+
+	str = kmalloc(len + 1, gfp);
+	if (str == NULL)
+		return NULL;
+
+	va_start(va, fmt);
+	len1 = vsnprintf(str, len + 1, fmt, va);
+	va_end(va);
+
+	KASSERT(len1 == len);
+
+	return str;
 }
 
 #endif  /* _LINUX_KERNEL_H_ */
