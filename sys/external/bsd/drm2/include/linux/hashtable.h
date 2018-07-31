@@ -36,12 +36,8 @@
 
 #include <linux/list.h>
 
-/*
- * XXX This assumes that HLIST_HEAD_INIT is just initialization to a
- * null pointer.
- */
 #define DECLARE_HASHTABLE(name, bits)					      \
-	struct hlist_head name[1u << (bits)] = { HLIST_HEAD_INIT }
+	struct hlist_head name[1u << (bits)]
 
 static inline void
 __hash_init(struct hlist_head *hash, unsigned n)
