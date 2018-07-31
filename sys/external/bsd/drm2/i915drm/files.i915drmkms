@@ -49,7 +49,7 @@ file	external/bsd/drm2/dist/drm/i915/i915_gem_render_state.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_shrinker.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_stolen.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_tiling.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/i915_gem_userptr.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/i915_gem_userptr.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gpu_error.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_guc_submission.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_irq.c	i915drmkms
