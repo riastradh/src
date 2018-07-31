@@ -41,7 +41,7 @@ void radeon_kfd_fini(void);
 void radeon_kfd_suspend(struct radeon_device *rdev);
 int radeon_kfd_resume(struct radeon_device *rdev);
 void radeon_kfd_interrupt(struct radeon_device *rdev,
-			const void *ih_ring_entry);
+			const volatile void *ih_ring_entry);
 void radeon_kfd_device_probe(struct radeon_device *rdev);
 void radeon_kfd_device_init(struct radeon_device *rdev);
 void radeon_kfd_device_fini(struct radeon_device *rdev);
