@@ -58,8 +58,13 @@ __KERNEL_RCSID(0, "$NetBSD$");
  * desired output at the end of the encoder chain.
  */
 
+#ifdef __NetBSD__
+static struct mutex bridge_lock;
+static struct list_head bridge_list = LIST_HEAD_INIT(bridge_list);
+#else
 static DEFINE_MUTEX(bridge_lock);
 static LIST_HEAD(bridge_list);
+#endif
 
 /**
  * drm_bridge_add - add the given bridge to the global bridge list
