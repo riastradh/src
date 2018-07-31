@@ -7946,7 +7946,7 @@ restart_ih:
 		ring_index = rptr / 4;
 
 		radeon_kfd_interrupt(rdev,
-				(const void *) &rdev->ih.ring[ring_index]);
+		    (const void *)__UNVOLATILE(&rdev->ih.ring[ring_index]));
 
 		src_id =  le32_to_cpu(rdev->ih.ring[ring_index]) & 0xff;
 		src_data = le32_to_cpu(rdev->ih.ring[ring_index + 1]) & 0xfffffff;
