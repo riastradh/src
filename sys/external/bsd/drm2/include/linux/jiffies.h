@@ -46,7 +46,7 @@ nsecs_to_jiffies64(uint64_t nsec)
 {
 
 	/* XXX Arbitrary cutoff, should review the arithmetic.  */
-	if (((1000000000 % hz) == 0) || (ns >= 20000000000ul))
+	if (((1000000000 % hz) == 0) || (nsec >= 20000000000ul))
 		return (nsec/1000000000)*hz;
 	else
 		return (nsec*hz)/1000000000;
