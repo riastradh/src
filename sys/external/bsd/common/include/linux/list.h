@@ -296,7 +296,7 @@ hlist_del_init(struct hlist_node *node)
 			hlist_entry(hlist_first(HEAD), typeof(*(VAR)),	      \
 			    FIELD));					      \
 		(VAR) != NULL;						      \
-		(VAR) = (hlist_next(VAR) == NULL ? NULL :		      \
+		(VAR) = (hlist_next(&(VAR)->FIELD) == NULL ? NULL :	      \
 			hlist_entry(hlist_next(&(VAR)->FIELD), typeof(*(VAR)),\
 			    FIELD)))
 
@@ -305,8 +305,9 @@ hlist_del_init(struct hlist_node *node)
 			hlist_entry(hlist_first(HEAD), typeof(*(VAR)),	      \
 			    FIELD)),					      \
 		    (NEXT) = ((VAR) == NULL ? NULL :			      \
-			hlist_entry(hlist_next(&(VAR)->FIELD), typeof(*(VAR)),\
-			    FIELD));					      \
+			hlist_next(&(VAR)->FIELD) == NULL ? NULL :	      \
+			    hlist_entry(hlist_next(&(VAR)->FIELD),	      \
+				typeof(*(VAR)), FIELD));		      \
 		(VAR) != NULL;						      \
 	        (VAR) = (NEXT))
 
