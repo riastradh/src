@@ -29,6 +29,7 @@
 #include <linux/mutex.h>
 #include <linux/types.h>
 #include <linux/workqueue.h>
+#include <drm/drmP.h>
 #include <drm/drm_dp_helper.h>
 
 struct drm_dp_mst_branch;
@@ -460,7 +461,9 @@ struct drm_dp_mst_topology_mgr {
 	unsigned long payload_mask;
 	unsigned long vcpi_mask;
 
-#ifndef __NetBSD__
+#ifdef __NetBSD__
+	drm_waitqueue_t tx_waitq;
+#else
 	wait_queue_head_t tx_waitq;
 #endif
 	struct work_struct work;
