@@ -40,5 +40,10 @@ struct fence {
 	const struct fence_ops	*ops;
 };
 
+#define	fence_put		linux_fence_put
+#define	fence_wait		linux_fence_wait
+
+long	fence_wait(struct fence *, bool);
+void	fence_put(struct fence *);
 
 #endif	/* _LINUX_FENCE_H_ */
