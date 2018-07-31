@@ -73,6 +73,9 @@
 #define	clamp_t(T, X, MIN, MAX)	min_t(T, max_t(T, X, MIN), MAX)
 #define	clamp(X, MN, MX)	MIN(MAX(X, MN), MX)
 
+#define	min3(X, Y, Z)	MIN(X, MIN(Y, Z))
+#define	max3(X, Y, Z)	MAX(X, MAX(Y, Z))
+
 /*
  * Rounding to nearest.
  */
