@@ -203,8 +203,8 @@ static int radeon_fence_check_signaled(wait_queue_t *wait, unsigned mode, int fl
 }
 
 #ifdef __NetBSD__
-static void
-radeon_wakeup(struct radeon_device *rdev)
+void
+radeon_fence_wakeup_locked(struct radeon_device *rdev)
 {
 	struct radeon_fence *fence, *next;
 

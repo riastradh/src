@@ -8508,8 +8508,15 @@ restart_ih:
 	if (queue_hotplug)
 		schedule_delayed_work(&rdev->hotplug_work, 0);
 	if (queue_reset) {
+#ifdef __NetBSD__
+		spin_lock(&rdev->fence_lock);
+		rdev->needs_reset = true;
+		radeon_fence_wakeup_locked(rdev);
+		spin_unlock(&rdev->fence_lock);
+#else
 		rdev->needs_reset = true;
 		wake_up_all(&rdev->fence_queue);
+#endif
 	}
 	if (queue_thermal)
 		schedule_work(&rdev->pm.dpm.thermal.work);
