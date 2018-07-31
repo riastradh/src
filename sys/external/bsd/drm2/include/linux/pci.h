@@ -65,6 +65,8 @@ struct acpi_devnode;
 #include <linux/ioport.h>
 #include <linux/kernel.h>
 
+struct pci_driver;
+
 struct pci_bus {
 	u_int		number;
 };
