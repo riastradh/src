@@ -385,7 +385,7 @@ drm_atomic_helper_check_modeset(struct drm_device *dev,
 	struct drm_crtc *crtc;
 	struct drm_crtc_state *crtc_state;
 	struct drm_connector *connector;
-	struct drm_connector_state *connector_state;
+	struct drm_connector_state *connector_state __unused;
 	int i, ret;
 
 	for_each_crtc_in_state(state, crtc, crtc_state, i) {
@@ -741,7 +741,7 @@ crtc_set_mode(struct drm_device *dev, struct drm_atomic_state *old_state)
 	struct drm_crtc *crtc;
 	struct drm_crtc_state *old_crtc_state;
 	struct drm_connector *connector;
-	struct drm_connector_state *old_conn_state;
+	struct drm_connector_state *old_conn_state __unused;
 	int i;
 
 	for_each_crtc_in_state(old_state, crtc, old_crtc_state, i) {
@@ -835,9 +835,9 @@ void drm_atomic_helper_commit_modeset_enables(struct drm_device *dev,
 					      struct drm_atomic_state *old_state)
 {
 	struct drm_crtc *crtc;
-	struct drm_crtc_state *old_crtc_state;
+	struct drm_crtc_state *old_crtc_state __unused;
 	struct drm_connector *connector;
-	struct drm_connector_state *old_conn_state;
+	struct drm_connector_state *old_conn_state __unused;
 	int i;
 
 	for_each_crtc_in_state(old_state, crtc, old_crtc_state, i) {
@@ -983,10 +983,19 @@ drm_atomic_helper_wait_for_vblanks(struct drm_device *dev,
 		if (!old_crtc_state->enable)
 			continue;
 
+#ifdef __NetBSD__
+		spin_lock(&dev->vbl_lock);
+		DRM_SPIN_WAIT_ON(ret, &dev->vblank[i].queue, &dev->vbl_lock,
+		    msecs_to_jiffies(50),
+		    (old_crtc_state->last_vblank_count !=
+			drm_crtc_vblank_count(crtc)));
+		spin_unlock(&dev->vbl_lock);
+#else
 		ret = wait_event_timeout(dev->vblank[i].queue,
 				old_crtc_state->last_vblank_count !=
 					drm_crtc_vblank_count(crtc),
 				msecs_to_jiffies(50));
+#endif
 
 		drm_crtc_vblank_put(crtc);
 	}
@@ -1172,7 +1181,7 @@ fail:
 }
 EXPORT_SYMBOL(drm_atomic_helper_prepare_planes);
 
-bool plane_crtc_active(struct drm_plane_state *state)
+static bool plane_crtc_active(struct drm_plane_state *state)
 {
 	return state->crtc && state->crtc->state->active;
 }
