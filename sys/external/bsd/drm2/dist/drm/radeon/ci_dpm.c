@@ -1765,7 +1765,6 @@ static int ci_set_boot_state(struct radeon_device *rdev)
 }
 #endif
 
-#ifdef CONFIG_DEBUG_FS
 static u32 ci_get_average_sclk_freq(struct radeon_device *rdev)
 {
 	u32 sclk_freq;
@@ -1791,7 +1790,6 @@ static u32 ci_get_average_mclk_freq(struct radeon_device *rdev)
 
 	return mclk_freq;
 }
-#endif
 
 static void ci_dpm_start_smc(struct radeon_device *rdev)
 {
