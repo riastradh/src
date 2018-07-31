@@ -43,6 +43,6 @@ void	linux_writecomb_fini(void);
 
 int	arch_phys_wc_add(unsigned long, unsigned long);
 void	arch_phys_wc_del(int);
-int	phys_wc_to_mtrr_index(int);
+int	arch_phys_wc_index(int);
 
 #endif  /* _LINUX_IO_H_ */

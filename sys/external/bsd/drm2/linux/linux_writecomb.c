@@ -151,7 +151,7 @@ arch_phys_wc_del(int id)
 }
 
 int
-phys_wc_to_mtrr_index(int handle)
+arch_phys_wc_index(int handle)
 {
 
 	/* XXX Actually implement this...requires changes to our MTRR API.  */
