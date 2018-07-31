@@ -53,6 +53,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_lock.c,v 1.4 2016/04/02 22:40:43 riastradh Exp $
 #include <sys/systm.h>
 
 #include <drm/drmP.h>
+#include <drm/drm_internal.h>
 #include "../dist/drm/drm_legacy.h"
 
 static bool	drm_lock_acquire(struct drm_lock_data *, int);
