@@ -69,7 +69,7 @@ hweight16(uint16_t n)
 }
 
 static inline unsigned int
-hweight32(uint16_t n)
+hweight32(uint32_t n)
 {
 	return popcount32(n);
 }
