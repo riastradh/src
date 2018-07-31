@@ -58,6 +58,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_drv.c,v 1.20 2017/12/05 19:13:52 jmcneill Exp $"
 #include <linux/pm.h>
 
 #include <drm/drmP.h>
+#include <drm/drm_internal.h>
 #include "../dist/drm/drm_legacy.h"
 
 static dev_type_open(drm_open);
@@ -139,15 +140,15 @@ drm_open(dev_t d, int flags, int fmt, struct lwp *l)
 		goto fail1;
 	}
 
-	spin_lock(&dev->count_lock);
+	mutex_lock(&drm_global_mutex);
 	if (dev->open_count == INT_MAX) {
-		spin_unlock(&dev->count_lock);
+		mutex_unlock(&drm_global_mutex);
 		error = EBUSY;
 		goto fail1;
 	}
 	firstopen = (dev->open_count == 0);
 	dev->open_count++;
-	spin_unlock(&dev->count_lock);
+	mutex_lock(&drm_global_mutex);
 
 	if (firstopen) {
 		/* XXX errno Linux->NetBSD */
@@ -174,11 +175,11 @@ drm_open(dev_t d, int flags, int fmt, struct lwp *l)
 
 fail3:	kmem_free(file, sizeof(*file));
 	fd_abort(curproc, fp, fd);
-fail2:	spin_lock(&dev->count_lock);
+fail2:	mutex_lock(&drm_global_mutex);
 	KASSERT(0 < dev->open_count);
 	--dev->open_count;
 	lastclose = (dev->open_count == 0);
-	spin_unlock(&dev->count_lock);
+	mutex_unlock(&drm_global_mutex);
 	if (lastclose)
 		(void)drm_lastclose(dev);
 fail1:	drm_minor_release(dminor);
@@ -197,11 +198,11 @@ drm_close(struct file *fp)
 	drm_close_file(file);
 	kmem_free(file, sizeof(*file));
 
-	spin_lock(&dev->count_lock);
+	mutex_lock(&drm_global_mutex);
 	KASSERT(0 < dev->open_count);
 	--dev->open_count;
 	lastclose = (dev->open_count == 0);
-	spin_unlock(&dev->count_lock);
+	mutex_unlock(&drm_global_mutex);
 
 	if (lastclose)
 		(void)drm_lastclose(dev);
@@ -255,7 +256,6 @@ drm_lastclose(struct drm_device *dev)
 	drm_legacy_sg_cleanup(dev);
 	drm_legacy_vma_flush(dev);
 	drm_legacy_dma_takedown(dev);
-
 	mutex_unlock(&dev->struct_mutex);
 
 	drm_legacy_dev_reinit(dev);
