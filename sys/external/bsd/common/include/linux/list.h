@@ -325,8 +325,8 @@ hlist_del_init(struct hlist_node *node)
 			hlist_entry(hlist_first_rcu(HEAD), typeof(*(VAR)),    \
 			    FIELD));					      \
 		(VAR) != NULL;						      \
-		(VAR) = (hlist_next_rcu(VAR) == NULL ? NULL :		      \
-			hlist_entry(hlist_next_rcu(VAR), typeof(*(VAR)),      \
-			    FIELD)))
+		(VAR) = (hlist_next_rcu(&(VAR)->FIELD) == NULL ? NULL :	      \
+			hlist_entry(hlist_next_rcu(&(VAR)->FIELD),	      \
+			    typeof(*(VAR)), FIELD)))
 
 #endif  /* _LINUX_LIST_H_ */
