@@ -60,7 +60,6 @@
 #include <drm/drm_agp_netbsd.h>
 #include <drm/drm_auth_netbsd.h>
 #include <drm/drm_copy_netbsd.h>
-#include <drm/drm_iomap_netbsd.h>
 #include <drm/drm_irq_netbsd.h>
 #include <drm/drm_wait_netbsd.h>
 

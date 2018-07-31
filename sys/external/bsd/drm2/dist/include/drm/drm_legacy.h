@@ -269,4 +269,8 @@ static __inline__ struct drm_local_map *drm_legacy_findmap(struct drm_device *de
 	return NULL;
 }
 
+#ifdef __NetBSD__
+#include <drm/drm_iomap_netbsd.h>
+#endif
+
 #endif /* __DRM_DRM_LEGACY_H__ */
