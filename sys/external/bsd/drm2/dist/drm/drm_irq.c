@@ -46,6 +46,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/vgaarb.h>
 #include <linux/export.h>
+#include <linux/moduleparam.h>
 
 #include <linux/atomic.h>
 #include <linux/ktime.h>
