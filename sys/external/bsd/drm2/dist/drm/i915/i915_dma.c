@@ -1192,7 +1192,7 @@ put_bridge:
 free_priv:
 	/* XXX intel_pm_fini */
 #ifdef __NetBSD__
-	spin_lock_destroy(&dev_prv->rps.client_lock);
+	spin_lock_destroy(&dev_priv->rps.client_lock);
 	linux_mutex_destroy(&dev_priv->rps.hw_lock);
 #endif
 	/* XXX end intel_pm_fini */
@@ -1316,7 +1316,7 @@ int i915_driver_unload(struct drm_device *dev)
 	kmem_cache_destroy(dev_priv->objects);
 	/* XXX intel_pm_fini */
 #ifdef __NetBSD__
-	spin_lock_destroy(&dev_prv->rps.client_lock);
+	spin_lock_destroy(&dev_priv->rps.client_lock);
 	linux_mutex_destroy(&dev_priv->rps.hw_lock);
 #endif
 	/* XXX end intel_pm_fini */
