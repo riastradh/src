@@ -188,7 +188,8 @@ find_first_zero_bit(const unsigned long *ptr, unsigned long nbits)
 			break;
 	}
 
-	result += ffs(~*p | (~0UL << MIN(nbits, bpl)));
+	CTASSERT(sizeof(unsigned long) <= sizeof(uint64_t));
+	result += ffs64(~(uint64_t)*p | (~0UL << MIN(nbits, bpl)));
 	return result;
 }
 
