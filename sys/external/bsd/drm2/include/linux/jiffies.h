@@ -83,6 +83,14 @@ usecs_to_jiffies(unsigned int usec)
 }
 
 static inline unsigned int
+jiffies_to_usecs(unsigned int j)
+{
+
+	/* XXX Do better arithmetic.  */
+	return (unsigned int)((unsigned long)j*1000000/hz);
+}
+
+static inline unsigned int
 timespec_to_jiffies(const struct timespec *ts)
 {
 	return tstohz(ts);
