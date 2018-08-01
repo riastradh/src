@@ -955,7 +955,7 @@ static u32 *copy_batch(struct drm_i915_gem_object *dest_obj,
 		goto unmap_src;
 	}
 
-	src = src_base + offset_in_page(batch_start_offset);
+	src = (char *)src_base + offset_in_page(batch_start_offset);
 	if (needs_clflush)
 		drm_clflush_virt_range(src, batch_len);
 
