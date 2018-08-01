@@ -83,6 +83,8 @@
 	((0 < (N)) ? (((N) + ((D) / 2)) / (D))				\
 	    : (((N) - ((D) / 2)) / (D)))
 
+#define	DIV_ROUND_CLOSEST_ULL(N, D)	(((N) + (D)/2)/(D))
+
 /*
  * Rounding to what may or may not be powers of two.
  */
