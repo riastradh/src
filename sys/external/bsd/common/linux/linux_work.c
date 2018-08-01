@@ -889,6 +889,15 @@ cancel_delayed_work_sync(struct delayed_work *dw)
 	return cancelled_p;
 }
 
+void
+flush_delayed_work(struct delayed_work *dw)
+{
+	struct workqueue_struct *wq = dw->work.w_wq;
+
+	if (wq != NULL)
+		flush_workqueue(wq);
+}
+
 static void
 linux_cancel_delayed_work_callout(struct delayed_work *dw, bool wait)
 {
