@@ -135,6 +135,14 @@ ktime_get_real(void)
 	return kt;
 }
 
+static inline uint64_t
+ktime_get_raw_ns(void)
+{
+
+	/* XXX */
+	return ktime_to_ns(ktime_get());
+}
+
 static inline ktime_t
 ktime_get_monotonic_offset(void)
 {
