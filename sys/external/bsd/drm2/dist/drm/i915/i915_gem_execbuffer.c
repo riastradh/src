@@ -41,6 +41,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/log2.h>
 #include <linux/pagemap.h>
 #include <linux/err.h>
+#include <asm/cpufeature.h>
 
 #define  __EXEC_OBJECT_HAS_PIN (1<<31)
 #define  __EXEC_OBJECT_HAS_FENCE (1<<30)
@@ -332,7 +333,8 @@ relocate_entry_gtt(struct drm_i915_gem_object *obj,
 	offset += reloc->offset;
 	reloc_page = io_mapping_map_atomic_wc(dev_priv->gtt.mappable,
 					      offset & PAGE_MASK);
-	iowrite32(lower_32_bits(delta), (char __iomem *)reloc_page + offset_in_page(offset));
+	iowrite32(lower_32_bits(delta), (uint32_t __iomem *)
+	    ((char __iomem *)reloc_page + offset_in_page(offset)));
 
 	if (INTEL_INFO(dev)->gen >= 8) {
 		offset += sizeof(uint32_t);
