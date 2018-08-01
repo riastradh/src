@@ -62,6 +62,16 @@ __ffs64(uint64_t x)
 	return ffs64(x) - 1;
 }
 
+/*
+ * Linux fls(0) = 0, fls(1) = 1, fls(0x80000000) = 32, so it matches
+ * our fls semantics.
+ */
+static inline int
+fls(int x)
+{
+	return fls32(x);
+}
+
 static inline unsigned int
 hweight16(uint16_t n)
 {
