@@ -33,6 +33,9 @@
 #define	_SYS_XCALL_H_
 
 #ifdef _KERNEL
+
+#include <sys/types.h>
+
 #define XC_HIGHPRI		0x01	/* high priority */
 #define XC_HIGHPRI_IPL(ipl)	(XC_HIGHPRI | xc_encode_ipl(ipl))
 
