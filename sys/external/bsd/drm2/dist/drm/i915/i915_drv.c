@@ -1032,6 +1032,7 @@ i915_pci_remove(struct pci_dev *pdev)
 
 	drm_put_dev(dev);
 }
+#endif
 
 #ifndef __NetBSD__
 static int i915_pm_suspend(struct device *dev)
@@ -1514,6 +1515,7 @@ static int vlv_resume_prepare(struct drm_i915_private *dev_priv,
 	return ret;
 }
 
+#ifndef __NetBSD__		/* XXX runtime pm */
 static int intel_runtime_suspend(struct device *device)
 {
 	struct pci_dev *pdev = to_pci_dev(device);
@@ -1654,8 +1656,7 @@ static int intel_runtime_resume(struct device *device)
 
 	return ret;
 }
-
-#endif	/* __NetBSD__ */
+#endif
 
 /*
  * This function implements common functionality of runtime and system
