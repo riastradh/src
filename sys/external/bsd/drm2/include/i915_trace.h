@@ -129,6 +129,11 @@ trace_i915_gem_request_wait_end(struct drm_i915_gem_request *request __unused)
 }
 
 static inline void
+trace_i915_gem_request_notify(struct intel_engine_cs *ring __unused)
+{
+}
+
+static inline void
 trace_i915_gem_ring_dispatch(struct drm_i915_gem_request *request __unused,
     uint32_t flags __unused)
 {
