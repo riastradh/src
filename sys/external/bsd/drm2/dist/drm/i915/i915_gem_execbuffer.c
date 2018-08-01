@@ -352,7 +352,8 @@ relocate_entry_gtt(struct drm_i915_gem_object *obj,
 		}
 
 		iowrite32(upper_32_bits(delta),
-			  reloc_page + offset_in_page(offset));
+		    (uint32_t __iomem *)
+		    ((char __iomem *)reloc_page + offset_in_page(offset)));
 	}
 
 #ifdef __NetBSD__
