@@ -1482,7 +1482,8 @@ int __i915_wait_request(struct drm_i915_gem_request *req,
 		atomic_read(&dev_priv->gpu_error.reset_counter))) ||	      \
 	    i915_gem_request_completed(req, false))
 	if (timeout) {
-		int ticks = nsecs_to_jiffies_timeout(*timeout);
+		int ticks = missed_irq(dev_priv, ring) ? 1 :
+		    nsecs_to_jiffies_timeout(*timeout);
 		if (interruptible) {
 			DRM_SPIN_TIMED_WAIT_UNTIL(ret, &ring->irq_queue,
 			    &dev_priv->irq_lock, ticks, EXIT_COND);
