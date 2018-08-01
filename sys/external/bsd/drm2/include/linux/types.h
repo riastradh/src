@@ -81,6 +81,8 @@ struct rcu_head {
 
 };
 
-#define DECLARE_BITMAP(name,size) size_t name[size/sizeof(size_t)]
+#define DECLARE_BITMAP(NAME, BITS)					      \
+	unsigned long NAME[((BITS) + ((NBBY*sizeof(unsigned long)) - 1)) /    \
+		(NBBY*sizeof(unsigned long))]
 
 #endif  /* _LINUX_TYPES_H_ */
