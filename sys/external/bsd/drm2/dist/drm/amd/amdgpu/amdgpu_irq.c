@@ -239,7 +239,11 @@ int amdgpu_irq_init(struct amdgpu_device *adev)
 	INIT_WORK(&adev->reset_work, amdgpu_irq_reset_work_func);
 
 	adev->irq.installed = true;
+#ifdef __NetBSD__
+	r = drm_irq_install(adev->ddev);
+#else
 	r = drm_irq_install(adev->ddev, adev->ddev->pdev->irq);
+#endif
 	if (r) {
 		adev->irq.installed = false;
 		flush_work(&adev->hotplug_work);

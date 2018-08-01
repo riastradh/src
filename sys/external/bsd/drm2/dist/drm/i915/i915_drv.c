@@ -1750,6 +1750,10 @@ static struct drm_driver driver = {
 	.preclose = i915_driver_preclose,
 	.postclose = i915_driver_postclose,
 	.set_busid = drm_pci_set_busid,
+#ifdef __NetBSD__
+	.request_irq = drm_pci_request_irq,
+	.free_irq = drm_pci_free_irq,
+#endif
 
 #if defined(CONFIG_DEBUG_FS)
 	.debugfs_init = i915_debugfs_init,

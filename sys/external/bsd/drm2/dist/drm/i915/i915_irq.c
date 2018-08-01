@@ -4607,7 +4607,11 @@ int intel_irq_install(struct drm_i915_private *dev_priv)
 	 */
 	dev_priv->pm.irqs_enabled = true;
 
+#ifdef __NetBSD__
+	return drm_irq_install(dev_priv->dev);
+#else
 	return drm_irq_install(dev_priv->dev, dev_priv->dev->pdev->irq);
+#endif
 }
 
 /**

@@ -508,6 +508,10 @@ static struct drm_driver kms_driver = {
 	.irq_postinstall = amdgpu_irq_postinstall,
 	.irq_uninstall = amdgpu_irq_uninstall,
 	.irq_handler = amdgpu_irq_handler,
+#ifdef __NetBSD__
+	.request_irq = drm_pci_request_irq,
+	.free_irq = drm_pci_free_irq,
+#endif
 	.ioctls = amdgpu_ioctls_kms,
 	.gem_free_object = amdgpu_gem_object_free,
 	.gem_open_object = amdgpu_gem_object_open,
