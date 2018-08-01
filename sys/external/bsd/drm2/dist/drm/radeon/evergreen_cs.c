@@ -2078,7 +2078,7 @@ static int evergreen_packet3_check(struct radeon_cs_parser *p,
 		}
 
 		if (idx_value + size > track->indirect_draw_buffer_size) {
-			dev_warn(p->dev, "DRAW_INDIRECT buffer too small %u + %llu > %lu\n",
+			dev_warn(p->dev, "DRAW_INDIRECT buffer too small %u + %"PRIx64" > %lu\n",
 				idx_value, size, track->indirect_draw_buffer_size);
 			return -EINVAL;
 		}
