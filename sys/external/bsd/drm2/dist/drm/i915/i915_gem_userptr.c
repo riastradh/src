@@ -609,8 +609,10 @@ __i915_gem_userptr_get_pages_worker(struct work_struct *_work)
 			if (ret == 0) {
 				list_add_tail(&obj->global_list,
 					      &to_i915(dev)->mm.unbound_list);
+#ifndef __NetBSD__
 				obj->get_page.sg = obj->pages->sgl;
 				obj->get_page.last = 0;
+#endif
 				pinned = 0;
 			}
 		}
