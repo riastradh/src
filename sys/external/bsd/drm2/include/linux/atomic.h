@@ -195,6 +195,12 @@ atomic64_xchg(struct atomic64 *a, uint64_t v)
 	return atomic_swap_64(&a->a_v, v);
 }
 
+static inline uint64_t
+atomic64_cmpxchg(struct atomic64 *atomic, uint64_t old, uint64_t new)
+{
+	return atomic_cas_64(&atomic->a_v, old, new);
+}
+
 static inline void
 set_bit(unsigned int bit, volatile unsigned long *ptr)
 {
