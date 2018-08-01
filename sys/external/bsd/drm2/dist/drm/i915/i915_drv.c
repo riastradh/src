@@ -725,6 +725,7 @@ static int i915_drm_suspend_late(struct drm_device *drm_dev, bool hibernation)
 		return ret;
 	}
 
+#ifndef __NetBSD__		/* pmf handles this for us.  */
 	pci_disable_device(drm_dev->pdev);
 	/*
 	 * During hibernation on some platforms the BIOS may try to access
@@ -740,6 +741,7 @@ static int i915_drm_suspend_late(struct drm_device *drm_dev, bool hibernation)
 	 */
 	if (!(hibernation && INTEL_INFO(dev_priv)->gen < 6))
 		pci_set_power_state(drm_dev->pdev, PCI_D3hot);
+#endif
 
 	return 0;
 }
@@ -1653,6 +1655,8 @@ static int intel_runtime_resume(struct device *device)
 	return ret;
 }
 
+#endif	/* __NetBSD__ */
+
 /*
  * This function implements common functionality of runtime and system
  * suspend sequence.
@@ -1674,6 +1678,8 @@ static int intel_suspend_complete(struct drm_i915_private *dev_priv)
 
 	return ret;
 }
+
+#ifndef __NetBSD__
 
 static const struct dev_pm_ops i915_pm_ops = {
 	/*
