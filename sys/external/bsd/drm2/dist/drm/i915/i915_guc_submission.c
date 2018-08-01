@@ -28,6 +28,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
 #include <linux/circ_buf.h>
+#include <asm/cpufeature.h>
 #include "i915_drv.h"
 #include "intel_guc.h"
 
