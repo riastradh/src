@@ -14,6 +14,7 @@ makeoptions 	i915drmkms 	"CWARNFLAGS.i915_drv.c"+="${${ACTIVE_CC} == gcc:? -Wno-
 makeoptions 	i915drmkms 	"CWARNFLAGS.i915_drv.c"+="${${ACTIVE_CC} == clang:? -Wno-initializer-overrides :}"
 makeoptions	i915drmkms	"CWARNFLAGS.i915_gem.c"+="-Wno-shadow"
 makeoptions	i915drmkms	"CWARNFLAGS.i915_gpu_error.c"+="-Wno-shadow"
+makeoptions 	i915drmkms 	"CWARNFLAGS.i915_vgpu.c"+="-Wno-shadow"
 makeoptions 	i915drmkms 	"CWARNFLAGS.intel_display.c"+="-Wno-shadow -Wno-conversion"
 makeoptions 	i915drmkms 	"CWARNFLAGS.intel_panel.c"+="-Wno-shadow"
 makeoptions 	i915drmkms 	"CWARNFLAGS.intel_pm.c"+="-Wno-shadow"
