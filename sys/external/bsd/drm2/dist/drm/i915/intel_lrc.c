@@ -1198,7 +1198,11 @@ static inline uint32_t wa_ctx_start(struct i915_wa_ctx_bb *wa_ctx,
 				    uint32_t offset,
 				    uint32_t start_alignment)
 {
+#ifdef __NetBSD__		/* XXX ALIGN means something else */
+	return wa_ctx->offset = round_up(offset, start_alignment);
+#else
 	return wa_ctx->offset = ALIGN(offset, start_alignment);
+#endif
 }
 
 static inline int wa_ctx_end(struct i915_wa_ctx_bb *wa_ctx,
