@@ -47,7 +47,7 @@ int	intel_gmch_probe(struct pci_dev *, struct pci_dev *,
 void	intel_gmch_remove(void);
 bool	intel_enable_gtt(void);
 void	intel_gtt_chipset_flush(void);
-void	intel_gtt_insert_entries(bus_dmamap_t, unsigned, unsigned);
+void	intel_gtt_insert_sg_entries(bus_dmamap_t, unsigned, unsigned);
 void	intel_gtt_clear_range(unsigned, unsigned);
 
 #define	AGP_USER_MEMORY		1

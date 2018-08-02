@@ -138,7 +138,8 @@ intel_gtt_chipset_flush(void)
 }
 
 void
-intel_gtt_insert_entries(bus_dmamap_t dmamap, unsigned va_page, unsigned flags)
+intel_gtt_insert_sg_entries(bus_dmamap_t dmamap, unsigned va_page,
+    unsigned flags)
 {
 	struct agp_i810_softc *const isc = agp_i810_sc->as_chipc;
 	off_t va = (va_page << PAGE_SHIFT);
