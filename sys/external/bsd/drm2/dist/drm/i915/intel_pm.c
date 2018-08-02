@@ -489,14 +489,14 @@ static const struct intel_watermark_params g4x_cursor_wm_info = {
 	.guard_size = 2,
 	.cacheline_size = G4X_FIFO_LINE_SIZE,
 };
-static const struct intel_watermark_params valleyview_wm_info = {
+static const struct intel_watermark_params valleyview_wm_info __unused = {
 	.fifo_size = VALLEYVIEW_FIFO_SIZE,
 	.max_wm = VALLEYVIEW_MAX_WM,
 	.default_wm = VALLEYVIEW_MAX_WM,
 	.guard_size = 2,
 	.cacheline_size = G4X_FIFO_LINE_SIZE,
 };
-static const struct intel_watermark_params valleyview_cursor_wm_info = {
+static const struct intel_watermark_params valleyview_cursor_wm_info __unused = {
 	.fifo_size = I965_CURSOR_FIFO,
 	.max_wm = VALLEYVIEW_CURSOR_MAX_WM,
 	.default_wm = I965_CURSOR_DFT_WM,
