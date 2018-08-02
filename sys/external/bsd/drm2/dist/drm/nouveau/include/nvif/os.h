@@ -39,6 +39,7 @@
 #include <linux/math64.h>
 #include <linux/errno.h>
 #include <linux/workqueue.h>
+#include <linux/device.h>
 
 #include <asm/byteorder.h>
 #include <asm/io.h>
