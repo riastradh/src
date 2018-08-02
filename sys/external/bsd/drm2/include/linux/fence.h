@@ -45,6 +45,8 @@ struct fence {
 #define	fence_wait		linux_fence_wait
 
 long	fence_wait(struct fence *, bool);
+struct fence *
+	fence_get(struct fence *);
 void	fence_put(struct fence *);
 
 #endif	/* _LINUX_FENCE_H_ */
