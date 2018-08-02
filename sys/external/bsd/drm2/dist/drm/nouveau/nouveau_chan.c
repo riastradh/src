@@ -96,8 +96,8 @@ nouveau_channel_prep(struct nouveau_drm *drm, struct nvif_device *device,
 {
 	struct nouveau_cli *cli = (void *)device->object.client;
 	struct nvkm_mmu *mmu = nvxx_mmu(device);
-	static const struct nv_dma_class zero_args;
-	struct nv_dma_class args = zero_args;
+	static const struct nv_dma_v0 zero_args;
+	struct nv_dma_v0 args = zero_args;
 	struct nouveau_channel *chan;
 	u32 target;
 	int ret;
@@ -301,8 +301,8 @@ nouveau_channel_init(struct nouveau_channel *chan, u32 vram, u32 gart)
 	struct nvif_device *device = chan->device;
 	struct nouveau_cli *cli = (void *)chan->user.client;
 	struct nvkm_mmu *mmu = nvxx_mmu(device);
-	static const struct nv_dma_class zero_args;
-	struct nv_dma_class args = zero_args;
+	static const struct nv_dma_v0 zero_args;
+	struct nv_dma_v0 args = zero_args;
 	int ret, i;
 
 	nvif_object_map(&chan->user);
