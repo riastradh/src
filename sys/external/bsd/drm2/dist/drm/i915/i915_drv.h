@@ -475,6 +475,10 @@ struct opregion_asle;
 #endif
 
 struct intel_opregion {
+#ifdef __NetBSD__
+	bus_space_tag_t bst;
+	bus_space_handle_t bsh;
+#endif
 	struct opregion_header *header;
 	struct opregion_acpi *acpi;
 	struct opregion_swsci *swsci;
