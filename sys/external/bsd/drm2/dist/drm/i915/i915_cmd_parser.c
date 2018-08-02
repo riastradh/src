@@ -883,7 +883,11 @@ static u32 *vmap_batch(struct drm_i915_gem_object *obj,
 
 	i = 0;
 #ifdef __NetBSD__
-	TAILQ_FOREACH(page, &obj->igo_pageq, pageq.queue) {
+	/*
+	 * XXX Why do we work through the page queue instead of just
+	 * using uvm_map?
+	 */
+	TAILQ_FOREACH(page, &obj->pageq, pageq.queue) {
 		if (first_page-- > 0)
 			continue;
 		if (i == npages)

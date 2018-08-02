@@ -2177,10 +2177,8 @@ struct drm_i915_gem_object {
 	unsigned int pin_display;
 
 #ifdef __NetBSD__
-	struct pglist igo_pageq;
-	bus_dma_segment_t *pages; /* `pages' is an expedient misnomer.  */
-	int igo_nsegs;
-	bus_dmamap_t igo_dmamap;
+	struct pglist pageq;
+	bus_dmamap_t pages;	/* expedient misnomer */
 #else
 	struct sg_table *pages;
 #endif
