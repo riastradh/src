@@ -112,7 +112,6 @@ static unsigned long i915_stolen_to_physical(struct drm_device *dev)
 	 *
 	 */
 	base = 0;
-#ifndef __NetBSD__		/* XXX i915 gem gsm stolen memory base */
 	if (INTEL_INFO(dev)->gen >= 3) {
 		/* Read Graphics Base of Stolen Memory directly */
 		pci_read_config_dword(dev->pdev, 0x5c, &base);
@@ -201,7 +200,6 @@ static unsigned long i915_stolen_to_physical(struct drm_device *dev)
 
 		base = tom - tseg_size - dev_priv->gtt.stolen_size;
 	}
-#endif
 
 	if (base == 0)
 		return 0;
