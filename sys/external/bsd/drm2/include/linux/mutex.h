@@ -109,6 +109,7 @@ mutex_lock_nest_lock(struct mutex *mutex, struct mutex *already)
 	mutex_lock(mutex);
 }
 
+#define	__lockdep_used		__unused
 #define	lockdep_assert_held(m)	do {} while (0)
 
 #define	SINGLE_DEPTH_NESTING	0
