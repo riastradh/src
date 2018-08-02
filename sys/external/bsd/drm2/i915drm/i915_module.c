@@ -78,6 +78,7 @@ i915drmkms_init(void)
 		return error;
 	}
 	drm_sysctl_init(&i915_def);
+	spin_lock_init(&mchdev_lock);
 
 	return 0;
 }
@@ -99,8 +100,9 @@ static void
 i915drmkms_fini(void)
 {
 
-	drm_pci_exit(i915_drm_driver, NULL);
+	spin_lock_destroy(&mchdev_lock);
 	drm_sysctl_fini(&i915_def);
+	drm_pci_exit(i915_drm_driver, NULL);
 }
 
 static int

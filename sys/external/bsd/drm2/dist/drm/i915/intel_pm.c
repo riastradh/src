@@ -4174,7 +4174,11 @@ void intel_update_sprite_watermarks(struct drm_plane *plane,
 /**
  * Lock protecting IPS related data structures
  */
+#ifdef __NetBSD__
+spinlock_t mchdev_lock;
+#else
 DEFINE_SPINLOCK(mchdev_lock);
+#endif
 
 /* Global for IPS driver to get at the current i915 device. Protected by
  * mchdev_lock. */
