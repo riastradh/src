@@ -32,8 +32,9 @@
 #ifndef	_LINUX_FENCE_H_
 #define	_LINUX_FENCE_H_
 
-struct fence_ops {
+#include <linux/rcupdate.h>
 
+struct fence_ops {
 };
 
 struct fence {
