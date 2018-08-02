@@ -2,6 +2,7 @@
 
 #ifndef __NVKM_DEVICE_H__
 #define __NVKM_DEVICE_H__
+#include <linux/notifier.h>
 #include <core/event.h>
 #include <core/object.h>
 
