@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ASM_RESERVATION_H_
-#define _ASM_RESERVATION_H_
+#ifndef _LINUX_RESERVATION_H_
+#define _LINUX_RESERVATION_H_
 
 #include <sys/atomic.h>
 
@@ -79,4 +79,4 @@ reservation_object_get_excl(struct reservation_object *reservation)
 	return fence;
 }
 
-#endif  /* _ASM_RESERVATION_H_ */
+#endif  /* _LINUX_RESERVATION_H_ */
