@@ -65,7 +65,7 @@ file	external/bsd/drm2/dist/drm/i915/i915_vgpu.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_acpi.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_atomic.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_atomic_plane.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/intel_audio.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/intel_audio.c	i915drmkms	# XXX hdaudio
 file	external/bsd/drm2/dist/drm/i915/intel_bios.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_crt.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_csr.c	i915drmkms
