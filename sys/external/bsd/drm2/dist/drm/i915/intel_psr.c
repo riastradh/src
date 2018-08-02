@@ -757,5 +757,9 @@ void intel_psr_init(struct drm_device *dev)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
 	INIT_DELAYED_WORK(&dev_priv->psr.work, intel_psr_work);
+#ifdef __NetBSD__
+	linux_mutex_init(&dev_priv->psr.lock);
+#else
 	mutex_init(&dev_priv->psr.lock);
+#endif
 }

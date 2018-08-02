@@ -15709,9 +15709,11 @@ void intel_modeset_cleanup(struct drm_device *dev)
 	intel_teardown_gmbus(dev);
 
 #ifdef __NetBSD__
+	linux_mutex_destroy(&dev_priv->psr.lock);
 	linux_mutex_destroy(&dev_priv->pps_mutex);
 	linux_mutex_destroy(&dev_priv->fbc.lock);
 #else
+	mutex_destroy(&dev_priv->psr.lock);
 	mutex_destroy(&dev_priv->pps_mutex);
 	mutex_destroy(&dev_priv->fbc.lock);
 #endif
