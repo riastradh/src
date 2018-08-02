@@ -509,8 +509,8 @@ nouveau_abi16_ioctl_notifierobj_alloc(ABI16_IOCTL_ARGS)
 	struct nouveau_abi16_ntfy *ntfy;
 	struct nvif_device *device = &abi16->device;
 	struct nvif_client *client;
-	static const struct nv_dma_class zero_args;
-	struct nv_dma_class args = zero_args;
+	static const struct nv_dma_v0 zero_args;
+	struct nv_dma_v0 args = zero_args;
 	int ret;
 
 	if (unlikely(!abi16))
