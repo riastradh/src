@@ -32,6 +32,8 @@
 #ifndef _LINUX_DMI_H_
 #define _LINUX_DMI_H_
 
+#include <sys/types.h>
+
 enum dmi_field {
 	DMI_NONE,
 	DMI_BIOS_VENDOR,
