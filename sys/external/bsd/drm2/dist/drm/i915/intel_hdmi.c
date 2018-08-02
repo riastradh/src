@@ -1043,7 +1043,7 @@ static void cpt_enable_hdmi(struct intel_encoder *encoder)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_crtc *crtc = to_intel_crtc(encoder->base.crtc);
 	struct intel_hdmi *intel_hdmi = enc_to_intel_hdmi(&encoder->base);
-	enum pipe pipe = crtc->pipe;
+	enum i915_pipe pipe = crtc->pipe;
 	u32 temp;
 
 	temp = I915_READ(intel_hdmi->hdmi_reg);
@@ -1628,7 +1628,7 @@ static void chv_data_lane_soft_reset(struct intel_encoder *encoder,
 	struct drm_i915_private *dev_priv = to_i915(encoder->base.dev);
 	enum dpio_channel ch = vlv_dport_to_channel(enc_to_dig_port(&encoder->base));
 	struct intel_crtc *crtc = to_intel_crtc(encoder->base.crtc);
-	enum pipe pipe = crtc->pipe;
+	enum i915_pipe pipe = crtc->pipe;
 	uint32_t val;
 
 	val = vlv_dpio_read(dev_priv, pipe, VLV_PCS01_DW0(ch));
@@ -1674,7 +1674,7 @@ static void chv_hdmi_pre_pll_enable(struct intel_encoder *encoder)
 	struct intel_crtc *intel_crtc =
 		to_intel_crtc(encoder->base.crtc);
 	enum dpio_channel ch = vlv_dport_to_channel(dport);
-	enum pipe pipe = intel_crtc->pipe;
+	enum i915_pipe pipe = intel_crtc->pipe;
 	u32 val;
 
 	intel_hdmi_prepare(encoder);
@@ -1748,7 +1748,7 @@ static void chv_hdmi_pre_pll_enable(struct intel_encoder *encoder)
 static void chv_hdmi_post_pll_disable(struct intel_encoder *encoder)
 {
 	struct drm_i915_private *dev_priv = to_i915(encoder->base.dev);
-	enum pipe pipe = to_intel_crtc(encoder->base.crtc)->pipe;
+	enum i915_pipe pipe = to_intel_crtc(encoder->base.crtc)->pipe;
 	u32 val;
 
 	mutex_lock(&dev_priv->sb_lock);
