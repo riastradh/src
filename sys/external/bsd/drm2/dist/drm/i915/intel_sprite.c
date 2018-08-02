@@ -195,7 +195,7 @@ void intel_pipe_update_end(struct intel_crtc *crtc)
 
 	if (crtc->debug.start_vbl_count &&
 	    crtc->debug.start_vbl_count != end_vbl_count) {
-		DRM_ERROR("Atomic update failure on pipe %c (start=%u end=%u) time %lld us, min %d, max %d, scanline start %d, end %d\n",
+		DRM_ERROR("Atomic update failure on pipe %c (start=%u end=%u) time %"PRIdMAX" us, min %d, max %d, scanline start %d, end %d\n",
 			  pipe_name(pipe), crtc->debug.start_vbl_count,
 			  end_vbl_count,
 			  ktime_us_delta(end_vbl_time, crtc->debug.start_vbl_time),
