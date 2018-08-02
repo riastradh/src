@@ -117,4 +117,12 @@ ida_simple_get(struct ida *ida, unsigned start, unsigned end, gfp_t gfp)
 	return id;
 }
 
+static inline void
+ida_simple_remove(struct ida *ida, unsigned int id)
+{
+
+	KASSERT((int)id >= 0);
+	ida_remove(ida, id);
+}
+
 #endif  /* _LINUX_IDR_H_ */
