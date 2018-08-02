@@ -231,6 +231,12 @@ trace_i915_va_alloc(struct i915_address_space *vm __unused,
 }
 
 static inline void
+trace_i915_gem_shrink(struct drm_i915_private *dev_priv, unsigned long target,
+    unsigned flagss)
+{
+}
+
+static inline void
 trace_switch_mm(struct intel_engine_cs *ring __unused,
     struct intel_context *to __unused)
 {
