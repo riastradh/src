@@ -1939,9 +1939,9 @@ void intel_power_domains_fini(struct drm_i915_private *dev_priv)
 	intel_display_set_init_power(dev_priv, true);
 
 #ifdef __NetBSD__
-	linux_mutex_destroy(&dev_priv->power_domains->lock);
+	linux_mutex_destroy(&dev_priv->power_domains.lock);
 #else
-	mutex_destroy(&dev_priv->power_domains->lock);
+	mutex_destroy(&dev_priv->power_domains.lock);
 #endif
 }
 
