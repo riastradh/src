@@ -190,6 +190,13 @@ list_replace(struct list_head *old, struct list_head *new)
 }
 
 static inline void
+list_replace_init(struct list_head *old, struct list_head *new)
+{
+	list_replace(old, new);
+	INIT_LIST_HEAD(old);
+}
+
+static inline void
 list_del_init(struct list_head *node)
 {
 	list_del(node);
