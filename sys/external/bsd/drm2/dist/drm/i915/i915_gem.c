@@ -5906,6 +5906,7 @@ i915_gem_object_create_from_data(struct drm_device *dev,
 	    UBC_WRITE);
 	if (ret)
 		goto fail;
+	bytes = size - uio.uio_resid;
 #else
 	sg = obj->pages;
 	bytes = sg_copy_from_buffer(sg->sgl, sg->nents, (void *)data, size);
