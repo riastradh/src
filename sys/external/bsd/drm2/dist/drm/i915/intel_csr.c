@@ -27,6 +27,7 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
+#include <linux/module.h>
 #include "i915_drv.h"
 #include "i915_reg.h"
 
@@ -454,7 +455,7 @@ void intel_csr_ucode_init(struct drm_device *dev)
 
 	/* CSR supported for platform, load firmware */
 	ret = request_firmware_nowait(THIS_MODULE, true, csr->fw_path,
-				&dev_priv->dev->pdev->dev,
+				dev_priv->dev->dev,
 				GFP_KERNEL, dev_priv,
 				finish_csr_load);
 	if (ret) {
