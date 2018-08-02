@@ -35,6 +35,8 @@
 #include <sys/types.h>
 #include <sys/reboot.h>
 
+struct notifier_block;
+
 /* XXX Implement this by posting a CRITICAL-OVER envsys event?  */
 static inline int
 orderly_poweroff(bool force __unused)
