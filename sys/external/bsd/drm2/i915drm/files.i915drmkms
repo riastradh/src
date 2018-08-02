@@ -58,7 +58,7 @@ file	external/bsd/drm2/dist/drm/i915/i915_guc_submission.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_irq.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_params.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_suspend.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/i915_sysfs.c	i915drmkms
+file	external/bsd/drm2/i915drm/i915_sysfs.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_trace_points.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_vgpu.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_acpi.c	i915drmkms
