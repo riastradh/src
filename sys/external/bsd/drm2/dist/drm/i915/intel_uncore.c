@@ -1299,9 +1299,9 @@ void intel_uncore_destroy(struct drm_device *dev)
 	struct drm_i915_private *const dev_priv = dev->dev_private;
 	unsigned i;
 
-	for (i = 0; i < FW_DOMAIN_ID_COUNT) {
+	for (i = 0; i < FW_DOMAIN_ID_COUNT; i++) {
 		if (dev_priv->uncore.fw_domains & (1u << i))
-			teardown_timer(&dev_priv->uncore.fw_domwin[i].timer);
+			teardown_timer(&dev_priv->uncore.fw_domain[i].timer);
 	}
 #endif
 }
