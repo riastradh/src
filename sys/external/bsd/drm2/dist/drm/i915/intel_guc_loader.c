@@ -491,7 +491,7 @@ static void guc_fw_fetch(struct drm_device *dev, struct intel_guc_fw *guc_fw)
 	DRM_DEBUG_DRIVER("before requesting firmware: GuC fw fetch status %s\n",
 		intel_guc_fw_status_repr(guc_fw->guc_fw_fetch_status));
 
-	err = request_firmware(&fw, guc_fw->guc_fw_path, &dev->pdev->dev);
+	err = request_firmware(&fw, guc_fw->guc_fw_path, dev->dev);
 	if (err)
 		goto fail;
 	if (!fw)
