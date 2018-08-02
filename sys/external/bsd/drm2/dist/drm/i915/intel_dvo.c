@@ -457,7 +457,7 @@ void intel_dvo_init(struct drm_device *dev)
 		struct i2c_adapter *i2c;
 		int gpio;
 		bool dvoinit;
-		enum pipe pipe;
+		enum i915_pipe pipe;
 		uint32_t dpll[I915_MAX_PIPES];
 
 		/* Allow the I2C driver info to specify the GPIO to be used in
