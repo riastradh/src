@@ -71,4 +71,12 @@ schedule_timeout_uninterruptible(long timeout)
 	return remain > 0 ? remain : 0;
 }
 
+static inline void
+cond_resched(void)
+{
+
+	if (curcpu()->ci_schedstate.spc_flags & SPCF_SHOULDYIELD)
+		preempt();
+}
+
 #endif  /* _LINUX_SCHED_H_ */
