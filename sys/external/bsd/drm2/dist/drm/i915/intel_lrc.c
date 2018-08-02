@@ -1923,7 +1923,7 @@ void intel_logical_ring_cleanup(struct intel_engine_cs *ring)
 	i915_gem_batch_pool_fini(&ring->batch_pool);
 
 	if (ring->status_page.obj) {
-		kunmap(sg_page(ring->status_page.obj->pages->sgl));
+		kunmap(ring->status_page.page);
 		ring->status_page.obj = NULL;
 	}
 
@@ -2450,6 +2450,7 @@ static void lrc_setup_hardware_status_page(struct intel_engine_cs *ring,
 	ring->status_page.gfx_addr = i915_gem_obj_ggtt_offset(default_ctx_obj)
 			+ LRC_PPHWSP_PN * PAGE_SIZE;
 	page = i915_gem_object_get_page(default_ctx_obj, LRC_PPHWSP_PN);
+	ring->status_page.page = page;
 	ring->status_page.page_addr = kmap(page);
 	ring->status_page.obj = default_ctx_obj;
 
