@@ -745,6 +745,15 @@ intel_logical_ring_advance_and_submit(struct drm_i915_gem_request *request)
 
 static void __wrap_ring_buffer(struct intel_ringbuffer *ringbuf)
 {
+#ifdef __NetBSD__
+	bus_size_t tail;
+	int rem = ringbuf->size - ringbuf->tail;
+
+	tail = ringbuf->tail;
+	rem /= 4;
+	while (rem--)
+		bus_space_write_4(ringbuf->bst, ringbuf->bsh, tail++, MI_NOOP);
+#else
 	uint32_t __iomem *virt;
 	int rem = ringbuf->size - ringbuf->tail;
 
@@ -752,6 +761,7 @@ static void __wrap_ring_buffer(struct intel_ringbuffer *ringbuf)
 	rem /= 4;
 	while (rem--)
 		iowrite32(MI_NOOP, virt++);
+#endif
 
 	ringbuf->tail = 0;
 	intel_ring_update_space(ringbuf);
