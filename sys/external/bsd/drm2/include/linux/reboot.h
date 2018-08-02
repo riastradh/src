@@ -45,5 +45,16 @@ orderly_poweroff(bool force __unused)
 	return 0;
 }
 
+static inline int
+register_reboot_notifier(struct notifier_block *block)
+{
+	return 0;
+}
+
+static inline int
+unregister_reboot_notifier(struct notifier_block *block)
+{
+	return 0;
+}
 
 #endif	/* _LINUX_REBOOT_H_ */
