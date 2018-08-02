@@ -45,6 +45,8 @@ struct shrinker {
 	int		seeks;
 };
 
+#define	SHRINK_STOP	(~0UL)
+
 #define	DEFAULT_SEEKS	2	/* XXX cargo-culted from Linux */
 
 static inline void

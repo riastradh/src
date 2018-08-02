@@ -34,7 +34,8 @@
 
 #include <sys/cdefs.h>
 
-#define	NOTIFY_OK	0
+#define	NOTIFY_DONE	0
+#define	NOTIFY_OK	1
 
 struct notifier_block {
 	int	(*notifier_call)(struct notifier_block *, unsigned long,
