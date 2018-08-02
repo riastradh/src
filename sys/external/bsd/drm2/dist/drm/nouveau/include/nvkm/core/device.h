@@ -254,7 +254,7 @@ nvkm_wr16(struct nvkm_device *d, bus_size_t a, uint16_t v)
 	return bus_space_write_stream_2(d->mmiot, d->mmioh, a, v);
 }
 static inline void
-nvkm_wr16(struct nvkm_device *d, bus_size_t a, uint32_t v)
+nvkm_wr32(struct nvkm_device *d, bus_size_t a, uint32_t v)
 {
 	return bus_space_write_stream_4(d->mmiot, d->mmioh, a, v);
 }
