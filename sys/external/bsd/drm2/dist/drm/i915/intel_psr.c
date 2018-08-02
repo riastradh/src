@@ -86,7 +86,8 @@ static void intel_psr_write_vsc(struct intel_dp *intel_dp,
 	struct intel_crtc *crtc = to_intel_crtc(dig_port->base.base.crtc);
 	enum transcoder cpu_transcoder = crtc->config->cpu_transcoder;
 	u32 ctl_reg = HSW_TVIDEO_DIP_CTL(cpu_transcoder);
-	uint32_t *data = (uint32_t *) vsc_psr;
+	uint32_t data;
+	const char *ptr = (const char *)vsc_psr;
 	unsigned int i;
 
 	/* As per BSPec (Pipe Video Data Island Packet), we need to disable
@@ -96,9 +97,9 @@ static void intel_psr_write_vsc(struct intel_dp *intel_dp,
 	POSTING_READ(ctl_reg);
 
 	for (i = 0; i < sizeof(*vsc_psr); i += 4) {
-		I915_WRITE(HSW_TVIDEO_DIP_VSC_DATA(cpu_transcoder,
-						   i >> 2), *data);
-		data++;
+		memcpy(&data, &ptr[i], 4);
+		I915_WRITE(HSW_TVIDEO_DIP_VSC_DATA(cpu_transcoder, i >> 2),
+		    data);
 	}
 	for (; i < VIDEO_DIP_VSC_DATA_SIZE; i += 4)
 		I915_WRITE(HSW_TVIDEO_DIP_VSC_DATA(cpu_transcoder,
