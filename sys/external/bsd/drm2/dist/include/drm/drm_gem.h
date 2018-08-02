@@ -60,7 +60,7 @@ struct drm_gem_object {
 
 #ifdef __NetBSD__
 	/* UVM anonymous object for shared memory mappings.  */
-	struct uvm_object *gemo_shm_uao;
+	struct uvm_object *filp;
 
 	/* UVM object with custom pager ops for device memory mappings.  */
 	struct uvm_object gemo_uvmobj;

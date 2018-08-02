@@ -114,8 +114,8 @@ static int render_state_setup(struct render_state *so)
 
 #ifdef __NetBSD__
 	/* XXX errno NetBSD->Linux */
-	ret = -uvm_map(kernel_map, &kva, PAGE_SIZE, so->obj->base.gemo_shm_uao,
-	    0, sizeof(*d), UVM_MAPFLAG(UVM_PROT_W, UVM_PROT_W, UVM_INH_NONE,
+	ret = -uvm_map(kernel_map, &kva, PAGE_SIZE, so->obj->base.filp, 0,
+	    sizeof(*d), UVM_MAPFLAG(UVM_PROT_W, UVM_PROT_W, UVM_INH_NONE,
 		UVM_ADV_NORMAL, 0));
 	if (ret)
 		return ret;

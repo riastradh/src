@@ -60,12 +60,7 @@ nouveau_gem_object_del(struct drm_gem_object *gem)
 	drm_gem_object_release(gem);
 
 	/* reset filp so nouveau_bo_del_ttm() can test for it */
-#ifdef __NetBSD__
-	/* XXX Whattakludge!  */
-	gem->gemo_shm_uao = NULL;
-#else
 	gem->filp = NULL;
-#endif
 	ttm_bo_unref(&bo);
 
 	pm_runtime_mark_last_busy(dev);
