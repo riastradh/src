@@ -43,6 +43,12 @@ trace_i915_flip_request(enum plane plane __unused,
 }
 
 static inline void
+trace_i915_flip_complete(enum plane plane __unused,
+    struct drm_i915_gem_object *obj __unused)
+{
+}
+
+static inline void
 trace_i915_gem_evict(struct drm_device *dev __unused, int min_size __unused,
     unsigned int alignment __unused, bool mappable __unused)
 {
