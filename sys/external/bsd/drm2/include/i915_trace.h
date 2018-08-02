@@ -243,6 +243,22 @@ trace_i915_gem_shrink(struct drm_i915_private *dev_priv, unsigned long target,
 }
 
 static inline void
+trace_i915_pipe_update_start(struct intel_crtc *crtc)
+{
+}
+
+static inline void
+trace_i915_pipe_update_vblank_evaded(struct intel_crtc *crtc)
+{
+}
+
+static inline void
+trace_i915_pipe_update_end(struct intel_crtc *crtc, uint32_t end_vbl_count,
+    int scanline_end)
+{
+}
+
+static inline void
 trace_switch_mm(struct intel_engine_cs *ring __unused,
     struct intel_context *to __unused)
 {
