@@ -41,6 +41,7 @@ struct fence {
 	const struct fence_ops	*ops;
 };
 
+#define	fence_get		linux_fence_get
 #define	fence_put		linux_fence_put
 #define	fence_wait		linux_fence_wait
 
