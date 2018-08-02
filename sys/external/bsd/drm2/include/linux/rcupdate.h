@@ -32,4 +32,6 @@
 #ifndef _LINUX_RCUPDATE_H_
 #define _LINUX_RCUPDATE_H_
 
+#define	__rcu
+
 #endif  /* _LINUX_RCUPDATE_H_ */
