@@ -310,13 +310,12 @@ i915_gem_object_put_pages_phys(struct drm_i915_gem_object *obj)
 			memcpy(dst, vaddr, PAGE_SIZE);
 			kunmap_atomic(dst);
 
+			set_page_dirty(page);
 #ifdef __NetBSD__
-			page->p_vmp.flags &= ~PG_CLEAN;
 			/* XXX mark page accessed */
 			uvm_obj_unwirepages(obj->base.filp, i*PAGE_SIZE,
 			    (i+1)*PAGE_SIZE);
 #else
-			set_page_dirty(page);
 			if (obj->madv == I915_MADV_WILLNEED)
 				mark_page_accessed(page);
 			page_cache_release(page);

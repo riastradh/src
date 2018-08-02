@@ -37,7 +37,6 @@
 #include <asm/page.h>
 #include <linux/shrinker.h>
 
-
 struct file;
 
 /* XXX Ugh bletch!  Whattakludge!  Linux's sense is reversed...  */
@@ -82,6 +81,13 @@ static inline void
 kvfree(void * ptr)
 {
 	panic("Unimplemented");
+}
+
+static inline void
+set_page_dirty(struct page *page)
+{
+
+	page->p_vmp.flags &= ~PG_CLEAN;
 }
 
 #endif  /* _LINUX_MM_H_ */
