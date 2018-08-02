@@ -112,7 +112,7 @@ static int intel_plane_atomic_check(struct drm_plane *plane,
 				    struct drm_plane_state *state)
 {
 	struct drm_crtc *crtc = state->crtc;
-	struct intel_crtc *intel_crtc;
+	struct intel_crtc *intel_crtc __unused;
 	struct intel_crtc_state *crtc_state;
 	struct intel_plane *intel_plane = to_intel_plane(plane);
 	struct intel_plane_state *intel_state = to_intel_plane_state(state);
