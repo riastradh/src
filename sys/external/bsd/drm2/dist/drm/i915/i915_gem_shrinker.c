@@ -289,9 +289,15 @@ i915_gem_shrinker_oom(struct notifier_block *nb, unsigned long event, void *ptr)
 	bool unlock;
 
 	while (!i915_gem_shrinker_lock(dev, &unlock) && --timeout) {
+#ifdef __NetBSD__
+		int error = kpause("i915shnk", true, 1, NULL);
+		if (error == EINTR || error == ERESTART)
+			return NOTIFY_DONE;
+#else
 		schedule_timeout_killable(1);
 		if (fatal_signal_pending(current))
 			return NOTIFY_DONE;
+#endif
 	}
 	if (timeout == 0) {
 		pr_err("Unable to purge GPU memory due lock contention.\n");
