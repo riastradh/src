@@ -39,6 +39,16 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "i915_drv.h"
 #include "i915_trace.h"
 
+#ifdef __NetBSD__
+/* XXX argh argh argh argh argh argh argh argh */
+static bool mutex_is_locked_by(struct mutex *mutex, struct proc *proc)
+{
+
+	KASSERT(proc == curproc);
+	/* Actually answers `do we own mutex?'.  */
+	return mutex_is_locked(mutex);
+}
+#else
 static bool mutex_is_locked_by(struct mutex *mutex, struct task_struct *task)
 {
 	if (!mutex_is_locked(mutex))
@@ -51,6 +61,7 @@ static bool mutex_is_locked_by(struct mutex *mutex, struct task_struct *task)
 	return false;
 #endif
 }
+#endif
 
 /**
  * i915_gem_shrink - Shrink buffer object caches
