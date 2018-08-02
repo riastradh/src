@@ -2504,9 +2504,9 @@ struct drm_i915_cmd_table {
 #define __I915__(p) ({ \
 	struct drm_i915_private *__p; \
 	if (__builtin_types_compatible_p(typeof(*p), struct drm_i915_private)) \
-		__p = (struct drm_i915_private *)p; \
+		__p = (struct drm_i915_private *)__UNCONST(p); \
 	else if (__builtin_types_compatible_p(typeof(*p), struct drm_device)) \
-		__p = to_i915((struct drm_device *)p); \
+		__p = to_i915((struct drm_device *)__UNCONST(p)); \
 	else \
 		BUILD_BUG(); \
 	__p; \
