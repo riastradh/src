@@ -189,7 +189,9 @@ static void nv04_tv_destroy(struct drm_encoder *encoder)
 	get_slave_funcs(encoder)->destroy(encoder);
 	drm_encoder_cleanup(encoder);
 
+#ifndef __NetBSD__		/* XXX How can this possibly be right?  */
 	kfree(encoder->helper_private);
+#endif
 	kfree(nouveau_encoder(encoder));
 }
 
