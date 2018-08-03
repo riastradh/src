@@ -1197,7 +1197,11 @@ int radeon_vm_init(struct radeon_device *rdev, struct radeon_vm *vm)
 #else
 	mutex_init(&vm->mutex);
 #endif
+#ifdef __NetBSD__
+	interval_tree_init(&vm->va);
+#else
 	vm->va = RB_ROOT;
+#endif
 	spin_lock_init(&vm->status_lock);
 	INIT_LIST_HEAD(&vm->invalidated);
 	INIT_LIST_HEAD(&vm->freed);
