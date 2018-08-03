@@ -325,7 +325,7 @@ struct radeon_bo *radeon_bo_ref(struct radeon_bo *bo)
 void radeon_bo_unref(struct radeon_bo **bo)
 {
 	struct ttm_buffer_object *tbo;
-	struct radeon_device *rdev;
+	struct radeon_device *rdev __unused;
 
 	if ((*bo) == NULL)
 		return;
