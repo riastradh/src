@@ -133,7 +133,7 @@ nvif_notify(const void *header, u32 length, const void *data, u32 size)
 		if (!WARN_ON(notify->size != size)) {
 			atomic_inc(&notify->putcnt);
 			if (test_bit(NVIF_NOTIFY_WORK, &notify->flags)) {
-				memcpy((void *)notify->data, data, size);
+				memcpy(__UNCONST(notify->data), data, size);
 				schedule_work(&notify->work);
 				return NVIF_NOTIFY_DROP;
 			}
@@ -162,7 +162,7 @@ nvif_notify_fini(struct nvif_notify *notify)
 		ret = nvif_object_ioctl(object, &args, sizeof(args), NULL);
 		if (ret == 0) {
 			notify->object = NULL;
-			kfree((void *)notify->data);
+			kfree(__UNCONST(notify->data));
 		}
 	}
 	return ret;
