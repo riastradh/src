@@ -280,5 +280,36 @@ int
 drm_irq_by_busid(struct drm_device *dev, void *data, struct drm_file *file)
 {
 
-	return -ENOSYS;
+	return -ENODEV;
+}
+
+int
+drm_pci_set_unique(struct drm_device *dev, struct drm_master *master,
+    struct drm_unique *unique)
+{
+	char kbuf[64], ubuf[64];
+	int ret;
+
+	/* Reject excessively long unique strings.  */
+	if (unique->unique_len > sizeof(ubuf) - 1)
+		return -EINVAL;
+
+	/* Copy in the alleged unique string, NUL-terminated.  */
+	ret = -copyin(unique->unique, ubuf, unique->unique_len);
+	if (ret)
+		return ret;
+	ubuf[unique->unique_len] = '\0';
+
+	/* Make sure it matches what we expect.  */
+	snprintf(kbuf, sizeof kbuf, "PCI:%d:%ld:%ld", dev->pdev->bus->number,
+	    PCI_SLOT(dev->pdev->devfn), PCI_FUNC(dev->pdev->devfn));
+	if (strncmp(kbuf, ubuf, sizeof(kbuf)) != 0)
+		return -EINVAL;
+
+	/* Remember it.  */
+	master->unique = kstrdup(ubuf, GFP_KERNEL);
+	master->unique_len = strlen(master->unique);
+
+	/* Success!  */
+	return 0;
 }
