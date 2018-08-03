@@ -56,6 +56,7 @@
 #define	queue_work			linux_queue_work
 #define	schedule_delayed_work		linux_schedule_delayed_work
 #define	schedule_work			linux_schedule_work
+#define	system_long_wq			linux_system_long_wq
 #define	system_wq			linux_system_wq
 #define	to_delayed_work			linux_to_delayed_work
 
