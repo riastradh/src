@@ -986,7 +986,7 @@ gk104_pll_calc_hiclk(int target_khz, int crystal,
 		int *N1, int *fN1, int *M1, int *P1,
 		int *N2, int *M2, int *P2)
 {
-	int best_clk = 0, best_err = target_khz, p_ref, n_ref;
+	int best_clk __unused = 0, best_err = target_khz, p_ref, n_ref;
 	bool upper = false;
 
 	*M1 = 1;
