@@ -43,6 +43,8 @@
 
 #define	TASK_COMM_LEN	MAXCOMLEN
 
+#define	MAX_SCHEDULE_TIMEOUT	(INT_MAX/2)	/* paranoia */
+
 #define	current	curproc
 
 static inline pid_t
