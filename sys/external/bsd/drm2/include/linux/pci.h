@@ -168,6 +168,7 @@ struct pci_dev {
 	uint8_t			revision;
 	uint32_t		class;
 	bool			msi_enabled;
+	bool			no_64bit_msi;
 };
 
 static inline device_t
