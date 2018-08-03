@@ -11,6 +11,10 @@
 #include <linux/types.h>
 #include <uapi/drm/drm.h>
 
+#ifdef __NetBSD__
+#include <drm/drm_agp_netbsd.h>
+#endif
+
 struct drm_device;
 struct drm_file;
 
