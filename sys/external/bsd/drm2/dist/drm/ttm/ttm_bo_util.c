@@ -536,7 +536,7 @@ static int ttm_buffer_object_transfer(struct ttm_buffer_object *bo,
 #ifdef __NetBSD__
 	linux_mutex_init(&fbo->wu_mutex);
 	drm_vma_node_init(&fbo->vma_node);
-	uvm_obj_init(&fbo->uvmobj, bdev->driver->ttm_uvm_ops, true, 1);
+	uvm_obj_init(&fbo->uvmobj, bo->bdev->driver->ttm_uvm_ops, true, 1);
 	mutex_obj_hold(bo->uvmobj.vmobjlock);
 	uvm_obj_setlock(&fbo->uvmobj, bo->uvmobj.vmobjlock);
 #else
