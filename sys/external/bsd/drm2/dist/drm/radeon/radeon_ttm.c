@@ -1093,11 +1093,10 @@ radeon_mmap_object(struct drm_device *dev, off_t offset, size_t size,
 		return -EINVAL;
 
 	if (__predict_false((offset >> PAGE_SHIFT) < DRM_FILE_PAGE_OFFSET))
-		return drm_mmap_object(dev, offset, size, prot, uobjp,
-		    uoffsetp, file);
-	else
-		return ttm_bo_mmap_object(&rdev->mman.bdev, offset, size, prot,
-		    uobjp, uoffsetp, file);
+		return -EINVAL;
+
+	return ttm_bo_mmap_object(&rdev->mman.bdev, offset, size, prot,
+	    uobjp, uoffsetp, file);
 }
 
 #else
