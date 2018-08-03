@@ -1555,6 +1555,7 @@ int radeon_pm_late_init(struct radeon_device *rdev)
 
 	if (rdev->pm.pm_method == PM_METHOD_DPM) {
 		if (rdev->pm.dpm_enabled) {
+#ifndef __NetBSD__		/* XXX radeon sysfs */
 			if (!rdev->pm.sysfs_initialized) {
 				ret = device_create_file(rdev->dev, &dev_attr_power_dpm_state);
 				if (ret)
@@ -1571,6 +1572,7 @@ int radeon_pm_late_init(struct radeon_device *rdev)
 					DRM_ERROR("failed to create device file for power method\n");
 				rdev->pm.sysfs_initialized = true;
 			}
+#endif
 
 			mutex_lock(&rdev->pm.mutex);
 			ret = radeon_dpm_late_enable(rdev);
@@ -1588,6 +1590,7 @@ int radeon_pm_late_init(struct radeon_device *rdev)
 	} else {
 		if ((rdev->pm.num_power_states > 1) &&
 		    (!rdev->pm.sysfs_initialized)) {
+#ifndef __NetBSD__	     /* XXX radeon sysfs */
 			/* where's the best place to put these? */
 			ret = device_create_file(rdev->dev, &dev_attr_power_profile);
 			if (ret)
@@ -1597,6 +1600,7 @@ int radeon_pm_late_init(struct radeon_device *rdev)
 				DRM_ERROR("failed to create device file for power method\n");
 			if (!ret)
 				rdev->pm.sysfs_initialized = true;
+#endif
 		}
 	}
 	return ret;
