@@ -100,7 +100,7 @@ struct gt215_ram {
 	struct gt215_ltrain ltrain;
 };
 
-void
+static void
 gt215_link_train_calc(u32 *vals, struct gt215_ltrain *train)
 {
 	int i, lo, hi;
@@ -154,7 +154,7 @@ gt215_link_train_calc(u32 *vals, struct gt215_ltrain *train)
 /*
  * Link training for (at least) DDR3
  */
-int
+static int
 gt215_link_train(struct gt215_ram *ram)
 {
 	struct gt215_ltrain *train = &ram->ltrain;
@@ -272,7 +272,7 @@ out:
 	return ret;
 }
 
-int
+static int
 gt215_link_train_init(struct gt215_ram *ram)
 {
 	static const u32 pattern[16] = {
@@ -338,7 +338,7 @@ gt215_link_train_init(struct gt215_ram *ram)
 	return 0;
 }
 
-void
+static void
 gt215_link_train_fini(struct gt215_ram *ram)
 {
 	if (ram->ltrain.mem)

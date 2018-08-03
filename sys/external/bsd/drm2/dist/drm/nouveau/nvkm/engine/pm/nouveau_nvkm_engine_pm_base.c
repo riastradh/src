@@ -702,7 +702,7 @@ nvkm_pm_oclass_get(struct nvkm_oclass *oclass, int index,
 	return 1;
 }
 
-int
+static int
 nvkm_perfsrc_new(struct nvkm_pm *pm, struct nvkm_perfsig *sig,
 		 const struct nvkm_specsrc *spec)
 {

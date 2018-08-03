@@ -1604,7 +1604,7 @@ gf100_gr_oneinit(struct nvkm_gr *base)
 	return 0;
 }
 
-int
+static int
 gf100_gr_init_(struct nvkm_gr *base)
 {
 	struct gf100_gr *gr = gf100_gr(base);

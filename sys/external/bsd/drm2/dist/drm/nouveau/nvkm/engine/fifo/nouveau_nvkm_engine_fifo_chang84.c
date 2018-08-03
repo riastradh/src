@@ -134,7 +134,7 @@ g84_fifo_chan_engine_fini(struct nvkm_fifo_chan *base,
 }
 
 
-int
+static int
 g84_fifo_chan_engine_init(struct nvkm_fifo_chan *base,
 			  struct nvkm_engine *engine)
 {
@@ -175,7 +175,7 @@ g84_fifo_chan_engine_ctor(struct nvkm_fifo_chan *base,
 	return nvkm_object_bind(object, NULL, 0, &chan->engn[engn]);
 }
 
-int
+static int
 g84_fifo_chan_object_ctor(struct nvkm_fifo_chan *base,
 			  struct nvkm_object *object)
 {
