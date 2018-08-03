@@ -2517,7 +2517,7 @@ void radeon_setup_mst_connector(struct drm_device *dev)
 		return;
 
 	list_for_each_entry(connector, &dev->mode_config.connector_list, head) {
-		int ret;
+		int ret __unused;
 
 		radeon_connector = to_radeon_connector(connector);
 
