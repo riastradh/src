@@ -753,7 +753,7 @@ int radeon_uvd_get_create_msg(struct radeon_device *rdev, int ring,
 	uint64_t offs = radeon_bo_size(rdev->uvd.vcpu_bo) -
 		RADEON_GPU_PAGE_SIZE;
 
-	uint32_t *msg = rdev->uvd.cpu_addr + offs;
+	uint32_t *msg = (void *)((char *)rdev->uvd.cpu_addr) + offs;
 	uint64_t addr = rdev->uvd.gpu_addr + offs;
 
 	int r, i;
