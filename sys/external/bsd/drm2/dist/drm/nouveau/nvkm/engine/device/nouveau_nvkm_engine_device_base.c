@@ -2189,7 +2189,7 @@ nvkm_device_fini(struct nvkm_device *device, bool suspend)
 		device->func->fini(device, suspend);
 
 	time = ktime_to_us(ktime_get()) - time;
-	nvdev_trace(device, "%s completed in %lldus...\n", action, time);
+	nvdev_trace(device, "%s completed in %"PRId64"us...\n", action, time);
 	return 0;
 
 fail:
@@ -2234,7 +2234,7 @@ nvkm_device_preinit(struct nvkm_device *device)
 		goto fail;
 
 	time = ktime_to_us(ktime_get()) - time;
-	nvdev_trace(device, "preinit completed in %lldus\n", time);
+	nvdev_trace(device, "preinit completed in %"PRId64"us\n", time);
 	return 0;
 
 fail:
@@ -2275,7 +2275,7 @@ nvkm_device_init(struct nvkm_device *device)
 	nvkm_acpi_init(device);
 
 	time = ktime_to_us(ktime_get()) - time;
-	nvdev_trace(device, "init completed in %lldus\n", time);
+	nvdev_trace(device, "init completed in %"PRId64"us\n", time);
 	return 0;
 
 fail_subdev:

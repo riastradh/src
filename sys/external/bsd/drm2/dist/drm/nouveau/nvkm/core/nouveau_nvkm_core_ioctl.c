@@ -43,7 +43,7 @@ nvkm_ioctl_nop(struct nvkm_object *object, void *data, u32 size)
 
 	nvif_ioctl(object, "nop size %d\n", size);
 	if (nvif_unpack(args->v0, 0, 0, false)) {
-		nvif_ioctl(object, "nop vers %lld\n", args->v0.version);
+		nvif_ioctl(object, "nop vers %"PRId64"\n", args->v0.version);
 		args->v0.version = NVIF_VERSION_LATEST;
 	}
 

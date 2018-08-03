@@ -112,7 +112,7 @@ nvkm_engine_init(struct nvkm_subdev *subdev)
 
 		engine->subdev.oneinit = true;
 		time = ktime_to_us(ktime_get()) - time;
-		nvkm_trace(subdev, "one-time init completed in %lldus\n", time);
+		nvkm_trace(subdev, "one-time init completed in %"PRId64"us\n", time);
 	}
 
 	if (engine->func->init)

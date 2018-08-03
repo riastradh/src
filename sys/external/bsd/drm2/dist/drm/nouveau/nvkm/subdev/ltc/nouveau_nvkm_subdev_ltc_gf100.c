@@ -139,7 +139,7 @@ gf100_ltc_invalidate(struct nvkm_ltc *ltc)
 		nvkm_warn(&ltc->subdev, "LTC invalidate timeout\n");
 
 	if (taken > 0)
-		nvkm_debug(&ltc->subdev, "LTC invalidate took %lld ns\n", taken);
+		nvkm_debug(&ltc->subdev, "LTC invalidate took %"PRId64" ns\n", taken);
 }
 
 void
@@ -154,7 +154,7 @@ gf100_ltc_flush(struct nvkm_ltc *ltc)
 		nvkm_warn(&ltc->subdev, "LTC flush timeout\n");
 
 	if (taken > 0)
-		nvkm_debug(&ltc->subdev, "LTC flush took %lld ns\n", taken);
+		nvkm_debug(&ltc->subdev, "LTC flush took %"PRId64" ns\n", taken);
 }
 
 /* TODO: Figure out tag memory details and drop the over-cautious allocation.
