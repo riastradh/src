@@ -74,6 +74,7 @@ file	external/bsd/drm2/dist/drm/i915/intel_dp_mst.c	i915drmkms
 #file	external/bsd/drm2/dist/drm/i915/intel_dsi_pll.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_dvo.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_fbc.c	i915drmkms
+file	external/bsd/drm2/dist/drm/i915/intel_fbdev.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_fifo_underrun.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_frontbuffer.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_guc_loader.c	i915drmkms

@@ -15,6 +15,7 @@ i915drmkms_top=external/bsd/drm2/dist/drm/i915
 i915drmkms_flag=i915drmkms
 
 env CONFIG_ACPI=y \
+env CONFIG_DRM_FBDEV_EMULATION=y \
 env src=. \
 make -f Makefile -V '$(i915-y)' \
 | tr ' ' '\n' \
