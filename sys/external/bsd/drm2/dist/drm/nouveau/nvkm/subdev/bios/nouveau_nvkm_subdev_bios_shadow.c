@@ -156,7 +156,7 @@ shadow_fw_init(struct nvkm_bios *bios, const char *name)
 	int ret = request_firmware(&fw, name, dev);
 	if (ret)
 		return ERR_PTR(-ENOENT);
-	return (void *)fw;
+	return __UNCONST(fw);
 }
 
 static const struct nvbios_source
