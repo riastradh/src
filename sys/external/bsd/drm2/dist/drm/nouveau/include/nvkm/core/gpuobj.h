@@ -11,6 +11,11 @@ struct nvkm_vm;
 #define NVOBJ_FLAG_ZERO_ALLOC 0x00000001
 #define NVOBJ_FLAG_HEAP       0x00000004
 
+#ifdef __NetBSD__
+#  define	__nvkm_gpuobj_iomem
+#  define	__iomem			__nvkm_gpuobj_iomem
+#endif
+
 struct nvkm_gpuobj {
 	struct nvkm_object object;
 	const struct nvkm_gpuobj_func *func;
@@ -24,6 +29,10 @@ struct nvkm_gpuobj {
 
 	void __iomem *map;
 };
+
+#ifdef __NetBSD__
+#  undef	__iomem
+#endif
 
 struct nvkm_gpuobj_func {
 	void *(*acquire)(struct nvkm_gpuobj *);
