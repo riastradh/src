@@ -11,8 +11,9 @@
 #define nvif_unpack(d,vl,vh,m) ({                                              \
 	if ((vl) == 0 || ret == -ENOSYS) {                                     \
 		int _size = sizeof(d);                                         \
-		if (_size <= size && (d).version >= (vl) &&                    \
-				     (d).version <= (vh)) {                    \
+		if (_size <= size &&                                           \
+		    ((d).version == (vl) || (d).version > (vl)) &&             \
+		    (d).version <= (vh)) {                                     \
 			data = (u8 *)data + _size;                             \
 			size = size - _size;                                   \
 			ret = ((m) || !size) ? 0 : -E2BIG;                     \
