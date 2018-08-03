@@ -339,7 +339,7 @@ static void radeon_fence_check_lockup(struct work_struct *work)
 
 		/* good news we believe it's a lockup */
 		dev_warn(rdev->dev, "GPU lockup (current fence id "
-			 "0x%016llx last fence id 0x%016llx on ring %d)\n",
+			 "0x%016"PRIx64" last fence id 0x%016"PRIx64" on ring %d)\n",
 			 (uint64_t)atomic64_read(&fence_drv->last_seq),
 			 fence_drv->sync_seq[ring], ring);
 
