@@ -763,7 +763,11 @@ static void radeon_vm_frag_ptes(struct radeon_device *rdev,
 	uint64_t frag_align = ((rdev->family == CHIP_CAYMAN) ||
 			       (rdev->family == CHIP_ARUBA)) ? 0x200 : 0x80;
 
+#ifdef __NetBSD__		/* XXX ALIGN means something else */
+	uint64_t frag_start = round_up(pe_start, frag_align);
+#else
 	uint64_t frag_start = ALIGN(pe_start, frag_align);
+#endif
 	uint64_t frag_end = pe_end & ~(frag_align - 1);
 
 	unsigned count;
