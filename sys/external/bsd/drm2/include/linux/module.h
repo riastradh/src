@@ -32,6 +32,9 @@
 #ifndef _LINUX_MODULE_H_
 #define _LINUX_MODULE_H_
 
+/* XXX Get this first so we don't nuke the module_init declaration.  */
+#include <sys/module.h>
+
 #include <linux/export.h>
 #include <linux/moduleparam.h>
 
