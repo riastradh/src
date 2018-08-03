@@ -274,3 +274,10 @@ drm_pci_set_busid(struct drm_device *dev, struct drm_master *master)
 
 	return 0;
 }
+
+int
+drm_irq_by_busid(struct drm_device *dev, void *data, struct drm_file *file)
+{
+
+	return -ENOSYS;
+}
