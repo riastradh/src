@@ -3,8 +3,6 @@
 #ifndef __NVKM_PMU_H__
 #define __NVKM_PMU_H__
 #include <core/subdev.h>
-#include <linux/workqueue.h>
-#include <drm/drmP.h>
 
 struct nvkm_pmu {
 	const struct nvkm_pmu_func *func;
