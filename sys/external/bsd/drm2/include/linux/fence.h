@@ -97,4 +97,15 @@ long	fence_default_wait(struct fence *, bool, long);
 long	fence_wait(struct fence *, bool);
 long	fence_wait_timeout(struct fence *, bool, int);
 
+static inline void
+FENCE_TRACE(struct fence *f, const char *fmt, ...)
+{
+	va_list va;
+
+	va_start(va, fmt);
+	printf("fence %u@%u: ", f->context, f->seqno);
+	vprintf(fmt, va);
+	va_end(va);
+}
+
 #endif	/* _LINUX_FENCE_H_ */
