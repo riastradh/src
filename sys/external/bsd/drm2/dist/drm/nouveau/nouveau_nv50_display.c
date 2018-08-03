@@ -271,9 +271,8 @@ nv50_dmac_create(struct nvif_device *device, struct nvif_object *disp,
 
 #ifdef __NetBSD__
     {
-	struct nouveau_device *device = nv_device(core);
-	const bus_dma_tag_t dmat = pci_dma64_available(&device->pdev->pd_pa) ?
-	    device->pdev->pd_pa.pa_dmat64 : device->pdev->pd_pa.pa_dmat;
+	struct nvkm_device *nvkm_device = nvxx_device(device);
+	const bus_dma_tag_t dmat = nvkm_device->func->dma_tag(nvkm_device);
 
 	int rsegs;
 
