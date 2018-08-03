@@ -488,7 +488,7 @@ int radeon_vm_bo_set_addr(struct radeon_device *rdev,
 			struct radeon_bo_va *tmp;
 			tmp = container_of(it, struct radeon_bo_va, it);
 			/* bo and tmp overlap, invalid offset */
-			dev_err(rdev->dev, "bo %p va 0x%010Lx conflict with "
+			dev_err(rdev->dev, "bo %p va 0x%010"PRIx64" conflict with "
 				"(bo %p 0x%010lx 0x%010lx)\n", bo_va->bo,
 				soffset, tmp->bo, tmp->it.start, tmp->it.last);
 			mutex_unlock(&vm->mutex);
