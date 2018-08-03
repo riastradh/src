@@ -211,22 +211,16 @@ out0:	uvmfault_unlockall(ufi, ufi->entry->aref.ar_amap, NULL);
 static int
 ttm_bo_uvm_fault_idle(struct ttm_buffer_object *bo, struct uvm_faultinfo *ufi)
 {
-	struct ttm_bo_device *const bdev = bo->bdev;
-	int ret = 0;
 
-	spin_lock(&bdev->fence_lock);
 	if (__predict_true(!test_bit(TTM_BO_PRIV_FLAG_MOVING,
 		    &bo->priv_flags)))
-		goto out;
+		return 0;
 	if (ttm_bo_wait(bo, false, false, true) == 0)
-		goto out;
+		return 0;
 
 	uvmfault_unlockall(ufi, ufi->entry->aref.ar_amap, NULL);
 	(void)ttm_bo_wait(bo, false, true, false);
-	ret = -ERESTART;
-
-out:	spin_unlock(&bdev->fence_lock);
-	return ret;
+	return -ERESTART;
 }
 
 int
