@@ -57,6 +57,7 @@
 #define	schedule_delayed_work		linux_schedule_delayed_work
 #define	schedule_work			linux_schedule_work
 #define	system_long_wq			linux_system_long_wq
+#define	system_power_efficient_wq	linux_system_power_efficient_wq
 #define	system_wq			linux_system_wq
 #define	to_delayed_work			linux_to_delayed_work
 
@@ -92,6 +93,7 @@ to_delayed_work(struct work_struct *work)
 
 extern struct workqueue_struct	*system_wq;
 extern struct workqueue_struct	*system_long_wq;
+extern struct workqueue_struct	*system_power_efficient_wq;
 
 int	linux_workqueue_init(void);
 void	linux_workqueue_fini(void);
