@@ -72,6 +72,7 @@ struct fence_cb {
 #define	fence_init		linux_fence_init
 #define	fence_put		linux_fence_put
 #define	fence_remove_callback	linux_fence_remove_callback
+#define	fence_signal		linux_fence_signal
 #define	fence_signal_locked	linux_fence_signal_locked
 #define	fence_wait		linux_fence_wait
 #define	fence_wait_timeout	linux_fence_wait_timeout
@@ -92,6 +93,7 @@ bool	fence_remove_callback(struct fence *, struct fence_cb *);
 
 bool	fence_is_signaled(struct fence *);
 bool	fence_is_signaled_locked(struct fence *);
+int	fence_signal(struct fence *);
 int	fence_signal_locked(struct fence *);
 long	fence_default_wait(struct fence *, bool, long);
 long	fence_wait(struct fence *, bool);
