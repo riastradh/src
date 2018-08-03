@@ -43,6 +43,7 @@ g94_sor_loff(struct nvkm_output_dp *outp)
 	return g94_sor_soff(outp) + !(outp->base.info.sorconf.link & 1) * 0x80;
 }
 
+#ifndef __NetBSD__		/* XXX unused? */
 /*******************************************************************************
  * TMDS/LVDS
  ******************************************************************************/
@@ -57,6 +58,7 @@ g94_sor_output_new(struct nvkm_disp *disp, int index,
 	return nvkm_output_new_(&g94_sor_output_func, disp,
 				index, dcbE, poutp);
 }
+#endif
 
 /*******************************************************************************
  * DisplayPort
