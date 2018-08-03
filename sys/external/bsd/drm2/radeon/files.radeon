@@ -62,7 +62,7 @@ file	external/bsd/drm2/dist/drm/radeon/r600_cs.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/r600_dma.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/r600_dpm.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/r600_hdmi.c	radeon
-file	external/bsd/drm2/dist/drm/radeon/radeon_acpi.c	radeon
+#file	external/bsd/drm2/dist/drm/radeon/radeon_acpi.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_agp.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_asic.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_atombios.c	radeon
