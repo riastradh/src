@@ -32,4 +32,61 @@
 #ifndef	_LINUX_REGULATOR_CONSUMER_H_
 #define	_LINUX_REGULATOR_CONSUMER_H_
 
+#include "opt_fdt.h"
+
+#ifdef FDT
+
+struct regulator {
+	struct fdtbus_regulator	regulator;
+};
+
+static inline int
+regulator_get_voltage(struct regulator *reg)
+{
+	unsigned uvolt;
+	int error;
+
+	error = fdtbus_regulator_get_voltage(&reg->regulator, &uvolt);
+	if (error) {
+		/* XXX errno NetBSD->Linux */
+		KASSERTMSG(error > 0, "negative error: %d", error);
+		return -error;
+	}
+
+	KASSERTMSG(uvolt <= INT_MAX, "high voltage: %u uV", uvolt);
+	return (int)uvol;
+}
+
+static inline int
+regulator_set_voltage(struct regulator *reg, int min_uvolt, int max_uvolt)
+{
+	unsigned v;
+
+	if (min_uvolt < 0 || max_uvolt < 0)
+		return -EINVAL;
+
+	/* XXX errno NetBSD->Linux */
+	return -fdtbus_regulator_set_voltage(&reg->regulator, min_uvolt,
+	    max_uvolt);
+}
+
+#else
+
+struct regulator;
+
+static inline int
+regulator_get_voltage(struct regulator *reg)
+{
+	panic("no voltage regulators here");
+}
+
+static inline int
+regulator_set_voltage(struct regulator *reg, int min_uvolt, int max_uvolt)
+{
+	panic("no voltage regulators here");
+}
+
+
+#endif
+
 #endif	/* _LINUX_REGULATOR_CONSUMER_H_ */
