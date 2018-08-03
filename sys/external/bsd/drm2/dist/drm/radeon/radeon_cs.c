@@ -181,13 +181,21 @@ static int radeon_cs_parser_relocs(struct radeon_cs_parser *p)
 	if (p->cs_flags & RADEON_CS_USE_VM)
 		p->vm_bos = radeon_vm_get_bos(p->rdev, p->ib.vm,
 					      &p->validated);
+#ifdef __NetBSD__
+	KASSERTMSG(!need_mmap_lock,
+	    "someone didn't finish adding support for userptr"
+	    " and it wasn't me");
+#else
 	if (need_mmap_lock)
 		down_read(&current->mm->mmap_sem);
+#endif
 
 	r = radeon_bo_list_validate(p->rdev, &p->ticket, &p->validated, p->ring);
 
+#ifndef __NetBSD__
 	if (need_mmap_lock)
 		up_read(&current->mm->mmap_sem);
+#endif
 
 	return r;
 }
