@@ -10,12 +10,12 @@ struct nv50_fb {
 	struct nvkm_fb base;
 #ifdef __NetBSD__
 	bus_dma_segment_t r100c08_seg;
-	bus_dmamap_t r100c08_map;
+	bus_dmamap_t r100c08_page;
 	void *r100c08_kva;
 #else
 	struct page *r100c08_page;
-	dma_addr_t r100c08;
 #endif
+	dma_addr_t r100c08;
 };
 
 struct nv50_fb_func {
