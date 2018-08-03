@@ -2303,6 +2303,12 @@ nvkm_device_del(struct nvkm_device **pdevice)
 			nvkm_subdev_del(&subdev);
 		}
 
+#ifdef __NetBSD__
+		linux_mutex_destroy(&device->mutex);
+#else
+		mutex_destroy(&device->mutex);
+#endif
+
 		nvkm_event_fini(&device->event);
 
 #ifdef __NetBSD__
@@ -2573,7 +2579,11 @@ nvkm_device_ctor(const struct nvkm_device_func *func,
 #endif
 	}
 
+#ifdef __NetBSD__
+	linux_mutex_init(&device->mutex);
+#else
 	mutex_init(&device->mutex);
+#endif
 
 	for (i = 0; i < NVKM_SUBDEV_NR; i++) {
 #define _(s,m) case s:                                                         \

@@ -184,6 +184,11 @@ nvkm_i2c_bus_del(struct nvkm_i2c_bus **pbus)
 		BUS_TRACE(bus, "dtor");
 		list_del(&bus->head);
 		i2c_del_adapter(&bus->i2c);
+#ifdef __NetBSD__
+		linux_mutex_destroy(&bus->mutex);
+#else
+		mutex_destroy(&bus->mutex);
+#endif
 		kfree(bus->i2c.algo_data);
 		kfree(*pbus);
 		*pbus = NULL;
@@ -207,7 +212,11 @@ nvkm_i2c_bus_ctor(const struct nvkm_i2c_bus_func *func,
 	bus->func = func;
 	bus->pad = pad;
 	bus->id = id;
+#ifdef __NetBSD__
+	linux_mutex_init(&bus->mutex);
+#else
 	mutex_init(&bus->mutex);
+#endif
 	list_add_tail(&bus->head, &pad->i2c->bus);
 	BUS_TRACE(bus, "ctor");
 
