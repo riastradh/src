@@ -327,8 +327,10 @@ static int intelfb_create(struct drm_fb_helper *helper,
 #endif
 	return 0;
 
+#ifndef __NetBSD__
 out_destroy_fbi:
 	drm_fb_helper_release_fbi(helper);
+#endif
 out_unpin:
 	i915_gem_object_ggtt_unpin(obj);
 	drm_gem_object_unreference(&obj->base);
