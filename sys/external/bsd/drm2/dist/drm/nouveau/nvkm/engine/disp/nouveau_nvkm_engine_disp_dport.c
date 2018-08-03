@@ -407,7 +407,14 @@ nvkm_dp_train(struct work_struct *w)
 
 	/* signal completion and enable link interrupt handling */
 	OUTP_DBG(&outp->base, "training complete");
+#ifdef __NetBSD__
+	spin_lock(&outp->lt.lock);
+	atomic_set(&outp->lt.done, 1);
+	DRM_SPIN_WAKEUP_ONE(&outp->lt.wait, &outp->lt.lock);
+	spin_unlock(&outp->lt.lock);
+#else
 	atomic_set(&outp->lt.done, 1);
 	wake_up(&outp->lt.wait);
+#endif
 	nvkm_notify_get(&outp->irq);
 }
