@@ -41,10 +41,10 @@
 #include <linux/mm_types.h>
 
 /* XXX Make the nm output a little more greppable...  */
-#define	kmap_atomic	linux_kmap_atomic
-#define	kunmap_atomic	linux_kunmap_atomic
-#define	kmap		linux_kmap
-#define	kunmap		linux_kunmap
+#define	kmap			linux_kmap
+#define	kmap_atomic		linux_kmap_atomic
+#define	kunmap			linux_kunmap
+#define	kunmap_atomic		linux_kunmap_atomic
 
 /* XXX Kludge!  */
 #define	kmap_atomic_prot(page, prot)	kmap_atomic(page)
