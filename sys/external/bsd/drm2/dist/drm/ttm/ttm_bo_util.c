@@ -44,6 +44,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/module.h>
 #include <linux/reservation.h>
 #include <linux/export.h>
+#include <asm/barrier.h>
 
 #ifdef __NetBSD__		/* PMAP_* caching flags for ttm_io_prot */
 #include <uvm/uvm_pmap.h>
