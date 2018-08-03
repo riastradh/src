@@ -1697,8 +1697,10 @@ int radeon_device_init(struct radeon_device *rdev,
 	return 0;
 
 failed:
+#ifndef __NetBSD__		/* XXX radeon vga */
 	if (runtime)
 		vga_switcheroo_fini_domain_pm_ops(rdev->dev);
+#endif
 	return r;
 }
 
