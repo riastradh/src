@@ -880,6 +880,15 @@ static const struct uvm_pagerops radeon_uvm_ops = {
 int radeon_ttm_tt_set_userptr(struct ttm_tt *ttm, uint64_t addr,
 			      uint32_t flags)
 {
+#ifdef __NetBSD__
+	/*
+	 * XXX Too painful to contemplate for now.  If you add this,
+	 * make sure to update radeon_cs.c radeon_cs_parser_relocs
+	 * (need_mmap_lock), and anything else using
+	 * radeon_ttm_tt_has_userptr.
+	 */
+	return -ENODEV;
+#else
 	struct radeon_ttm_tt *gtt = radeon_ttm_tt_to_gtt(ttm);
 
 	if (gtt == NULL)
@@ -889,6 +898,7 @@ int radeon_ttm_tt_set_userptr(struct ttm_tt *ttm, uint64_t addr,
 	gtt->usermm = current->mm;
 	gtt->userflags = flags;
 	return 0;
+#endif
 }
 
 bool radeon_ttm_tt_has_userptr(struct ttm_tt *ttm)

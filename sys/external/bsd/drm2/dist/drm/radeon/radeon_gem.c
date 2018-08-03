@@ -290,6 +290,15 @@ int radeon_gem_create_ioctl(struct drm_device *dev, void *data,
 int radeon_gem_userptr_ioctl(struct drm_device *dev, void *data,
 			     struct drm_file *filp)
 {
+#ifdef __NetBSD__
+	/*
+	 * XXX Too painful to contemplate for now.  If you add this,
+	 * make sure to update radeon_cs.c radeon_cs_parser_relocs
+	 * (need_mmap_lock), and anything else using
+	 * radeon_ttm_tt_has_userptr.
+	 */
+	return -ENODEV;
+#else
 	struct radeon_device *rdev = dev->dev_private;
 	struct drm_radeon_gem_userptr *args = data;
 	struct drm_gem_object *gobj;
@@ -373,6 +382,7 @@ handle_lockup:
 	r = radeon_gem_handle_lockup(rdev, r);
 
 	return r;
+#endif
 }
 
 int radeon_gem_set_domain_ioctl(struct drm_device *dev, void *data,
