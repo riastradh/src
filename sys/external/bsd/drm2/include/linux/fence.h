@@ -68,6 +68,7 @@ struct fence_cb {
 
 #define	fence_add_callback	linux_fence_add_callback
 #define	fence_context_alloc	linux_fence_context_alloc
+#define	fence_enable_sw_signaling linux_fence_enable_sw_signaling
 #define	fence_get		linux_fence_get
 #define	fence_init		linux_fence_init
 #define	fence_put		linux_fence_put
@@ -90,6 +91,7 @@ void	fence_put(struct fence *);
 
 int	fence_add_callback(struct fence *, struct fence_cb *, fence_func_t);
 bool	fence_remove_callback(struct fence *, struct fence_cb *);
+void	fence_enable_sw_signaling(struct fence *);
 
 bool	fence_is_signaled(struct fence *);
 bool	fence_is_signaled_locked(struct fence *);
