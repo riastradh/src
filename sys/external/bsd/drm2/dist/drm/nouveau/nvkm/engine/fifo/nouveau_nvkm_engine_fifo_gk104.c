@@ -81,7 +81,7 @@ gk104_fifo_runlist_update(struct gk104_fifo *fifo, u32 engine)
 	if (cold) {
 		uint count = 2000;
 		while (count-- > 0) {
-			if (!(nvkm_rd32(priv, 0x002284 +
+			if (!(nvkm_rd32(device, 0x002284 +
 			    (engine * 0x08)) & 0x00100000))
 				break;
 			delay(1000);
@@ -95,7 +95,7 @@ gk104_fifo_runlist_update(struct gk104_fifo *fifo, u32 engine)
 		spin_lock(&engn->lock);
 		DRM_SPIN_TIMED_WAIT_NOINTR_UNTIL(ret, &engn->wait, &engn->lock,
 		    msecs_to_jiffies(2000),
-		    !(nvkm_rd32(priv, 0x002284 +
+		    !(nvkm_rd32(device, 0x002284 +
 			    (engine * 0x08)) & 0x00100000));
 		if (ret == 0)
 			nvkm_error(subdev, "runlist %d update timeout\n",
