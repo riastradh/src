@@ -254,7 +254,6 @@ drm_lastclose(struct drm_device *dev)
 	if (dev->agp)
 		drm_agp_clear_hook(dev);
 	drm_legacy_sg_cleanup(dev);
-	drm_legacy_vma_flush(dev);
 	drm_legacy_dma_takedown(dev);
 	mutex_unlock(&dev->struct_mutex);
 
