@@ -11,7 +11,7 @@ struct gk104_fifo_engn {
 	struct nvkm_memory *runlist[2];
 	int cur_runlist;
 #ifdef __NetBSD__
-	spin_lock_t lock;
+	spinlock_t lock;
 	drm_waitqueue_t wait;
 #else
 	wait_queue_head_t wait;
