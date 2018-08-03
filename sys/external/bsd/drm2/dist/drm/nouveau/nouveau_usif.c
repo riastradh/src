@@ -117,7 +117,11 @@ usif_notify(const void *header, u32 length, const void *data, u32 size)
 		list_add_tail(&ntfy->p->base.link, &filp->event_list);
 		filp->event_space -= ntfy->p->e.base.length;
 	}
+#ifdef __NetBSD__
+	DRM_SPIN_WAKEUP_ONE(&filp->event_wait, &dev->event_lock);
+#else
 	wake_up_interruptible(&filp->event_wait);
+#endif
 	spin_unlock_irqrestore(&dev->event_lock, flags);
 	atomic_set(&ntfy->enabled, 0);
 	return NVIF_NOTIFY_DROP;
