@@ -2562,14 +2562,15 @@ nvkm_device_ctor(const struct nvkm_device_func *func,
 	if (mmio) {
 #ifdef __NetBSD__
 		/* XXX errno NetBSD->Linux */
-		ret = -bus_space_map(mmiot, mmio_base, mmio_size, 0, &mmioh);
+		ret = -bus_space_map(mmiot, mmio_base, mmio_size,
+		    BUS_SPACE_MAP_LINEAR, &mmioh);
 		if (ret) {
 			nvdev_error(device, "unable to map device registers\n");
 			goto done; /* XXX Linux leaks mutex */
 		}
 		device->mmiot = mmiot;
 		device->mmioh = mmioh;
-		device->mmiosz = mmiosz;
+		device->mmiosz = mmio_size;
 #else
 		device->pri = ioremap(mmio_base, mmio_size);
 		if (!device->pri) {
