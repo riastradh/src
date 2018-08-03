@@ -1155,6 +1155,7 @@ agp_get_info(void *devcookie, struct agp_info *info)
 	info->ai_aperture_size = sc->as_apsize;	/* XXXfvdl inconsistent */
 	info->ai_memory_allowed = sc->as_maxmem;
 	info->ai_memory_used = sc->as_allocated;
+	info->ai_devid = sc->as_id;
 }
 
 int
