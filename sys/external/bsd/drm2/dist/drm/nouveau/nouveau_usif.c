@@ -355,6 +355,9 @@ usif_ioctl(struct drm_file *filp, void __user *user, u32 argc)
 	case NVIF_IOCTL_V0_NTFY_PUT:
 		ret = usif_notify_put(filp, data, size, argv, argc);
 		break;
+	case NVIF_IOCTL_V0_MAP_NETBSD:
+		/* Kernel-only kludge.  */
+		ret = -EINVAL;
 	default:
 		ret = nvif_client_ioctl(client, argv, argc);
 		break;

@@ -258,9 +258,12 @@ nvkm_fifo_chan_ntfy(struct nvkm_object *object, u32 type,
 }
 
 static int
-nvkm_fifo_chan_map(struct nvkm_object *object, u64 *addr, u32 *size)
+nvkm_fifo_chan_map(struct nvkm_object *object, bus_space_tag_t *tagp,
+    u64 *addr, u32 *size)
 {
 	struct nvkm_fifo_chan *chan = nvkm_fifo_chan(object);
+	/* XXX Uh oh.  Can't map this more than once.  OK?  */
+	*tagp = chan->bst;
 	*addr = chan->addr;
 	*size = chan->size;
 	return 0;

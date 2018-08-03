@@ -67,6 +67,10 @@ struct nvif_object {
 	s32 oclass;
 	void *priv; /*XXX: hack */
 	struct {
+#ifdef __NetBSD__
+		bus_space_tag_t tag;
+		bus_space_handle_t handle;
+#endif
 		void __iomem *ptr;
 		u32 size;
 	} map;

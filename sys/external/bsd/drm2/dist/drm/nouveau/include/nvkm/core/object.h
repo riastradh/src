@@ -29,7 +29,12 @@ struct nvkm_object_func {
 	int (*fini)(struct nvkm_object *, bool suspend);
 	int (*mthd)(struct nvkm_object *, u32 mthd, void *data, u32 size);
 	int (*ntfy)(struct nvkm_object *, u32 mthd, struct nvkm_event **);
+#ifdef __NetBSD__
+	int (*map)(struct nvkm_object *, bus_space_tag_t *tagp, u64 *addr,
+	    u32 *size);
+#else
 	int (*map)(struct nvkm_object *, u64 *addr, u32 *size);
+#endif
 	int (*rd08)(struct nvkm_object *, u64 addr, u8 *data);
 	int (*rd16)(struct nvkm_object *, u64 addr, u16 *data);
 	int (*rd32)(struct nvkm_object *, u64 addr, u32 *data);
@@ -54,7 +59,8 @@ int nvkm_object_init(struct nvkm_object *);
 int nvkm_object_fini(struct nvkm_object *, bool suspend);
 int nvkm_object_mthd(struct nvkm_object *, u32 mthd, void *data, u32 size);
 int nvkm_object_ntfy(struct nvkm_object *, u32 mthd, struct nvkm_event **);
-int nvkm_object_map(struct nvkm_object *, u64 *addr, u32 *size);
+int nvkm_object_map(struct nvkm_object *, bus_space_tag_t *, u64 *addr,
+    u32 *size);
 int nvkm_object_rd08(struct nvkm_object *, u64 addr, u8  *data);
 int nvkm_object_rd16(struct nvkm_object *, u64 addr, u16 *data);
 int nvkm_object_rd32(struct nvkm_object *, u64 addr, u32 *data);

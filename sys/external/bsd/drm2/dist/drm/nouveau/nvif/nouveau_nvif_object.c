@@ -183,7 +183,8 @@ nvif_object_unmap(struct nvif_object *object)
 		};
 
 		if (object->map.ptr) {
-			client->driver->unmap(client, object->map.ptr,
+			client->driver->unmap(client, object->map.tag,
+						      object->map.handle,
 						      object->map.size);
 			object->map.ptr = NULL;
 		}
@@ -199,18 +200,36 @@ nvif_object_map(struct nvif_object *object)
 	struct nvif_client *client = object->client;
 	struct {
 		struct nvif_ioctl_v0 ioctl;
+#ifdef __NetBSD__
+		struct nvif_ioctl_map_netbsd_v0 map;
+#else
 		struct nvif_ioctl_map_v0 map;
+#endif
 	} args = {
+#ifdef __NetBSD__
+		.ioctl.type = NVIF_IOCTL_V0_MAP_NETBSD,
+#else
 		.ioctl.type = NVIF_IOCTL_V0_MAP,
+#endif
 	};
 	int ret = nvif_object_ioctl(object, &args, sizeof(args), NULL);
 	if (ret == 0) {
 		object->map.size = args.map.length;
+#ifdef __NetBSD__
+		ret = client->driver->map(client, args.map.tag,
+		    args.map.handle, object->map.size, &object->map.handle,
+		    &object->map.ptr);
+		if (ret) {
+			nvif_object_unmap(object);
+			return -ENOMEM;
+		}
+#else
 		object->map.ptr = client->driver->map(client, args.map.handle,
 						      object->map.size);
 		if (ret = -ENOMEM, object->map.ptr)
 			return 0;
 		nvif_object_unmap(object);
+#endif
 	}
 	return ret;
 }

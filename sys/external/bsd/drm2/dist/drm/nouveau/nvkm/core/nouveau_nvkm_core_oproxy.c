@@ -42,9 +42,10 @@ nvkm_oproxy_ntfy(struct nvkm_object *object, u32 mthd,
 }
 
 static int
-nvkm_oproxy_map(struct nvkm_object *object, u64 *addr, u32 *size)
+nvkm_oproxy_map(struct nvkm_object *object, bus_space_tag_t *tagp, u64 *addr,
+    u32 *size)
 {
-	return nvkm_object_map(nvkm_oproxy(object)->object, addr, size);
+	return nvkm_object_map(nvkm_oproxy(object)->object, tagp, addr, size);
 }
 
 static int

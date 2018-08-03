@@ -205,10 +205,12 @@ nvkm_udevice_wr32(struct nvkm_object *object, u64 addr, u32 data)
 }
 
 static int
-nvkm_udevice_map(struct nvkm_object *object, u64 *addr, u32 *size)
+nvkm_udevice_map(struct nvkm_object *object, bus_space_tag_t *tagp, u64 *addr,
+    u32 *size)
 {
 	struct nvkm_udevice *udev = nvkm_udevice(object);
 	struct nvkm_device *device = udev->device;
+	*tagp = device->func->resource_tag(device, 0);
 	*addr = device->func->resource_addr(device, 0);
 	*size = device->func->resource_size(device, 0);
 	return 0;

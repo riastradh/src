@@ -260,8 +260,29 @@ nvkm_ioctl_map(struct nvkm_object *object, void *data, u32 size)
 
 	nvif_ioctl(object, "map size %d\n", size);
 	if (nvif_unpack(args->v0, 0, 0, false)) {
+		bus_space_tag_t dummy __unused;
 		nvif_ioctl(object, "map vers %d\n", args->v0.version);
-		ret = nvkm_object_map(object, &args->v0.handle,
+		ret = nvkm_object_map(object, &dummy,
+					      &args->v0.handle,
+					      &args->v0.length);
+	}
+
+	return ret;
+}
+
+static int
+nvkm_ioctl_map_netbsd(struct nvkm_object *object, void *data, u32 size)
+{
+	union {
+		struct nvif_ioctl_map_netbsd_v0 v0;
+	} *args = data;
+	int ret;
+
+	nvif_ioctl(object, "map size %d\n", size);
+	if (nvif_unpack(args->v0, 0, 0, false)) {
+		nvif_ioctl(object, "map vers %d\n", args->v0.version);
+		ret = nvkm_object_map(object, &args->v0.tag,
+					      &args->v0.handle,
 					      &args->v0.length);
 	}
 
@@ -385,6 +406,7 @@ nvkm_ioctl_v0[] = {
 	{ 0x00, nvkm_ioctl_ntfy_del },
 	{ 0x00, nvkm_ioctl_ntfy_get },
 	{ 0x00, nvkm_ioctl_ntfy_put },
+	{ 0x00, nvkm_ioctl_map_netbsd },
 };
 
 static int

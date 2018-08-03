@@ -194,12 +194,14 @@ nv50_disp_chan_ntfy(struct nvkm_object *object, u32 type,
 	return -EINVAL;
 }
 
-int
-nv50_disp_chan_map(struct nvkm_object *object, u64 *addr, u32 *size)
+static int
+nv50_disp_chan_map(struct nvkm_object *object, bus_space_tag_t *tagp,
+    u64 *addr, u32 *size)
 {
 	struct nv50_disp_chan *chan = nv50_disp_chan(object);
 	struct nv50_disp *disp = chan->root->disp;
 	struct nvkm_device *device = disp->base.engine.subdev.device;
+	*tagp = device->func->resource_tag(device, 0);
 	*addr = device->func->resource_addr(device, 0) +
 		0x640000 + (chan->chid * 0x1000);
 	*size = 0x001000;

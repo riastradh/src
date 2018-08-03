@@ -44,6 +44,30 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "nouveau_drm.h"
 #include "nouveau_usif.h"
 
+#ifdef __NetBSD__
+#define	__iomem	__nvif_iomem
+static int
+nvkm_client_map(void *priv, bus_space_tag_t tag, u64 busaddr, u32 size,
+    bus_space_handle_t *handlep, void __iomem **ptrp)
+{
+	int ret;
+
+	ret = -bus_space_map(tag, busaddr, size, BUS_SPACE_MAP_LINEAR,
+	    handlep);
+	if (ret)
+		return ret;
+	*ptrp = bus_space_vaddr(tag, *handlep);
+	return 0;
+}
+
+static void
+nvkm_client_unmap(void *priv, bus_space_tag_t tag, bus_space_handle_t handle,
+    u32 size)
+{
+
+	bus_space_unmap(tag, handle, size);
+}
+#else
 static void
 nvkm_client_unmap(void *priv, void __iomem *ptr, u32 size)
 {
@@ -55,6 +79,7 @@ nvkm_client_map(void *priv, u64 handle, u32 size)
 {
 	return ioremap(handle, size);
 }
+#endif
 
 static int
 nvkm_client_ioctl(void *priv, bool super, void *data, u32 size, void **hack)
