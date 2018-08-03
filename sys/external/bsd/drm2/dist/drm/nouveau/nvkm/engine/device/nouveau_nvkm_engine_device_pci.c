@@ -1566,13 +1566,14 @@ nvkm_device_pci(struct nvkm_device *device)
 }
 
 #ifdef __NetBSD__
+#include <dev/pci/pcivar.h>
 static bus_dma_tag_t
 nvkm_device_pci_dma_tag(struct nvkm_device *device)
 {
 	struct nvkm_device_pci *pdev = nvkm_device_pci(device);
-	const struct pci_attach_args *pa = &pdev->pd_pa;
+	const struct pci_attach_args *pa = &pdev->pdev->pd_pa;
 
-	return pci_dma64_avaliable(pa) ? pa->pa_dmat64 : pa->pa_dmat;
+	return pci_dma64_available(pa) ? pa->pa_dmat64 : pa->pa_dmat;
 }
 
 static bus_space_tag_t
