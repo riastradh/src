@@ -54,6 +54,10 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <subdev/fb.h>
 #include <subdev/ltc.h>
 
+#ifdef __NetBSD__
+#  define	__iomem	__nvkm_memory_iomem
+#endif
+
 struct gk20a_instobj {
 	struct nvkm_memory memory;
 	struct nvkm_mem mem;

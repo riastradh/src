@@ -17,6 +17,11 @@ struct nvkm_memory {
 	const struct nvkm_memory_func *func;
 };
 
+#ifdef __NetBSD__
+#  define	__nvkm_memory_iomem
+#  define	__iomem			__nvkm_memory_iomem
+#endif
+
 struct nvkm_memory_func {
 	void *(*dtor)(struct nvkm_memory *);
 	enum nvkm_memory_target (*target)(struct nvkm_memory *);
@@ -29,6 +34,10 @@ struct nvkm_memory_func {
 	void (*wr32)(struct nvkm_memory *, u64 offset, u32 data);
 	void (*map)(struct nvkm_memory *, struct nvkm_vma *, u64 offset);
 };
+
+#ifdef __NetBSD__
+#  undef	__iomem
+#endif
 
 void nvkm_memory_ctor(const struct nvkm_memory_func *, struct nvkm_memory *);
 int nvkm_memory_new(struct nvkm_device *, enum nvkm_memory_target,
