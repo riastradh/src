@@ -172,7 +172,9 @@ void radeon_kfd_fini(void)
 {
 	if (kgd2kfd) {
 		kgd2kfd->exit();
+#ifdef CONFIG_HSA_AMD_MODULE
 		symbol_put(kgd2kfd_init);
+#endif
 	}
 }
 
