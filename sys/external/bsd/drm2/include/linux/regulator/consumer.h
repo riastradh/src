@@ -32,7 +32,9 @@
 #ifndef	_LINUX_REGULATOR_CONSUMER_H_
 #define	_LINUX_REGULATOR_CONSUMER_H_
 
+#ifdef _KERNEL_OPT
 #include "opt_fdt.h"
+#endif
 
 #ifdef FDT
 
