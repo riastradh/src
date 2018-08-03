@@ -44,7 +44,8 @@ pcirom_read(void *data, u32 offset, u32 length, struct nvkm_bios *bios)
 {
 	struct priv *priv = data;
 	if (offset + length <= priv->size) {
-		memcpy_fromio(bios->data + offset, priv->rom + offset, length);
+		memcpy_fromio(bios->data + offset,
+		    (const char __iomem *)priv->rom + offset, length);
 		return length;
 	}
 	return 0;
