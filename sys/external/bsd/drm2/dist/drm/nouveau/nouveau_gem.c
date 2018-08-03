@@ -383,9 +383,11 @@ validate_init(struct nouveau_channel *chan, struct drm_file *file_priv,
 	int trycnt = 0;
 	int ret = -EINVAL, i;
 	struct nouveau_bo *res_bo = NULL;
-	LIST_HEAD(gart_list);
-	LIST_HEAD(vram_list);
-	LIST_HEAD(both_list);
+	struct list_head gart_list, vram_list, both_list;
+
+	INIT_LIST_HEAD(&gart_list);
+	INIT_LIST_HEAD(&vram_list);
+	INIT_LIST_HEAD(&both_list);
 
 	ww_acquire_init(&op->ticket, &reservation_ww_class);
 retry:
