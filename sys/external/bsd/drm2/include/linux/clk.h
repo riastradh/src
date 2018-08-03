@@ -32,4 +32,6 @@
 #ifndef	_LINUX_CLK_H_
 #define	_LINUX_CLK_H_
 
+#include <dev/clk/clk.h>
+
 #endif	/* _LINUX_CLK_H_ */
