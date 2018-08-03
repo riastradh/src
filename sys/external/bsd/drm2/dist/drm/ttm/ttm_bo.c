@@ -54,6 +54,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/reservation.h>
 #include <linux/printk.h>
 #include <linux/export.h>
+#include <linux/fence.h>
 
 #define TTM_ASSERT_LOCKED(param)
 #define TTM_DEBUG(fmt, arg...)	do {} while (0)
