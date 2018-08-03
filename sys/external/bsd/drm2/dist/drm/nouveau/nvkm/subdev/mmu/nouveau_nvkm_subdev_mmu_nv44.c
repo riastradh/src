@@ -207,7 +207,7 @@ fail3: __unused	bus_dmamem_unmap(dmat, mmu->nullp, nullsz);
 		goto fail2;
 	}
 	mmu->null = mmu->nullmap->dm_segs[0].ds_addr;
-    } while (0)
+    } while (0);
 #else
 	mmu->nullp = dma_alloc_coherent(device->dev, 16 * 1024,
 					&mmu->null, GFP_KERNEL);
