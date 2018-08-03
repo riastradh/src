@@ -283,7 +283,7 @@ nouveau_ttm_mmap_object(struct drm_device *dev, off_t offset, size_t size,
 	KASSERT(0 == (offset & (PAGE_SIZE - 1)));
 
 	if (__predict_false((offset >> PAGE_SHIFT) < DRM_FILE_PAGE_OFFSET))
-		return drm_mmap_object(dev, offset, size, prot, uobjp,
+		return drm_legacy_mmap_object(dev, offset, size, prot, uobjp,
 		    uoffsetp, file);
 	else
 		return ttm_bo_mmap_object(&drm->ttm.bdev, offset, size, prot,

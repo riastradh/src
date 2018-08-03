@@ -76,7 +76,7 @@ drm_gem_or_legacy_mmap_object(struct drm_device *dev, off_t byte_offset,
 	if (*uobjp != NULL)
 		return 0;
 
-	return drm_mmap_object(dev, byte_offset, nbytes, prot, uobjp,
+	return drm_legacy_mmap_object(dev, byte_offset, nbytes, prot, uobjp,
 	    uoffsetp, file);
 }
 
