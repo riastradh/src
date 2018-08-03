@@ -1650,7 +1650,15 @@ nvkm_device_pci_func = {
 #endif
 	.resource_addr = nvkm_device_pci_resource_addr,
 	.resource_size = nvkm_device_pci_resource_size,
+#ifdef __NetBSD__
+#  ifdef __arm__
+	.cpu_coherent = false,
+#  else
+	.cpu_coherent = true,
+#  endif
+#else
 	.cpu_coherent = !IS_ENABLED(CONFIG_ARM),
+#endif
 };
 
 int
