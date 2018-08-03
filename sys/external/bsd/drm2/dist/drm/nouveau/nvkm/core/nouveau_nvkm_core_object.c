@@ -238,7 +238,11 @@ nvkm_object_ctor(const struct nvkm_object_func *func,
 	object->handle = oclass->handle;
 	INIT_LIST_HEAD(&object->head);
 	INIT_LIST_HEAD(&object->tree);
+#ifdef __NetBSD__
+	object->on_tree = false;
+#else
 	RB_CLEAR_NODE(&object->node);
+#endif
 	WARN_ON(oclass->engine && !object->engine);
 }
 

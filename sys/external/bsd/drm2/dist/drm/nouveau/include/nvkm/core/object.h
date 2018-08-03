@@ -21,6 +21,7 @@ struct nvkm_object {
 	u64 token;
 	u64 object;
 	struct rb_node node;
+	bool on_tree;
 };
 
 struct nvkm_object_func {

@@ -16,6 +16,7 @@ struct nvkm_dmaobj {
 	u64 limit;
 
 	struct rb_node rb;
+	bool on_tree;
 	u64 handle; /*XXX HANDLE MERGE */
 };
 
