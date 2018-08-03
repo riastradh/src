@@ -41,6 +41,7 @@ __KERNEL_RCSID(0, "$NetBSD: nouveau_pci.c,v 1.11 2018/05/31 23:46:59 mrg Exp $")
 #include <drm/drmP.h>
 
 #include <core/device.h>
+#include <core/pci.h>
 
 #include "nouveau_drm.h"
 #include "nouveau_pci.h"
@@ -215,7 +216,7 @@ nouveau_pci_detach(device_t self, int flags)
 		return error;
 	sc->sc_drm_dev = NULL;
 
-out1:	nouveau_object_ref(NULL, (void *)&sc->sc_nv_dev);
+out1:	nvkm_device_del(&sc->sc_nv_dev);
 out0:	pmf_device_deregister(self);
 	return 0;
 }
