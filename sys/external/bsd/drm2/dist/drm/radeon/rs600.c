@@ -663,7 +663,7 @@ void rs600_gart_set_page(struct radeon_device *rdev, unsigned i,
 			 uint64_t entry)
 {
 	void __iomem *ptr = (void *)rdev->gart.ptr;
-	writeq(entry, ptr + (i * 8));
+	writeq(entry, (char __iomem *)ptr + (i * 8));
 }
 
 #ifdef __NetBSD__
