@@ -192,7 +192,7 @@ void ttm_eu_fence_buffer_objects(struct ww_acquire_ctx *ticket,
 	struct ttm_buffer_object *bo;
 	struct ttm_bo_global *glob;
 	struct ttm_bo_device *bdev;
-	struct ttm_bo_driver *driver;
+	struct ttm_bo_driver *driver __unused;
 
 	if (list_empty(list))
 		return;
