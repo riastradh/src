@@ -97,4 +97,9 @@ trace_radeon_vm_set_page(uint64_t pe __unused, uint64_t addr __unused,
 {
 }
 
+static inline void
+trace_radeon_vm_flush(uint64_t pd_addr, int ring, unsigned id)
+{
+}
+
 #endif	/* _RADEON_TRACE_H_ */
