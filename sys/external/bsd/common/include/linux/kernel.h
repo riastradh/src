@@ -55,6 +55,7 @@
 #define	__user
 #define	__must_check	/* __attribute__((warn_unused_result)), if GCC */
 #define	__always_unused	__unused
+#define	noinline	__noinline
 
 #define	barrier()	__insn_barrier()
 #define	likely(X)	__predict_true(X)
