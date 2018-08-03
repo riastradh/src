@@ -167,6 +167,15 @@ list_splice_tail(const struct list_head *list, struct list_head *head)
 }
 
 static inline void
+list_splice_tail_init(struct list_head *list, struct list_head *head)
+{
+	if (!list_empty(list)) {
+		__list_splice_between(head->prev, list, head);
+		INIT_LIST_HEAD(list);
+	}
+}
+
+static inline void
 list_move(struct list_head *node, struct list_head *head)
 {
 	list_del(node);
