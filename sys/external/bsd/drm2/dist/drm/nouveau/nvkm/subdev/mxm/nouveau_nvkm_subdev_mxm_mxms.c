@@ -160,13 +160,15 @@ mxms_foreach(struct nvkm_mxm *mxm, u8 types,
 			int i, j;
 
 			for (j = headerlen - 1, ptr = data; j >= 0; j--)
-				ptr += sprintf(ptr, "%02x", dump[j]);
+				ptr += snprintf(ptr, sizeof data - (ptr - data),
+				    "%02x", dump[j]);
 			dump += headerlen;
 
 			nvkm_debug(subdev, "%4s: %s\n", mxms_desc[type], data);
 			for (i = 0; i < entries; i++, dump += recordlen) {
 				for (j = recordlen - 1, ptr = data; j >= 0; j--)
-					ptr += sprintf(ptr, "%02x", dump[j]);
+					ptr += snprintf(ptr, sizeof data -
+					    (ptr - data), "%02x", dump[j]);
 				nvkm_debug(subdev, "      %s\n", data);
 			}
 		}
