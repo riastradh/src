@@ -1607,7 +1607,9 @@ nvkm_device_pci_fini(struct nvkm_device *device, bool suspend)
 {
 	struct nvkm_device_pci *pdev = nvkm_device_pci(device);
 	if (suspend) {
+#ifndef __NetBSD__		/* XXX pmf takes care of this for us.  */
 		pci_disable_device(pdev->pdev);
+#endif
 		pdev->suspend = true;
 	}
 }
@@ -1617,10 +1619,12 @@ nvkm_device_pci_preinit(struct nvkm_device *device)
 {
 	struct nvkm_device_pci *pdev = nvkm_device_pci(device);
 	if (pdev->suspend) {
+#ifndef __NetBSD__		/* XXX pmf takes care of this for us.  */
 		int ret = pci_enable_device(pdev->pdev);
 		if (ret)
 			return ret;
 		pci_set_master(pdev->pdev);
+#endif
 		pdev->suspend = false;
 	}
 	return 0;
