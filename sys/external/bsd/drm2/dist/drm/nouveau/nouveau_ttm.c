@@ -29,6 +29,9 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#include <sys/param.h>
+#include <uvm/uvm_extern.h>	/* pmap_pv_track/untrack */
+
 #include "nouveau_drm.h"
 #include "nouveau_ttm.h"
 #include "nouveau_gem.h"
@@ -451,8 +454,8 @@ nouveau_ttm_init(struct nouveau_drm *drm)
 					 device->func->resource_size(device, 1));
 
 #ifdef __NetBSD__
-	pmap_pv_track(nv_device_resource_start(device, 1),
-	    nv_device_resource_len(device, 1));
+	pmap_pv_track(device->func->resource_addr(device, 1),
+	    device->func->resource_size(device, 1));
 #endif
 
 	/* GART init */
@@ -488,7 +491,8 @@ nouveau_ttm_fini(struct nouveau_drm *drm)
 	drm->ttm.mtrr = 0;
 
 #ifdef __NetBSD__
-	pmap_pv_untrack(nv_device_resource_start(nv_device(drm->device), 1),
-	    nv_device_resource_len(nv_device(drm->device), 1));
+	struct nvkm_device *device = nvxx_device(&drm->device);
+	pmap_pv_untrack(device->func->resource_addr(device, 1),
+	    device->func->resource_size(device, 1));
 #endif
 }
