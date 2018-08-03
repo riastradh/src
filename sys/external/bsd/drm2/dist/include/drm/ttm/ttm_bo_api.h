@@ -301,7 +301,10 @@ struct ttm_bo_kmap_obj {
 		} io;
 		struct {
 			vsize_t			vsize;
-		} uvm;
+		} vmapped;
+		struct {
+			struct page		*page;
+		} kmapped;
 	} u;
 #else
 	struct page *page;
