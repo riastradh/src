@@ -281,7 +281,8 @@ reservation_object_read_begin(struct reservation_object *robj,
     struct reservation_object_read_ticket *ticket)
 {
 
-	ticket->version = robj->robj_version;
+	while ((ticket->version = robj->robj_version) & 1)
+		SPINLOCK_BACKOFF_HOOK;
 	membar_consumer();
 }
 
