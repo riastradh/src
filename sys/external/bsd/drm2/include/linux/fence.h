@@ -46,7 +46,7 @@ struct fence_cb;
 struct fence {
 	struct kref		refcount;
 	spinlock_t		*lock;
-	unsigned long		flags;
+	volatile unsigned long	flags;
 	unsigned		context;
 	unsigned		seqno;
 	const struct fence_ops	*ops;
