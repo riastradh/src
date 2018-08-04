@@ -180,7 +180,7 @@ compare_key(void *cookie, const void *vn, const void *vk)
 static const rb_tree_ops_t workqueues_rb_ops = {
 	.rbto_compare_nodes = compare_nodes,
 	.rbto_compare_key = compare_key,
-	.rbto_node_offset = offsetof(struct workqueue_struct, wq_lwp),
+	.rbto_node_offset = offsetof(struct workqueue_struct, wq_node),
 };
 
 struct wq_whoami_work {
