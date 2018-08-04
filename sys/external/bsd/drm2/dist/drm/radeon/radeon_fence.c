@@ -1165,7 +1165,7 @@ radeon_fence_default_wait(struct fence *f, bool intr, signed long timo)
 	struct radeon_device *rdev = fence->rdev;
 	int r;
 
-	BUG_ON(!spin_is_locked(&rdev->fence_lock));
+	spin_lock(&rdev->fence_lock);
 	if (intr) {
 		DRM_SPIN_TIMED_WAIT_UNTIL(r, &rdev->fence_queue,
 		    &rdev->fence_lock, timo,
@@ -1175,6 +1175,7 @@ radeon_fence_default_wait(struct fence *f, bool intr, signed long timo)
 		    &rdev->fence_lock, timo,
 		    radeon_test_signaled(fence));
 	}
+	spin_unlock(&rdev->fence_lock);
 
 	return r;
 }
