@@ -88,10 +88,6 @@ typedef unsigned long long cycles_t;
 /* XXX Not sure this is correct.  */
 typedef off_t loff_t;
 
-struct rcu_head {
-
-};
-
 #define DECLARE_BITMAP(NAME, BITS)					      \
 	unsigned long NAME[((BITS) + ((NBBY*sizeof(unsigned long)) - 1)) /    \
 		(NBBY*sizeof(unsigned long))]
