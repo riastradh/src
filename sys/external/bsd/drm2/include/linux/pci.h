@@ -525,6 +525,7 @@ pci_dev_put(struct pci_dev *pdev)
 		return;
 
 	KASSERT(ISSET(pdev->pd_kludges, NBPCI_KLUDGE_GET_MUMBLE));
+	kmem_free(pdev->bus, sizeof(*pdev->bus));
 	kmem_free(pdev, sizeof(*pdev));
 }
 
