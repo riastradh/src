@@ -633,7 +633,7 @@ static int skl_resume_prepare(struct drm_i915_private *dev_priv);
 static int bxt_resume_prepare(struct drm_i915_private *dev_priv);
 
 
-static int i915_drm_suspend(struct drm_device *dev)
+int i915_drm_suspend(struct drm_device *dev)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	pci_power_t opregion_target_state;
@@ -770,7 +770,7 @@ int i915_suspend_switcheroo(struct drm_device *dev, pm_message_t state)
 	return i915_drm_suspend_late(dev, false);
 }
 
-static int i915_drm_resume(struct drm_device *dev)
+int i915_drm_resume(struct drm_device *dev)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
@@ -843,7 +843,7 @@ static int i915_drm_resume(struct drm_device *dev)
 	return 0;
 }
 
-static int i915_drm_resume_early(struct drm_device *dev)
+int i915_drm_resume_early(struct drm_device *dev)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	int ret = 0;
