@@ -106,6 +106,8 @@ gc_thread(void *cookie)
 			break;
 	}
 	mutex_exit(&gc.lock);
+
+	kthread_exit(0);
 }
 
 int
