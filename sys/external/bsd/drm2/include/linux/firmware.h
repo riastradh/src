@@ -159,7 +159,7 @@ request_firmware_nowait(struct module *module, bool uevent, const char *name,
 	/* Initialize the work.  */
 	work->flw_name = namedup;
 	work->flw_callback = callback;
-	work->flw_cookie = callback;
+	work->flw_cookie = cookie;
 	work->flw_device = device;
 	work->flw_module = module;
 	INIT_WORK(&work->flw_work, request_firmware_work);
