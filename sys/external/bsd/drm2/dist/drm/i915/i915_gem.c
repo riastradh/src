@@ -5845,8 +5845,10 @@ i915_gem_object_create_from_data(struct drm_device *dev,
 	struct uio uio = {
 	    .uio_iov = &iov,
 	    .uio_iovcnt = 1,
+	    .uio_offset = 0,
 	    .uio_resid = size,
 	    .uio_rw = UIO_WRITE,
+	    .uio_vmspace = curproc->p_vmspace
 	};
 #else
 	struct sg_table *sg;
