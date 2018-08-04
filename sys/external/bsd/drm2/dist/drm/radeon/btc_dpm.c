@@ -2761,6 +2761,7 @@ void btc_dpm_debugfs_print_current_performance_level(struct radeon_device *rdev,
 			   current_index, pl->sclk, pl->mclk, pl->vddc, pl->vddci);
 	}
 }
+#endif	/* CONFIG_DEBUG_FS */
 
 u32 btc_dpm_get_current_sclk(struct radeon_device *rdev)
 {
@@ -2807,7 +2808,6 @@ u32 btc_dpm_get_current_mclk(struct radeon_device *rdev)
 		return pl->mclk;
 	}
 }
-#endif
 
 u32 btc_dpm_get_sclk(struct radeon_device *rdev, bool low)
 {
