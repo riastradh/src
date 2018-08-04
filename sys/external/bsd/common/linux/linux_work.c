@@ -50,13 +50,6 @@ __KERNEL_RCSID(0, "$NetBSD: linux_work.c,v 1.1 2016/02/24 22:04:15 skrll Exp $")
 
 #include <linux/workqueue.h>
 
-/* XXX Kludge until we sync with HEAD.  */
-#if DIAGNOSTIC
-#define	__diagused
-#else
-#define	__diagused	__unused
-#endif
-
 struct workqueue_struct {
 	struct workqueue		*wq_workqueue;
 
