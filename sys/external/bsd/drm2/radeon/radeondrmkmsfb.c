@@ -367,10 +367,10 @@ static bool
 radeonfb_genfb_setmode(struct genfb_softc *genfb, int mode)
 {
 	struct radeonfb_softc *sc = (struct radeonfb_softc *)genfb;
+	struct drm_fb_helper *fb_helper = sc->sc_rfa.rfa_fb_helper;
 
-	if (mode == WSDISPLAYIO_MODE_EMUL) {
-		drm_fb_helper_set_config(sc->sc_rfa.rfa_fb_helper);
-	}
+	if (mode == WSDISPLAYIO_MODE_EMUL)
+		drm_fb_helper_restore_fbdev_mode_unlocked(fb_helper);
 
 	return true;
 }
