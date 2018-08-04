@@ -225,7 +225,7 @@ i915drmkms_suspend(device_t self, const pmf_qual_t *qual)
 	if (dev == NULL)
 		return true;
 
-	ret = i915_drm_freeze(dev);
+	ret = i915_drm_suspend(dev);
 	if (ret)
 		return false;
 
@@ -242,10 +242,10 @@ i915drmkms_resume(device_t self, const pmf_qual_t *qual)
 	if (dev == NULL)
 		return true;
 
-	ret = i915_drm_thaw_early(dev);
+	ret = i915_drm_resume_early(dev);
 	if (ret)
 		return false;
-	ret = i915_drm_thaw(dev);
+	ret = i915_drm_resume(dev);
 	if (ret)
 		return false;
 
