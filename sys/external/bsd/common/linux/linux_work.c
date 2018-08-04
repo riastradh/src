@@ -193,7 +193,8 @@ struct wq_whoami_work {
 static void
 workqueue_whoami_work(struct work_struct *work)
 {
-	struct wq_whoami_work *www = www;
+	struct wq_whoami_work *www = container_of(work, struct wq_whoami_work,
+	    www_work);
 	struct workqueue_struct *wq = www->www_wq;
 
 	KASSERT(wq->wq_lwp == NULL);
