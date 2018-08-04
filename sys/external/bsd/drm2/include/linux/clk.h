@@ -32,6 +32,26 @@
 #ifndef	_LINUX_CLK_H_
 #define	_LINUX_CLK_H_
 
+/* XXX Use FDT as a proxy for clk API until we have a clk flag.  */
+
+#ifdef _KERNEL_OPT
+#include "opt_fdt.h"
+#endif
+
+#ifdef FDT
+
 #include <dev/clk/clk.h>
+
+#else
+
+struct clk;
+
+static inline unsigned
+clk_get_rate(struct clk *clk)
+{
+	panic("unreachable");
+}
+
+#endif
 
 #endif	/* _LINUX_CLK_H_ */
