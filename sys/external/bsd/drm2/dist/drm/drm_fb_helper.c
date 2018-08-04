@@ -2216,7 +2216,7 @@ int drm_fb_helper_hotplug_event(struct drm_fb_helper *fb_helper)
 	drm_setup_crtcs(fb_helper);
 	drm_modeset_unlock_all(dev);
 #ifdef __NetBSD__
-	drm_fb_helper_set_config(fb_helper);
+	drm_fb_helper_restore_fbdev_mode_unlocked(fb_helper);
 #else
 	drm_fb_helper_set_par(fb_helper->fbdev);
 #endif
