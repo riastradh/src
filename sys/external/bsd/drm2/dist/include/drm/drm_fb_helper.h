@@ -164,9 +164,7 @@ int drm_fb_helper_init(struct drm_device *dev,
 		       struct drm_fb_helper *helper, int crtc_count,
 		       int max_conn);
 void drm_fb_helper_fini(struct drm_fb_helper *helper);
-#ifdef __NetBSD__		/* XXX fb info */
-int drm_fb_helper_set_config(struct drm_fb_helper *);
-#else
+#ifndef __NetBSD__		/* XXX fb info */
 int drm_fb_helper_blank(int blank, struct fb_info *info);
 int drm_fb_helper_pan_display(struct fb_var_screeninfo *var,
 			      struct fb_info *info);
@@ -176,8 +174,8 @@ int drm_fb_helper_check_var(struct fb_var_screeninfo *var,
 #endif
 
 int drm_fb_helper_restore_fbdev_mode_unlocked(struct drm_fb_helper *fb_helper);
-#ifndef __NetBSD__		/* XXX fb info */
 
+#ifndef __NetBSD__		/* XXX fb info */
 struct fb_info *drm_fb_helper_alloc_fbi(struct drm_fb_helper *fb_helper);
 void drm_fb_helper_unregister_fbi(struct drm_fb_helper *fb_helper);
 void drm_fb_helper_release_fbi(struct drm_fb_helper *fb_helper);

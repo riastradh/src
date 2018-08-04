@@ -1262,18 +1262,7 @@ int drm_fb_helper_set_par(struct fb_info *info)
 	return 0;
 }
 EXPORT_SYMBOL(drm_fb_helper_set_par);
-#endif
 
-/* XXX Temporary -- just use drm_fb_helper_restore_fbdev_mode_unlocked.  */
-int
-drm_fb_helper_set_config(struct drm_fb_helper *fb_helper)
-{
-
-	drm_fb_helper_restore_fbdev_mode_unlocked(fb_helper);
-	return 0;
-}
-
-#ifndef __NetBSD__		/* XXX fb info */
 static int pan_display_atomic(struct fb_var_screeninfo *var,
 			      struct fb_info *info)
 {
