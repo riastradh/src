@@ -579,9 +579,7 @@ nouveau_fbcon_set_suspend(struct drm_device *dev, int state)
 		console_lock();
 		if (state == FBINFO_STATE_RUNNING)
 			nouveau_fbcon_accel_restore(dev);
-#endif
 		drm_fb_helper_set_suspend(&drm->fbcon->helper, state);
-#ifndef __NetBSD__
 		if (state != FBINFO_STATE_RUNNING)
 			nouveau_fbcon_accel_save_disable(dev);
 		console_unlock();
