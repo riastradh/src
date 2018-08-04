@@ -133,7 +133,6 @@ nouveau_pci_attach(device_t parent, device_t self, void *aux)
 {
 	struct nouveau_pci_softc *const sc = device_private(self);
 	const struct pci_attach_args *const pa = aux;
-	uint64_t devname;
 	int error;
 
 	pci_aprint_devinfo(pa, NULL);
@@ -147,8 +146,6 @@ nouveau_pci_attach(device_t parent, device_t self, void *aux)
 	sc->sc_task_state = NOUVEAU_TASK_ATTACH;
 	SIMPLEQ_INIT(&sc->sc_task_u.attach);
 
-	devname = (uint64_t)device_unit(device_parent(self)) << 32;
-	devname |= pa->pa_bus << 16;
 	/* XXX errno Linux->NetBSD */
 	error = -nvkm_device_pci_new(&sc->sc_pci_dev,
 	    nouveau_config, nouveau_debug, true, true, ~0ULL,
