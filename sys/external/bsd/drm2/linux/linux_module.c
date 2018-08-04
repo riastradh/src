@@ -42,12 +42,9 @@ __KERNEL_RCSID(0, "$NetBSD: linux_module.c,v 1.6 2015/04/13 22:24:34 pgoyette Ex
 #include <linux/io.h>
 #include <linux/mutex.h>
 #include <linux/rcupdate.h>
-#include <linux/reservation.h>
 #include <linux/workqueue.h>
 
 MODULE(MODULE_CLASS_MISC, drmkms_linux, "i2cexec");
-
-DEFINE_WW_CLASS(reservation_ww_class __cacheline_aligned);
 
 static int
 linux_init(void)
