@@ -5845,6 +5845,7 @@ i915_gem_object_create_from_data(struct drm_device *dev,
 	struct uio uio = {
 	    .uio_iov = &iov,
 	    .uio_iovcnt = 1,
+	    .uio_offset = 0,
 	    .uio_resid = size,
 	    .uio_rw = UIO_WRITE,
 	};
@@ -5868,6 +5869,7 @@ i915_gem_object_create_from_data(struct drm_device *dev,
 
 	i915_gem_object_pin_pages(obj);
 #ifdef __NetBSD__
+	UIO_SETUP_SYSSPACE(&uio);
 	/* XXX errno NetBSD->Linux */
 	ret = -ubc_uiomove(obj->base.filp, &uio, size, UVM_ADV_NORMAL,
 	    UBC_WRITE);
