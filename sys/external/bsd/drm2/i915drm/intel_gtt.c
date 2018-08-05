@@ -177,6 +177,7 @@ intel_gtt_insert_sg_entries(bus_dmamap_t dmamap, unsigned va_page,
 		va += PAGE_SIZE;
 	}
 	agp_i810_post_gtt_entry(isc, (va - PAGE_SIZE));
+	intel_gtt_chipset_flush();
 }
 
 void
