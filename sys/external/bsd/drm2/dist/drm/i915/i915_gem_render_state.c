@@ -101,7 +101,7 @@ static int render_state_setup(struct render_state *so)
 	const struct intel_renderstate_rodata *rodata = so->rodata;
 	unsigned int i = 0, reloc_index = 0;
 #ifdef __NetBSD__
-	vaddr_t kva;
+	vaddr_t kva = 0;	/* hint */
 #else
 	struct page *page;
 #endif
