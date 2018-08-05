@@ -5025,9 +5025,6 @@ struct drm_i915_gem_object *i915_gem_alloc_object(struct drm_device *dev,
 
 static bool discard_backing_storage(struct drm_i915_gem_object *obj)
 {
-#ifdef __NetBSD__
-	panic("XXX");
-#else
 	/* If we are the last user of the backing storage (be it shmemfs
 	 * pages or stolen etc), we know that the pages are going to be
 	 * immediately released. In this case, we can then skip copying
@@ -5047,6 +5044,10 @@ static bool discard_backing_storage(struct drm_i915_gem_object *obj)
 	 * acquiring such a reference whilst we are in the middle of
 	 * freeing the object.
 	 */
+#ifdef __NetBSD__
+	/* XXX This number might be a fencepost.  */
+	return obj->base.filp->uo_refs == 1;
+#else
 	return atomic_long_read(&obj->base.filp->f_count) == 1;
 #endif
 }
