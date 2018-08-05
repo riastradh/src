@@ -37,6 +37,8 @@
 
 struct notifier_block;
 
+#define	SYS_RESTART	0
+
 /* XXX Implement this by posting a CRITICAL-OVER envsys event?  */
 static inline int
 orderly_poweroff(bool force __unused)
