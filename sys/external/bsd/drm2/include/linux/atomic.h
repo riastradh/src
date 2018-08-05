@@ -228,7 +228,7 @@ change_bit(unsigned int bit, volatile unsigned long *ptr)
 	do v = *p; while (atomic_cas_ulong(p, v, (v ^ mask)) != v);
 }
 
-static inline unsigned long
+static inline int
 test_and_set_bit(unsigned int bit, volatile unsigned long *ptr)
 {
 	const unsigned int units = (sizeof(*ptr) * CHAR_BIT);
@@ -241,7 +241,7 @@ test_and_set_bit(unsigned int bit, volatile unsigned long *ptr)
 	return ((v & mask) != 0);
 }
 
-static inline unsigned long
+static inline int
 test_and_clear_bit(unsigned int bit, volatile unsigned long *ptr)
 {
 	const unsigned int units = (sizeof(*ptr) * CHAR_BIT);
@@ -254,7 +254,7 @@ test_and_clear_bit(unsigned int bit, volatile unsigned long *ptr)
 	return ((v & mask) != 0);
 }
 
-static inline unsigned long
+static inline int
 test_and_change_bit(unsigned int bit, volatile unsigned long *ptr)
 {
 	const unsigned int units = (sizeof(*ptr) * CHAR_BIT);
