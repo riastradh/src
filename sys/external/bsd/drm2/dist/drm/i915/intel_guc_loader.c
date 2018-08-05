@@ -548,6 +548,7 @@ static void guc_fw_fetch(struct drm_device *dev, struct intel_guc_fw *guc_fw)
 		iov.iov_len = fw->size;
 		uio.uio_iov = &iov;
 		uio.uio_iovcnt = 1;
+		uio.uio_offset = 0;
 		uio.uio_resid = fw->size;
 		uio.uio_rw = UIO_READ;
 		UIO_SETUP_SYSSPACE(&uio);
