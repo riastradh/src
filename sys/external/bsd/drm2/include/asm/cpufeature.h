@@ -37,6 +37,7 @@
 #if defined(__i386__) || defined(__x86_64__)
 
 #define	cpu_has_clflush	((cpu_info_primary.ci_feat_val[0] & CPUID_CFLUSH) != 0)
+#define	cpu_has_pat	((cpu_info_primary.ci_feat_val[0] & CPUID_PAT) != 0)
 
 static inline size_t
 cache_line_size(void)
