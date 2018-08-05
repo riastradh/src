@@ -223,8 +223,8 @@ struct nvkm_device *nvkm_device_find(u64 name);
 int nvkm_device_list(u64 *name, int size);
 
 #ifdef __NetBSD__
-void	nouveau_devices_init(void);
-void	nouveau_devices_fini(void);
+void	nvkm_devices_init(void);
+void	nvkm_devices_fini(void);
 #endif
 
 /* privileged register interface accessor macros */

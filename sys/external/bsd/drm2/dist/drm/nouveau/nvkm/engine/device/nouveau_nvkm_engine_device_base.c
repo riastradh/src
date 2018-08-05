@@ -39,14 +39,14 @@ static struct mutex nv_devices_mutex;
 static struct list_head nv_devices = LIST_HEAD_INIT(nv_devices);
 
 void
-nouveau_devices_init(void)
+nvkm_devices_init(void)
 {
 
 	linux_mutex_init(&nv_devices_mutex);
 }
 
 void
-nouveau_devices_fini(void)
+nvkm_devices_fini(void)
 {
 
 	linux_mutex_destroy(&nv_devices_mutex);
