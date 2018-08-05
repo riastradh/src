@@ -262,8 +262,10 @@ static int guc_ucode_xfer_dma(struct drm_i915_private *dev_priv)
 	iov.iov_len = UOS_RSA_SIG_SIZE;
 	uio.uio_iov = &iov;
 	uio.uio_iovcnt = 1;
+	uio.uio_offset = 0;
 	uio.uio_resid = UOS_RSA_SIG_SIZE;
 	uio.uio_rw = UIO_READ;
+	UIO_SETUP_SYSSPACE(&uio);
 	/* XXX errno NetBSD->Linux */
 	ret = -ubc_uiomove(fw_obj->base.filp, &uio, UOS_RSA_SIG_SIZE,
 	    UVM_ADV_NORMAL, UBC_READ);
