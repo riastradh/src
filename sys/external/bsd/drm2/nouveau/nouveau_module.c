@@ -54,7 +54,7 @@ extern struct drm_driver *const nouveau_drm_driver; /* XXX */
 static int
 nouveau_init(void)
 {
-	nouveau_devices_init();
+	nvkm_devices_init();
 	drm_sysctl_init(&nouveau_def);
 
 	return 0;
@@ -65,7 +65,7 @@ nouveau_fini(void)
 {
 
 	drm_sysctl_fini(&nouveau_def);
-	nouveau_devices_fini();
+	nvkm_devices_fini();
 }
 
 static int
