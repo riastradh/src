@@ -77,7 +77,7 @@ static inline void
 ndelay(unsigned int nsec)
 {
 
-	DELAY(nsec / 1000);
+	DELAY((nsec + 999) / 1000);
 }
 
 #endif  /* _LINUX_DELAY_H_ */
