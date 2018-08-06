@@ -155,7 +155,10 @@ fence_release(struct kref *refcount)
 {
 	struct fence *fence = container_of(refcount, struct fence, refcount);
 
-	(*fence->ops->release)(fence);
+	if (fence->ops->release)
+		(*fence->ops->release)(fence);
+	else
+		fence_free(fence);
 }
 
 /*
