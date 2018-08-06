@@ -32,6 +32,8 @@
 #ifndef _LINUX_MM_H_
 #define _LINUX_MM_H_
 
+#include <sys/malloc.h>
+
 #include <uvm/uvm_extern.h>
 
 #include <asm/page.h>
@@ -77,10 +79,17 @@ get_num_physpages(void)
 	return uvmexp.npages;
 }
 
+/*
+ * XXX Requires that kmalloc in <linux/slab.h> and vmalloc in
+ * <linux/vmalloc.h> both use malloc(9).  If you change either of
+ * those, be sure to update this.
+ */
 static inline void
-kvfree(void * ptr)
+kvfree(void *ptr)
 {
-	panic("Unimplemented");
+
+	if (ptr != NULL)
+		free(ptr, M_TEMP);
 }
 
 static inline void
