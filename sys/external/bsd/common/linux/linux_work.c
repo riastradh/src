@@ -282,6 +282,8 @@ linux_workqueue_timeout(void *cookie)
 	default:
 		panic("delayed work callout in bad state: %p", dw);
 	}
+	KASSERT(dw->dw_state == DELAYED_WORK_IDLE ||
+	    dw->dw_state == DELAYED_WORK_SCHEDULED);
 	mutex_exit(&wq->wq_lock);
 }
 
