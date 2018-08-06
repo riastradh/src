@@ -40,10 +40,14 @@
 
 #include <asm/page.h>
 
+/*
+ * XXX vmalloc and kmalloc both use malloc(9).  If you change this, be
+ * sure to update kmalloc in <linux/slab.h> and kvfree in <linux/mm.h>.
+ */
+
 static inline bool
 is_vmalloc_addr(void *addr)
 {
-	/* XXX Assumes vmalloc and kmalloc both use malloc(9).  */
 	return true;
 }
 
