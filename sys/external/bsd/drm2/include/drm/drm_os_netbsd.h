@@ -41,7 +41,10 @@
 #define	CONFIG_X86_PAT	1
 #endif
 
+#if defined(_KERNEL_OPT)
 #include "pci.h"
+#endif
+
 #if NPCI > 0
 #define	CONFIG_PCI	1
 #endif
