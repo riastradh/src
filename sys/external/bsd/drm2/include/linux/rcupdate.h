@@ -43,7 +43,6 @@
 	(P) = (V);							      \
 } while (0)
 
-
 #define	rcu_dereference(P) ({						      \
 	typeof(*(P)) *__rcu_dereference_tmp = (P);			      \
 	membar_datadep_consumer();					      \
