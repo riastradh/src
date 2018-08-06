@@ -6,9 +6,6 @@
 # drivers, a.k.a. `UMS' (user mode-setting), attach.
 define	drmkms_pci: drmkms
 
-# XXX Not quite right!  Should AGP stuff be kept separate?
-makeoptions	drmkms_pci	CPPFLAGS+="-DCONFIG_AGP"
-
 #file	external/bsd/drm2/dist/drm/ati_pcigart.c	drmkms_pci
 file	external/bsd/drm2/dist/drm/drm_agpsupport.c	drmkms_pci
 file	external/bsd/drm2/pci/drm_pci.c			drmkms_pci

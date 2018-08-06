@@ -56,7 +56,7 @@
 #define NAGP 1
 #endif
 #if NAGP > 0
-#define	__OS_HAS_AGP	1
+#define	CONFIG_AGP	1
 #endif
 __CTASSERT(PAGE_SIZE == AGP_PAGE_SIZE);
 __CTASSERT(PAGE_SHIFT == AGP_PAGE_SHIFT);
