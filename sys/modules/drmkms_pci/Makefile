@@ -8,6 +8,9 @@
 
 KMOD=	drmkms_pci
 
+CPPFLAGS+=	-DCONFIG_AGP
+CPPFLAGS+=	-DCONFIG_PCI
+
 #SRCS+=	ati_pcigart.c		# XXX Restore for ATI support.
 SRCS+=	drm_agpsupport.c
 SRCS+=	drm_pci.c
