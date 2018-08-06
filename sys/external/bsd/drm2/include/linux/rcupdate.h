@@ -59,8 +59,8 @@ struct rcu_head {
 	struct rcu_head	*rcuh_next;
 };
 
-#define	linux_call_rcu		call_rcu
-#define	linux_synchronize_rcu	synchronize_rcu
+#define	call_rcu		linux_call_rcu
+#define	synchronize_rcu		linux_synchronize_rcu
 
 int	linux_rcu_gc_init(void);
 void	linux_rcu_gc_fini(void);
