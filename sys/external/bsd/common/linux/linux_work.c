@@ -592,6 +592,7 @@ cancel_delayed_work(struct delayed_work *dw)
 				dw->dw_state = DELAYED_WORK_IDLE;
 			}
 			cancelled_p = true;
+			break;
 		default:
 			panic("invalid delayed work state: %d",
 			    dw->dw_state);
