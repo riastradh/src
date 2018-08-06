@@ -183,6 +183,7 @@ struct wq_whoami_work {
 	struct work_struct	www_work;
 };
 
+#if 0
 static void
 workqueue_whoami_work(struct work_struct *work)
 {
@@ -224,7 +225,7 @@ workqueue_whoami(struct workqueue_struct *wq)
 
 	KASSERT(collision == wq);
 }
-
+#endif
 struct work_struct *
 current_work(void)
 {
@@ -265,9 +266,10 @@ alloc_ordered_workqueue(const char *name, int linux_flags)
 	TAILQ_INIT(&wq->wq_delayed);
 	wq->wq_current_work = NULL;
 
+#if 0
 	workqueue_whoami(wq);
 	KASSERT(wq->wq_lwp != NULL);
-
+#endif
 	return wq;
 }
 
