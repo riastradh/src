@@ -348,7 +348,10 @@ cancel_work(struct work_struct *work)
 	struct workqueue_struct *wq;
 	bool cancelled_p = false;
 
-	wq = work->work_queue;
+	/* If there's no workqueue, nothing to cancel.   */
+	if ((wq = work->work_queue) == NULL)
+		goto out;
+
 	mutex_enter(&wq->wq_lock);
 	if (__predict_false(work->work_queue != wq)) {
 		cancelled_p = false;
@@ -360,7 +363,7 @@ cancel_work(struct work_struct *work)
 	}
 	mutex_exit(&wq->wq_lock);
 
-	return cancelled_p;
+out:	return cancelled_p;
 }
 
 bool
@@ -369,7 +372,10 @@ cancel_work_sync(struct work_struct *work)
 	struct workqueue_struct *wq;
 	bool cancelled_p = false;
 
-	wq = work->work_queue;
+	/* If there's no workqueue, nothing to cancel.   */
+	if ((wq = work->work_queue) == NULL)
+		goto out;
+
 	mutex_enter(&wq->wq_lock);
 	if (__predict_false(work->work_queue != wq)) {
 		cancelled_p = false;
@@ -384,7 +390,7 @@ cancel_work_sync(struct work_struct *work)
 	}
 	mutex_exit(&wq->wq_lock);
 
-	return cancelled_p;
+out:	return cancelled_p;
 }
 
 /*
