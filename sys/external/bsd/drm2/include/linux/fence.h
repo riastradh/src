@@ -79,9 +79,12 @@ struct fence_cb {
 
 #define	fence_add_callback	linux_fence_add_callback
 #define	fence_context_alloc	linux_fence_context_alloc
+#define	fence_default_wait	linux_fence_default_wait
 #define	fence_destroy		linux_fence_destroy
 #define	fence_enable_sw_signaling linux_fence_enable_sw_signaling
+#define	fence_free		linux_fence_free
 #define	fence_get		linux_fence_get
+#define	fence_get_rcu		linux_fence_get_rcu
 #define	fence_init		linux_fence_init
 #define	fence_is_signaled	linux_fence_is_signaled
 #define	fence_is_signaled_locked linux_fence_is_signaled_locked
