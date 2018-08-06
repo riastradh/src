@@ -47,6 +47,7 @@
 #define	current_work			linux_current_work
 #define	destroy_workqueue		linux_destroy_workqueue
 #define	flush_delayed_work		linux_flush_delayed_work
+#define	flush_scheduled_work		linux_flush_scheduled_work
 #define	flush_work			linux_flush_work
 #define	flush_workqueue			linux_flush_workqueue
 #define	queue_delayed_work		linux_queue_delayed_work
