@@ -73,6 +73,12 @@ fls(int x)
 }
 
 static inline unsigned int
+hweight8(uint8_t w)
+{
+	return popcount(w & 0xff);
+}
+
+static inline unsigned int
 hweight16(uint16_t n)
 {
 	return popcount32(n);
@@ -256,12 +262,5 @@ find_first_zero_bit(const unsigned long *ptr, unsigned long nbits)
 	for ((BIT) = find_first_bit((PTR), (NBITS));			      \
 	     (BIT) < (NBITS);						      \
 	     (BIT) = find_next_bit((PTR), (NBITS), (BIT) + 1))
-
-static inline unsigned
-hweight8(unsigned w)
-{
-
-	return popcount(w & 0xff);
-}
 
 #endif  /* _LINUX_BITOPS_H_ */
