@@ -3,14 +3,14 @@
 .include "../Makefile.inc"
 .include "Makefile.inc"
 
+KMOD=	drmkms
+MKLDSCRIPT=yes
+
 .PATH:	${S}/external/bsd/drm2/drm
 .PATH:	${S}/external/bsd/drm2/i2c
 .PATH:	${S}/external/bsd/drm2/pci
 
 .PATH:	${S}/external/bsd/drm2/dist/drm
-
-MKLDSCRIPT=yes
-KMOD=	drmkms
 
 # NetBSD additions.
 SRCS+=	drm_cdevsw.c
