@@ -148,7 +148,7 @@ drm_open(dev_t d, int flags, int fmt, struct lwp *l)
 	}
 	firstopen = (dev->open_count == 0);
 	dev->open_count++;
-	mutex_lock(&drm_global_mutex);
+	mutex_unlock(&drm_global_mutex);
 
 	if (firstopen) {
 		/* XXX errno Linux->NetBSD */
