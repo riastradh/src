@@ -160,6 +160,15 @@ list_splice(const struct list_head *list, struct list_head *head)
 }
 
 static inline void
+list_splice_init(struct list_head *list, struct list_head *head)
+{
+	if (!list_empty(list)) {
+		__list_splice_between(head, list, head->next);
+		INIT_LIST_HEAD(list);
+	}
+}
+
+static inline void
 list_splice_tail(const struct list_head *list, struct list_head *head)
 {
 	if (!list_empty(list))
