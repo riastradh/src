@@ -423,7 +423,7 @@ fence_wait_timeout(struct fence *fence, bool intr, long timeout)
 }
 
 /*
- * fence_wait_timeout(fence, intr, timeout)
+ * fence_wait(fence, intr)
  *
  *	Wait until fence is signalled; or until interrupt, if intr is
  *	true.  Return -ERESTARTSYS if interrupted, negative error code
