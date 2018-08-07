@@ -59,6 +59,14 @@ nsecs_to_jiffies64(uint64_t nsec)
 		return (nsec*hz)/1000000000;
 }
 
+static inline uint32_t
+nsecs_to_jiffies(uint64_t nsec)
+{
+
+	/* XXX Not sure what else to do but truncate...  */
+	return (uint32_t)nsecs_to_jiffies64(nsec);
+}
+
 static inline unsigned int
 msecs_to_jiffies(unsigned int msec)
 {
