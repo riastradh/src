@@ -116,6 +116,9 @@ viadrm_attach(device_t parent, device_t self, void *aux)
 	if (!pmf_device_register(self, NULL, NULL))
 		aprint_error_dev(self, "couldn't establish power handler\n");
 
+	/* Initialize the Linux PCI device descriptor.  */
+	linux_pci_dev_init(&sc->sc_pci_dev, self, device_parent(self), pa, 0);
+
 	/* XXX errno Linux->NetBSD */
 	error = -drm_pci_attach(self, pa, &sc->sc_pci_dev, via_drm_driver,
 	    *cookiep, &sc->sc_drm_dev);
@@ -141,6 +144,8 @@ viadrm_detach(device_t self, int flags)
 	if (error)
 		return error;
 	sc->sc_drm_dev = NULL;
+
+out:	linux_pci_dev_destroy(&sc->sc_pci_dev);
 	pmf_device_deregister(self);
-out:	return 0;
+	return 0;
 }
