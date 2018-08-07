@@ -656,15 +656,11 @@ bool
 cancel_delayed_work_sync(struct delayed_work *dw)
 {
 	struct workqueue_struct *wq;
-	bool cancelled_p = false;
+	bool cancelled_p;
 
-retry:
-	/*
-	 * If there's no workqueue, nothing to cancel, unless we've
-	 * started over from cancelling the callout.
-	 */
+	/* If there's no workqueue, nothing to cancel.  */
 	if ((wq = dw->work.work_queue) == NULL)
-		return cancelled_p;
+		return false;
 
 	mutex_enter(&wq->wq_lock);
 	if (__predict_false(dw->work.work_queue != wq)) {
@@ -694,9 +690,9 @@ retry:
 			 *
 			 * If it's too late and the callout has already
 			 * begun to execute, we must wait for it to
-			 * complete.  In that case, the work has been
-			 * dissociated from the queue, so we must start
-			 * over from the top.
+			 * complete.  But we got in soon enough to ask
+			 * the callout not to run, so we successfully
+			 * cancelled it in that case.
 			 *
 			 * If we stopped the callout before it started,
 			 * however, then destroy the callout and
@@ -705,7 +701,7 @@ retry:
 			dw->dw_state = DELAYED_WORK_CANCELLED;
 			cancelled_p = true;
 			if (callout_halt(&dw->dw_callout, &wq->wq_lock))
-				goto retry;
+				break;
 			cancel_delayed_work_done(wq, dw);
 			break;
 		default:
