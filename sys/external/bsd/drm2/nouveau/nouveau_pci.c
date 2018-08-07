@@ -217,7 +217,8 @@ nouveau_pci_detach(device_t self, int flags)
 	sc->sc_drm_dev = NULL;
 
 out1:	nvkm_device_del(&sc->sc_nv_dev);
-out0:	pmf_device_deregister(self);
+out0:	linux_pci_dev_destroy(&sc->sc_pci_dev);
+	pmf_device_deregister(self);
 	return 0;
 }
 
