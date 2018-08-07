@@ -83,7 +83,7 @@ static int radeon_cs_parser_relocs(struct radeon_cs_parser *p)
 	struct radeon_cs_chunk *chunk;
 	struct radeon_cs_buckets buckets;
 	unsigned i;
-	bool need_mmap_lock = false;
+	bool need_mmap_lock __diagused = false;
 	int r;
 
 	if (p->chunk_relocs == NULL) {
