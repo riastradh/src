@@ -170,6 +170,10 @@
 #define LPCIB_SMB_HOSTC_HSTEN	(1 << 0)	/* enable host controller */
 #define LPCIB_SMB_HOSTC_SMIEN	(1 << 1)	/* generate SMI */
 #define LPCIB_SMB_HOSTC_I2CEN	(1 << 2)	/* enable I2C commands */
+#define	LPCIB_SMB_TCOBASE	0x50
+#define	LPCIB_SMB_TCOCTL	0x54
+# define	LPCIB_SMB_TCOCTL_TCO_BASE_EN	__BIT(8)
+# define	LPCIB_SMB_TCOCTL_TCO_BASE_LOCK	__BIT(0)
 
 /* SMBus I/O registers */
 #define LPCIB_SMB_HS	0x00		/* host status */
@@ -250,6 +254,15 @@
 #define	LPCIB_RCBA_HPTC_2000_BASE	0xfed02000
 #define	LPCIB_RCBA_HPTC_3000		0x00000003
 #define	LPCIB_RCBA_HPTC_3000_BASE	0xfed03000
+
+/* ICH SMBus PCR Registers */
+#define	LPCIB_SMB_PCR_TCOCFG		0x00
+# define	LPCIB_SMB_PCR_TCOCFG_IE		__BIT(7)
+# define	LPCIB_SMB_PCR_TCOCFG_IS		__BITS(2,0)
+#define	LPCIB_SMB_PCR_GC		0x0c
+# define	LPCIB_SMB_PCR_GC_NR		__BIT(1)
+# define	LPCIB_SMB_PCR_GC_FD		__BIT(0)
+#define	LPCIB_SMB_PCR_PCE		0x10
 
 /*
  * System management TCO registers

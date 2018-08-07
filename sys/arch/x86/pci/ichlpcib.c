@@ -644,9 +644,9 @@ tcotimer_configure(device_t self)
 		    ": %d\n", error);
 		return;
 	}
-	arg.ta_rcbat = sc->sc_rcbat;
-	arg.ta_rcbah = sc->sc_rcbah;
-	arg.ta_has_rcba = sc->sc_has_rcba;
+	arg.ta_auxt = sc->sc_rcbat;
+	arg.ta_auxh = sc->sc_rcbah;
+	arg.ta_version = sc->sc_has_rcba ? 1 : 0;
 	arg.ta_pcib = &(sc->sc_pcib);
 
 	sc->sc_tco = config_found_ia(self, "tcoichbus", &arg, NULL);

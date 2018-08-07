@@ -57,13 +57,13 @@ struct tco_softc{
 	struct sysmon_wdog	sc_smw;
 	bus_space_tag_t		sc_iot;
 	bus_space_handle_t	sc_ioh;
-	bus_space_tag_t		sc_rcbat;
-	bus_space_handle_t	sc_rcbah;
+	bus_space_tag_t		sc_auxt;
+	bus_space_handle_t	sc_auxh;
 	struct pcib_softc *	sc_pcib;
 	int			sc_armed;
 	unsigned int		sc_min_t;
 	unsigned int		sc_max_t;
-	int			sc_has_rcba;
+	int			sc_version;
 };
 
 static int tco_match(device_t, cfdata_t, void *);
@@ -107,12 +107,13 @@ tco_attach(device_t parent, device_t self, void *aux)
 
 	sc->sc_iot = ta->ta_iot;
 	sc->sc_ioh = ta->ta_ioh;
-	sc->sc_rcbat = ta->ta_rcbat;
-	sc->sc_rcbah = ta->ta_rcbah;
+	sc->sc_auxt = ta->ta_auxt;
+	sc->sc_auxh = ta->ta_auxh;
 	sc->sc_pcib = ta->ta_pcib;
-	sc->sc_has_rcba = ta->ta_has_rcba;
+	sc->sc_version = ta->ta_version;
 
-	aprint_normal(": TCO (watchdog) timer configured.\n");
+	aprint_normal(": TCO (watchdog) timer v%d configured.\n",
+	    sc->sc_version);
 	aprint_naive("\n");
 
 	/* Explicitly stop the TCO timer. */
@@ -154,12 +155,18 @@ tco_attach(device_t parent, device_t self, void *aux)
 	 * ICH5 or older are limited to 4ticks min and 39ticks max.
 	 *                              2secs          23secs
 	 */
-	if (sc->sc_has_rcba) {
-		sc->sc_max_t = LPCIB_TCOTIMER2_MAX_TICK;
-		sc->sc_min_t = LPCIB_TCOTIMER2_MIN_TICK;
-	} else {
+	switch (sc->sc_version) {
+	case 0:			/* <=ICH5 */
 		sc->sc_max_t = LPCIB_TCOTIMER_MAX_TICK;
 		sc->sc_min_t = LPCIB_TCOTIMER_MIN_TICK;
+		break;
+	case 1:			/* ICH6..<???>, with RCBA */
+	case 2:
+		sc->sc_max_t = LPCIB_TCOTIMER2_MAX_TICK;
+		sc->sc_min_t = LPCIB_TCOTIMER2_MIN_TICK;
+		break;
+	default:
+		panic("unknown TCO version: %d", sc->sc_version);
 	}
 	sc->sc_smw.smw_period = lpcib_tcotimer_tick_to_second(sc->sc_max_t);
 
@@ -225,25 +232,31 @@ tcotimer_setmode(struct sysmon_wdog *smw)
 		period = lpcib_tcotimer_second_to_tick(smw->smw_period);
 		if (period < sc->sc_min_t || period > sc->sc_max_t)
 			return EINVAL;
-		
+
 		/* Stop the TCO timer, */
 		tcotimer_stop(sc);
 
 		/* set the timeout, */
-		if (sc->sc_has_rcba) {
-			/* ICH6 or newer */
-			ich6period = bus_space_read_2(sc->sc_iot, sc->sc_ioh,
-						      LPCIB_TCO_TMR2);
-			ich6period &= 0xfc00;
-			bus_space_write_2(sc->sc_iot, sc->sc_ioh,
-					  LPCIB_TCO_TMR2, ich6period | period);
-		} else {
+		switch (sc->sc_version) {
+		case 0:
 			/* ICH5 or older */
 			ich5period = bus_space_read_1(sc->sc_iot, sc->sc_ioh,
 						   LPCIB_TCO_TMR);
 			ich5period &= 0xc0;
 			bus_space_write_1(sc->sc_iot, sc->sc_ioh,
 					  LPCIB_TCO_TMR, ich5period | period);
+			break;
+		case 1:
+		case 2:
+			/* ICH6 or newer */
+			ich6period = bus_space_read_2(sc->sc_iot, sc->sc_ioh,
+						      LPCIB_TCO_TMR2);
+			ich6period &= 0xfc00;
+			bus_space_write_2(sc->sc_iot, sc->sc_ioh,
+					  LPCIB_TCO_TMR2, ich6period | period);
+			break;
+		default:
+			panic("unknown TCO version: %d", sc->sc_version);
 		}
 
 		/* and start/reload the timer. */
@@ -260,10 +273,17 @@ tcotimer_tickle(struct sysmon_wdog *smw)
 	struct tco_softc *sc = smw->smw_cookie;
 
 	/* any value is allowed */
-	if (sc->sc_has_rcba)
-		bus_space_write_2(sc->sc_iot, sc->sc_ioh, LPCIB_TCO_RLD, 1);
-	else
+	switch (sc->sc_version) {
+	case 0:
 		bus_space_write_1(sc->sc_iot, sc->sc_ioh, LPCIB_TCO_RLD, 1);
+		break;
+	case 1:
+	case 2:
+		bus_space_write_2(sc->sc_iot, sc->sc_ioh, LPCIB_TCO_RLD, 1);
+		break;
+	default:
+		panic("unknown TCO version: %d", sc->sc_version);
+	}
 
 	return 0;
 }
@@ -308,19 +328,8 @@ tcotimer_disable_noreboot(device_t self)
 {
 	struct tco_softc *sc = device_private(self);
 
-	if (sc->sc_has_rcba) {
-		uint32_t status;
-
-		status = bus_space_read_4(sc->sc_rcbat, sc->sc_rcbah,
-		    LPCIB_GCS_OFFSET);
-		status &= ~LPCIB_GCS_NO_REBOOT;
-		bus_space_write_4(sc->sc_rcbat, sc->sc_rcbah,
-		    LPCIB_GCS_OFFSET, status);
-		status = bus_space_read_4(sc->sc_rcbat, sc->sc_rcbah,
-		    LPCIB_GCS_OFFSET);
-		if (status & LPCIB_GCS_NO_REBOOT)
-			goto error;
-	} else {
+	switch (sc->sc_version) {
+	case 0: {
 		pcireg_t pcireg;
 
 		pcireg = pci_conf_read(sc->sc_pcib->sc_pc, sc->sc_pcib->sc_tag,
@@ -333,6 +342,36 @@ tcotimer_disable_noreboot(device_t self)
 			if (pcireg & LPCIB_PCI_GEN_STA_NO_REBOOT)
 				goto error;
 		}
+		break;
+	}
+	case 1: {
+		uint32_t status;
+
+		status = bus_space_read_4(sc->sc_auxt, sc->sc_auxh,
+		    LPCIB_GCS_OFFSET);
+		status &= ~LPCIB_GCS_NO_REBOOT;
+		bus_space_write_4(sc->sc_auxt, sc->sc_auxh, LPCIB_GCS_OFFSET,
+		    status);
+		status = bus_space_read_4(sc->sc_auxt, sc->sc_auxh,
+		    LPCIB_GCS_OFFSET);
+		if (status & LPCIB_GCS_NO_REBOOT)
+			goto error;
+	}
+	case 2: {
+		uint32_t gc;
+
+		gc = bus_space_read_4(sc->sc_auxt, sc->sc_auxh,
+		    LPCIB_SMB_PCR_GC);
+		gc &= ~LPCIB_SMB_PCR_GC_NR;
+		bus_space_write_4(sc->sc_auxt, sc->sc_auxh, LPCIB_SMB_PCR_GC,
+		    gc);
+		gc = bus_space_read_4(sc->sc_auxt, sc->sc_auxh,
+		    LPCIB_SMB_PCR_GC);
+		if (gc & LPCIB_SMB_PCR_GC_NR)
+			goto error;
+	}
+	default:
+		panic("unknown TCO version: %d", sc->sc_version);
 	}
 
 	return 0;

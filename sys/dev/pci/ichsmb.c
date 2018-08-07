@@ -42,6 +42,8 @@ __KERNEL_RCSID(0, "$NetBSD: ichsmb.c,v 1.57 2018/04/09 15:36:00 msaitoh Exp $");
 
 #include <dev/i2c/i2cvar.h>
 
+#include <arch/x86/pci/tco.h>
+
 #ifdef ICHIIC_DEBUG
 #define DPRINTF(x) printf x
 #else
@@ -60,6 +62,15 @@ struct ichsmb_softc {
 	pci_chipset_tag_t	sc_pc;
 	void *			sc_ih;
 	int			sc_poll;
+
+	bool			sc_tco_enable;
+	bus_space_tag_t		sc_tcot;
+	bus_space_handle_t	sc_tcoh;
+	bus_size_t		sc_tcosz;
+	bus_space_tag_t		sc_sbt;
+	bus_space_handle_t	sc_sbh;
+	bus_space_handle_t	sc_sbsz;
+	device_t		sc_tco_device;
 
 	struct i2c_controller	sc_i2c_tag;
 	kmutex_t 		sc_i2c_mutex;
@@ -202,6 +213,51 @@ ichsmb_attach(device_t parent, device_t self, void *aux)
 			aprint_normal_dev(self, "polling\n");
 	}
 
+	conf = pci_conf_read(pa->pa_pc, pa->pa_tag, LPCIB_SMB_TCOCTL);
+	sc->sc_tco_enable = conf & LPCIB_SMB_TCOCTL_TCO_BASE_EN;
+	if (sc->sc_tco_enable) do {
+		if (pci_mapreg_map(pa, LPCIB_SMB_TCOBASE, PCI_MAPREG_TYPE_IO,
+			0, &sc->sc_tcot, &sc->sc_tcoh, NULL, &sc->sc_tcosz)) {
+			aprint_error_dev(self, "failed to map TCO base\n");
+			break;
+		}
+		/* XXX BEGIN UNCOMMITTABLE KLUDGE */
+	    {
+		pcitag_t p2sb_tag = pci_make_tag(pa->pa_pc,
+		    pa->pa_bus, pa->pa_device, /*func*/ 1);
+		const int P2SB_SBREG = 0x10;
+		const int P2SB_CNTL = 0xe0;
+		const int P2SB_CNTL_HIDE = __BIT(8);
+		/* Unhide the sideband registers.  */
+		pcireg_t cntl = pci_conf_read(pa->pa_pc, p2sb_tag, P2SB_CNTL);
+		pci_conf_write(pa->pa_pc, p2sb_tag, P2SB_CNTL,
+		    cntl & ~P2SB_CNTL_HIDE);
+		/* Map the sideband registers.  */
+		const int SBREG_SMB_BASE = 0xc60000;
+		const int SBREG_SMB_SIZE = 0x14;
+		bus_addr_t sbreg_base;
+		bus_size_t sbreg_size;
+		if (pci_mapreg_info(pa->pa_pc, p2sb_tag, P2SB_SBREG,
+			PCI_MAPREG_TYPE_MEM, &sbreg_base, &sbreg_size, NULL)) {
+			aprint_error_dev(self, "failed to find sideband\n");
+			break;
+		}
+		sc->sc_sbt = pa->pa_memt;
+		if (bus_space_map(sc->sc_sbt, sbreg_base + SBREG_SMB_BASE,
+			SBREG_SMB_SIZE, 0, &sc->sc_sbh)) {
+			aprint_error_dev(self, "failed to map sideband\n");
+			break;
+		}
+		sc->sc_sbsz = SBREG_SMB_SIZE;
+		/* Rehide the sieband registers.  */
+		pci_conf_write(pa->pa_pc, p2sb_tag, P2SB_CNTL, cntl);
+	    }
+		/* XXX END UNCOMMITTABLE KLUDGE */
+		sc->sc_tco_device = NULL;
+		flags = 0;
+		ichsmb_rescan(self, "tcoichbus", &flags);
+	} while (0);
+
 	sc->sc_i2c_device = NULL;
 	flags = 0;
 	mutex_init(&sc->sc_i2c_mutex, MUTEX_DEFAULT, IPL_NONE);
@@ -215,24 +271,41 @@ static int
 ichsmb_rescan(device_t self, const char *ifattr, const int *flags)
 {
 	struct ichsmb_softc *sc = device_private(self);
-	struct i2cbus_attach_args iba;
 
-	if (!ifattr_match(ifattr, "i2cbus"))
-		return 0;
+	if (ifattr_match(ifattr, "i2cbus")) {
+		struct i2cbus_attach_args iba;
 
-	if (sc->sc_i2c_device)
-		return 0;
+		if (sc->sc_i2c_device)
+			return 0;
 
-	/* Attach I2C bus */
-	sc->sc_i2c_tag.ic_cookie = sc;
-	sc->sc_i2c_tag.ic_acquire_bus = ichsmb_i2c_acquire_bus;
-	sc->sc_i2c_tag.ic_release_bus = ichsmb_i2c_release_bus;
-	sc->sc_i2c_tag.ic_exec = ichsmb_i2c_exec;
+		/* Attach I2C bus */
+		sc->sc_i2c_tag.ic_cookie = sc;
+		sc->sc_i2c_tag.ic_acquire_bus = ichsmb_i2c_acquire_bus;
+		sc->sc_i2c_tag.ic_release_bus = ichsmb_i2c_release_bus;
+		sc->sc_i2c_tag.ic_exec = ichsmb_i2c_exec;
 
-	memset(&iba, 0, sizeof(iba));
-	iba.iba_type = I2C_TYPE_SMBUS;
-	iba.iba_tag = &sc->sc_i2c_tag;
-	sc->sc_i2c_device = config_found_ia(self, ifattr, &iba, iicbus_print);
+		memset(&iba, 0, sizeof(iba));
+		iba.iba_type = I2C_TYPE_SMBUS;
+		iba.iba_tag = &sc->sc_i2c_tag;
+		sc->sc_i2c_device = config_found_ia(self, ifattr, &iba,
+		    iicbus_print);
+	}
+
+	if (ifattr_match(ifattr, "tcoichbus") && sc->sc_tco_enable) {
+		struct lpcib_tco_attach_args ta;
+
+		if (sc->sc_tco_device)
+			return 0;
+
+		memset(&ta, 0, sizeof(ta));
+		ta.ta_version = 2;
+		ta.ta_iot = sc->sc_tcot;
+		ta.ta_ioh = sc->sc_tcoh;
+		ta.ta_auxt = sc->sc_sbt;
+		ta.ta_auxh = sc->sc_sbh;
+		ta.ta_pcib = NULL;
+		sc->sc_tco_device = config_found_ia(self, ifattr, &ta, NULL);
+	}
 
 	return 0;
 }
@@ -248,6 +321,17 @@ ichsmb_detach(device_t self, int flags)
 		if (error)
 			return error;
 	}
+
+	if (sc->sc_tco_device) {
+		error = config_detach(sc->sc_tco_device, flags);
+		if (error)
+			return error;
+	}
+
+	if (sc->sc_sbsz)
+		bus_space_unmap(sc->sc_sbt, sc->sc_sbh, sc->sc_sbsz);
+	if (sc->sc_tcosz)
+		bus_space_unmap(sc->sc_tcot, sc->sc_tcoh, sc->sc_tcosz);
 
 	mutex_destroy(&sc->sc_i2c_mutex);
 

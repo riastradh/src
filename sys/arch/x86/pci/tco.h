@@ -36,12 +36,12 @@
 #ifndef _X86_PCI_TCO_H_
 #define _X86_PCI_TCO_H_
 
-struct lpcib_tco_attach_args {  
-	int			ta_has_rcba;
+struct lpcib_tco_attach_args {
+	int			ta_version;
 	bus_space_tag_t		ta_iot;
 	bus_space_handle_t	ta_ioh;
-	bus_space_tag_t		ta_rcbat;
-	bus_space_handle_t	ta_rcbah;
+	bus_space_tag_t		ta_auxt;
+	bus_space_handle_t	ta_auxh;
 	struct pcib_softc *	ta_pcib;
 };
 
