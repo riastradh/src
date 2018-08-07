@@ -265,8 +265,10 @@ alloc_ordered_workqueue(const char *name, int linux_flags)
 	TAILQ_INIT(&wq->wq_delayed);
 	wq->wq_current_work = NULL;
 
-	workqueue_whoami(wq);
-	KASSERT(wq->wq_lwp != NULL);
+	if (0) {		/* XXX broken garbage */
+		workqueue_whoami(wq);
+		KASSERT(wq->wq_lwp != NULL);
+	}
 
 	return wq;
 }
