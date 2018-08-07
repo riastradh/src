@@ -156,6 +156,9 @@ amdgpu_attach_real(device_t self)
 	sc->sc_task_state = AMDGPU_TASK_ATTACH;
 	SIMPLEQ_INIT(&sc->sc_task_u.attach);
 
+	/* Initialize the Linux PCI device descriptor.  */
+	linux_pci_dev_init(&sc->sc_pci_dev, self, pa, 0);
+
 	/* XXX errno Linux->NetBSD */
 	error = -drm_pci_attach(self, pa, &sc->sc_pci_dev, amdgpu_drm_driver,
 	    flags, &sc->sc_drm_dev);

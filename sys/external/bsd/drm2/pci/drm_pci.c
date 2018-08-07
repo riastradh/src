@@ -82,9 +82,6 @@ drm_pci_attach(device_t self, const struct pci_attach_args *pa,
 	if (ret)
 		goto fail0;
 
-	/* Initialize the Linux PCI device descriptor.  */
-	linux_pci_dev_init(pdev, self, pa, 0);
-
 	/* Create a DRM device.  */
 	dev = drm_dev_alloc(driver, self);
 	if (dev == NULL) {

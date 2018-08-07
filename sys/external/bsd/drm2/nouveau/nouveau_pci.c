@@ -139,6 +139,9 @@ nouveau_pci_attach(device_t parent, device_t self, void *aux)
 
 	sc->sc_dev = self;
 
+	/* Initialize the Linux PCI device descriptor.  */
+	linux_pci_dev_init(&sc->sc_pci_dev, self, pa, 0);
+
 	if (!pmf_device_register(self, &nouveau_pci_suspend,
 		&nouveau_pci_resume))
 		aprint_error_dev(self, "unable to establish power handler\n");
