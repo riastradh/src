@@ -230,6 +230,7 @@ linux_workqueue_thread(void *cookie)
 		while (!TAILQ_EMPTY(&tmp)) {
 			struct work_struct *const work = TAILQ_FIRST(&tmp);
 
+			KASSERT(work->work_queue == wq);
 			TAILQ_REMOVE(&tmp, work, work_entry);
 			KASSERT(wq->wq_current_work == NULL);
 			wq->wq_current_work = work;
@@ -266,6 +267,7 @@ linux_workqueue_timeout(void *cookie)
 	KASSERT(wq != NULL);
 
 	mutex_enter(&wq->wq_lock);
+	KASSERT(dw->work.work_queue == wq);
 	switch (dw->dw_state) {
 	case DELAYED_WORK_IDLE:
 		panic("delayed work callout uninitialized: %p", dw);
