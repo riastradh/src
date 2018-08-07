@@ -34,6 +34,7 @@
 
 #include <sys/types.h>
 #include <sys/endian.h>
+#include <sys/kernel.h>
 #include <sys/time.h>
 
 #include <linux/time.h>
