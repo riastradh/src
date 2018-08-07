@@ -56,6 +56,9 @@ struct amd_sched_entity {
 
 	struct fence			*dependency;
 	struct fence_cb			cb;
+	void				(*func)(struct fence *,
+					    struct amd_sched_entity *);
+	struct list_head		entry;
 };
 
 /**

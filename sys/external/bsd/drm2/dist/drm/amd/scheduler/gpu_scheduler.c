@@ -224,13 +224,19 @@ void amd_sched_entity_fini(struct amd_gpu_scheduler *sched,
 	kfifo_free(&entity->job_queue);
 }
 
+static void amd_sched_entity_wakeup_cb(struct fence *f,
+    struct amd_sched_entity *entity)
+{
+	entity->dependency = NULL;
+	fence_put(f);
+	amd_sched_wakeup(entity->sched);
+}
+
 static void amd_sched_entity_wakeup(struct fence *f, struct fence_cb *cb)
 {
 	struct amd_sched_entity *entity =
 		container_of(cb, struct amd_sched_entity, cb);
-	entity->dependency = NULL;
-	fence_put(f);
-	amd_sched_wakeup(entity->sched);
+	amd_sched_entity_wakeup_cb(f, entity);
 }
 
 static bool amd_sched_entity_add_dependency_cb(struct amd_sched_entity *entity)
@@ -255,8 +261,8 @@ static bool amd_sched_entity_add_dependency_cb(struct amd_sched_entity *entity)
 		}
 
 		/* Wait for fence to be scheduled */
-		entity->cb.func = amd_sched_entity_wakeup;
-		list_add_tail(&entity->cb.node, &s_fence->scheduled_cb);
+		entity->func = amd_sched_entity_wakeup_cb;
+		list_add_tail(&entity->entry, &s_fence->scheduled_cb);
 		return true;
 	}
 
