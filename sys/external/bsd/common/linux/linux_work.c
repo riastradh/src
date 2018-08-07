@@ -704,10 +704,12 @@ flush_workqueue(struct workqueue_struct *wq)
 	uint64_t gen;
 
 	mutex_enter(&wq->wq_lock);
-	gen = wq->wq_gen;
-	do {
-		cv_wait(&wq->wq_cv, &wq->wq_lock);
-	} while (gen == wq->wq_gen);
+	if (wq->wq_current_work || !TAILQ_EMPTY(&wq->wq_queue)) {
+		gen = wq->wq_gen;
+		do {
+			cv_wait(&wq->wq_cv, &wq->wq_lock);
+		} while (gen == wq->wq_gen);
+	}
 	mutex_exit(&wq->wq_lock);
 }
 
