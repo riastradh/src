@@ -60,7 +60,6 @@ file 	arch/x86/pci/rdcpcib.c 		rdcpcib
 
 define	fwhichbus {}
 define	hpetichbus {}
-define	tcoichbus {}
 device	ichlpcib: acpipmtimer, isabus, fwhichbus, hpetichbus, gpiobus, tcoichbus
 attach	ichlpcib at pci
 file 	arch/x86/pci/ichlpcib.c 	ichlpcib

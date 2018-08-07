@@ -1020,7 +1020,8 @@ attach	nfsmb at nfsmbc
 file	dev/pci/nfsmb.c			nfsmbc | nfsmb
 
 # Intel ICH SMBus controller
-device	ichsmb: i2cbus
+define	tcoichbus { }
+device	ichsmb: i2cbus, tcoichbus
 attach	ichsmb at pci
 file	dev/pci/ichsmb.c		ichsmb
 
