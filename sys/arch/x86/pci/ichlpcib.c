@@ -634,9 +634,16 @@ tcotimer_configure(device_t self)
 {
 	struct lpcib_softc *sc = device_private(self);
 	struct lpcib_tco_attach_args arg;
+	int error;
 
 	arg.ta_iot = sc->sc_iot;
-	arg.ta_ioh = sc->sc_ioh;
+	error = bus_space_subregion(sc->sc_iot, sc->sc_ioh, LPCIB_TCO_BASE,
+	    0x20, &arg.ta_ioh);
+	if (error) {
+		aprint_error_dev(self, "unable to subregion TCO registers"
+		    ": %d\n", error);
+		return;
+	}
 	arg.ta_rcbat = sc->sc_rcbat;
 	arg.ta_rcbah = sc->sc_rcbah;
 	arg.ta_has_rcba = sc->sc_has_rcba;

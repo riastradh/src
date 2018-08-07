@@ -256,28 +256,33 @@
  *  (offset from PMBASE)
  */
 #define LPCIB_TCO_BASE		0x60
-#define LPCIB_TCO_RLD		(LPCIB_TCO_BASE+0x00)
-#define LPCIB_TCO_TMR		(LPCIB_TCO_BASE+0x01)
-#define LPCIB_TCO_TMR2		(LPCIB_TCO_BASE+0x12) /* ICH6 and newer */
+
+/*
+ * System management TCO registers
+ *  (offset from TCOBASE)
+ */
+#define LPCIB_TCO_RLD		0x00
+#define LPCIB_TCO_TMR		0x01
+#define LPCIB_TCO_TMR2		0x12 /* ICH6 and newer */
 # define LPCIB_TCO_TMR_MASK 		0x3f
-#define LPCIB_TCO_DAT_IN	(LPCIB_TCO_BASE+0x02)
-#define LPCIB_TCO_DAT_OUT	(LPCIB_TCO_BASE+0x03)
-#define LPCIB_TCO1_STS		(LPCIB_TCO_BASE+0x04)
+#define LPCIB_TCO_DAT_IN	0x02
+#define LPCIB_TCO_DAT_OUT	0x03
+#define LPCIB_TCO1_STS		0x04
 # define LPCIB_TCO1_STS_TIMEOUT 	0x08
-#define LPCIB_TCO2_STS		(LPCIB_TCO_BASE+0x06)
+#define LPCIB_TCO2_STS		0x06
 # define LPCIB_TCO2_STS_BOOT_STS 	0x04
 # define LPCIB_TCO2_STS_SECONDS_TO_STS 	0x02
-#define LPCIB_TCO1_CNT		(LPCIB_TCO_BASE+0x08)
+#define LPCIB_TCO1_CNT		0x08
 # define LPCIB_TCO1_CNT_TCO_LOCK 	(1 << 12)
 # define LPCIB_TCO1_CNT_TCO_TMR_HLT	(1 << 11)
 # define LPCIB_TCO1_CNT_SEND_NOW	(1 << 10)
 # define LPCIB_TCO1_CNT_NMI2SMI_EN	(1 << 9)
 # define LPCIB_TCO1_CNT_NMI_NOW		(1 << 8)
-#define LPCIB_TCO2_CNT		(LPCIB_TCO_BASE+0x0a)
-#define LPCIB_TCO_MESSAGE1	(LPCIB_TCO_BASE+0x0c)
-#define LPCIB_TCO_MESSAGE2	(LPCIB_TCO_BASE+0x0d)
-#define LPCIB_TCO_WDSTATUS	(LPCIB_TCO_BASE+0x0e)
-#define LPCIB_SW_IRQ_GEN	(LPCIB_TCO_BASE+0x10)
+#define LPCIB_TCO2_CNT		0x0a
+#define LPCIB_TCO_MESSAGE1	0x0c
+#define LPCIB_TCO_MESSAGE2	0x0d
+#define LPCIB_TCO_WDSTATUS	0x0e
+#define LPCIB_SW_IRQ_GEN	0x10
 
 /*
  * TCO timer tick.  ICH datasheets say:
