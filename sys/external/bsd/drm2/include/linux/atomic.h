@@ -286,6 +286,68 @@ atomic64_cmpxchg(struct atomic64 *atomic, uint64_t expect, uint64_t new)
 	return old;
 }
 
+struct atomic_long {
+	volatile unsigned long	al_v;
+};
+
+typedef struct atomic_long atomic_long_t;
+
+static inline long
+atomic_long_read(struct atomic_long *a)
+{
+	/* no membar */
+	return (unsigned long)a->al_v;
+}
+
+static inline void
+atomic_long_set(struct atomic_long *a, long v)
+{
+	/* no membar */
+	a->al_v = v;
+}
+
+static inline long
+atomic_long_add_unless(struct atomic_long *a, long addend, long zero)
+{
+	long value;
+
+	smp_mb__before_atomic();
+	do {
+		value = (long)a->al_v;
+		if (value == zero)
+			break;
+	} while (atomic_cas_ulong(&a->al_v, (unsigned long)value,
+		(unsigned long)(value + addend)) != (unsigned long)value);
+	smp_mb__after_atomic();
+
+	return value != zero;
+}
+
+static inline long
+atomic_long_inc_not_zero(struct atomic_long *a)
+{
+	/* membar implied by atomic_long_add_unless */
+	return atomic_long_add_unless(a, 1, 0);
+}
+
+static inline long
+atomic_long_cmpxchg(struct atomic_long *a, long expect, long new)
+{
+	long old;
+
+	/*
+	 * XXX As an optimization, under Linux's semantics we are
+	 * allowed to skip the memory barrier if the comparison fails,
+	 * but taking advantage of that is not convenient here.
+	 */
+	smp_mb__before_atomic();
+	old = (long)atomic_cas_ulong(&a->al_v, (unsigned long)expect,
+	    (unsigned long)new);
+	smp_mb__after_atomic();
+
+	return old;
+}
+
 static inline void
 set_bit(unsigned int bit, volatile unsigned long *ptr)
 {
