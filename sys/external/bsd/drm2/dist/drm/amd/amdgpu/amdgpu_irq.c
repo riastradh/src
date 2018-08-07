@@ -174,7 +174,7 @@ void amdgpu_irq_uninstall(struct drm_device *dev)
  *
  * This is the irq handler for the amdgpu driver (all asics).
  */
-irqreturn_t amdgpu_irq_handler(int irq, void *arg)
+irqreturn_t amdgpu_irq_handler(DRM_IRQ_ARGS)
 {
 	struct drm_device *dev = (struct drm_device *) arg;
 	struct amdgpu_device *adev = dev->dev_private;

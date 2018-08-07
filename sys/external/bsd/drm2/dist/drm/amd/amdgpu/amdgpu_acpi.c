@@ -35,11 +35,10 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <drm/drm_crtc_helper.h>
 #include "amdgpu.h"
 #include "amdgpu_acpi.h"
+#include "amdgpu_pm.h"
 #include "atom.h"
 
 #define ACPI_AC_CLASS           "ac_adapter"
-
-extern void amdgpu_pm_acpi_event_handler(struct amdgpu_device *adev);
 
 struct atif_verify_interface {
 	u16 size;		/* structure size in bytes (includes size field) */

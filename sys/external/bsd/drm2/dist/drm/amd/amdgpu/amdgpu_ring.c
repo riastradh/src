@@ -31,6 +31,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#include <asm/byteorder.h>
+#include <linux/log2.h>
 #include <linux/seq_file.h>
 #include <linux/slab.h>
 #include <drm/drmP.h>
@@ -386,7 +388,7 @@ int amdgpu_ring_init(struct amdgpu_device *adev, struct amdgpu_ring *ring,
 			return r;
 		}
 		r = amdgpu_bo_kmap(ring->ring_obj,
-				       (void **)&ring->ring);
+				       (void **)__UNVOLATILE(&ring->ring));
 		amdgpu_bo_unreserve(ring->ring_obj);
 		if (r) {
 			dev_err(adev->dev, "(%d) ring map failed\n", r);

@@ -33,6 +33,8 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <asm/div64.h>
 #include <linux/gcd.h>
 
+#include "amdgpu_pll.h"
+
 /**
  * amdgpu_pll_reduce_ratio - fractional number reduction
  *

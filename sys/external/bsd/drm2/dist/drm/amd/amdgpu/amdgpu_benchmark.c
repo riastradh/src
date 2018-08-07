@@ -65,7 +65,7 @@ exit_do_move:
 static void amdgpu_benchmark_log_results(int n, unsigned size,
 					 unsigned int time,
 					 unsigned sdomain, unsigned ddomain,
-					 char *kind)
+					 const char *kind)
 {
 	unsigned int throughput = (n * (size >> 10)) / time;
 	DRM_INFO("amdgpu: %s %u bo moves of %u kB from"

@@ -593,7 +593,7 @@ static void vi_print_gpu_status_regs(struct amdgpu_device *adev)
  * mask to be used by vi_gpu_soft_reset().
  * Returns a mask of the blocks to be reset.
  */
-u32 vi_gpu_check_soft_reset(struct amdgpu_device *adev)
+static u32 vi_gpu_check_soft_reset(struct amdgpu_device *adev)
 {
 	u32 reset_mask = 0;
 	u32 tmp;
@@ -1025,6 +1025,7 @@ static int vi_set_vce_clocks(struct amdgpu_device *adev, u32 evclk, u32 ecclk)
 
 static void vi_pcie_gen3_enable(struct amdgpu_device *adev)
 {
+#ifndef __NetBSD__		/* XXX amdgpu pcie */
 	u32 mask;
 	int ret;
 
@@ -1045,6 +1046,7 @@ static void vi_pcie_gen3_enable(struct amdgpu_device *adev)
 		return;
 
 	/* todo */
+#endif
 }
 
 static void vi_program_aspm(struct amdgpu_device *adev)

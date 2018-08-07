@@ -29,6 +29,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include "amdgpu.h"
+#include "amdgpu_gfx.h"
 
 /*
  * GPU scratch registers helpers function.

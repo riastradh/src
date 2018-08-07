@@ -102,7 +102,9 @@ void amdgpu_amdkfd_fini(void)
 {
 	if (kgd2kfd) {
 		kgd2kfd->exit();
+#ifndef __NetBSD__
 		symbol_put(kgd2kfd_init);
+#endif
 	}
 }
 
@@ -163,6 +165,7 @@ int amdgpu_amdkfd_resume(struct amdgpu_device *rdev)
 	return r;
 }
 
+#ifndef __NetBSD__		/* XXX unused? */
 u32 pool_to_domain(enum kgd_memory_pool p)
 {
 	switch (p) {
@@ -170,6 +173,7 @@ u32 pool_to_domain(enum kgd_memory_pool p)
 	default: return AMDGPU_GEM_DOMAIN_GTT;
 	}
 }
+#endif
 
 int alloc_gtt_mem(struct kgd_dev *kgd, size_t size,
 			void **mem_obj, uint64_t *gpu_addr,

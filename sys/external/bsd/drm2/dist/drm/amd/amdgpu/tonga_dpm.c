@@ -27,6 +27,7 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
+#include <linux/module.h>
 #include "drmP.h"
 #include "amdgpu.h"
 #include "tonga_smumgr.h"

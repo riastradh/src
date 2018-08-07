@@ -292,7 +292,11 @@ struct fence *amdgpu_ctx_get_fence(struct amdgpu_ctx *ctx,
 
 void amdgpu_ctx_mgr_init(struct amdgpu_ctx_mgr *mgr)
 {
+#ifdef __NetBSD__
+	linux_mutex_init(&mgr->lock);
+#else
 	mutex_init(&mgr->lock);
+#endif
 	idr_init(&mgr->ctx_handles);
 }
 
@@ -310,5 +314,9 @@ void amdgpu_ctx_mgr_fini(struct amdgpu_ctx_mgr *mgr)
 	}
 
 	idr_destroy(&mgr->ctx_handles);
+#ifdef __NetBSD__
+	linux_mutex_destroy(&mgr->lock);
+#else
 	mutex_destroy(&mgr->lock);
+#endif
 }
