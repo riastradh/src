@@ -286,13 +286,14 @@ linux_workqueue_timeout(void *cookie)
 		callout_destroy(&dw->dw_callout);
 		TAILQ_REMOVE(&wq->wq_delayed, dw, dw_entry);
 		release_work(&dw->work, wq);
-		break;
+		/* Can't touch dw any more.  */
+		goto out;
 	default:
 		panic("delayed work callout in bad state: %p", dw);
 	}
 	KASSERT(dw->dw_state == DELAYED_WORK_IDLE ||
 	    dw->dw_state == DELAYED_WORK_SCHEDULED);
-	mutex_exit(&wq->wq_lock);
+out:	mutex_exit(&wq->wq_lock);
 }
 
 struct work_struct *
