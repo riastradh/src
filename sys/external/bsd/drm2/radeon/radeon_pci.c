@@ -229,7 +229,7 @@ radeon_attach_real(device_t self)
 	SIMPLEQ_INIT(&sc->sc_task_u.attach);
 
 	/* Initialize the Linux PCI device descriptor.  */
-	linux_pci_dev_init(&sc->sc_pci_dev, self, pa, 0);
+	linux_pci_dev_init(&sc->sc_pci_dev, self, device_parent(self), pa, 0);
 
 	/* XXX errno Linux->NetBSD */
 	error = -drm_pci_attach(self, pa, &sc->sc_pci_dev, radeon_drm_driver,
