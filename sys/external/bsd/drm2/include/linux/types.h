@@ -92,4 +92,7 @@ typedef off_t loff_t;
 	unsigned long NAME[((BITS) + ((NBBY*sizeof(unsigned long)) - 1)) /    \
 		(NBBY*sizeof(unsigned long))]
 
+/* Definition copied in <linux/kernel.h> for convenience.  */
+#define	__user
+
 #endif  /* _LINUX_TYPES_H_ */
