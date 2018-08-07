@@ -84,6 +84,9 @@ static int
 nouveau_pci_match(device_t parent, cfdata_t match, void *aux)
 {
 	const struct pci_attach_args *const pa = aux;
+	struct pci_dev pdev;
+	struct nvkm_device *device;
+	int ret;
 
 	if (PCI_VENDOR(pa->pa_id) != PCI_VENDOR_NVIDIA &&
 	    PCI_VENDOR(pa->pa_id) != PCI_VENDOR_NVIDIA_SGS)
@@ -121,6 +124,15 @@ nouveau_pci_match(device_t parent, cfdata_t match, void *aux)
 	    IS_BETWEEN(0x1d80, 0x1dff))
 		return 0;
 #undef IS_BETWEEN
+
+	linux_pci_dev_init(&pdev, NULL, parent, pa, 0);
+	ret = nvkm_device_pci_new(&pdev, NULL, "error", true, false, 0,
+	    &device);
+	if (ret == 0)		/* don't want to hang onto it */
+		nvkm_device_del(&device);
+	linux_pci_dev_destroy(&pdev);
+	if (ret)		/* failure */
+		return 0;
 
 	return 6;		/* XXX Beat genfb_pci...  */
 }
