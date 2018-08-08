@@ -411,13 +411,15 @@ reservation_object_add_shared_fence(struct reservation_object *robj,
 		/* Commit the update.  */
 		reservation_object_write_commit(robj, &ticket);
 	} else {
-		KASSERT(list->shared_count < prealloc->shared_max);
+		uint32_t shared_count = (list == NULL? 0 : list->shared_count);
+
+		KASSERT(shared_count < prealloc->shared_max);
 
 		/*
 		 * Copy the fences over, but replace if we find one
 		 * with the same context number.
 		 */
-		for (i = 0; i < list->shared_count; i++) {
+		for (i = 0; i < shared_count; i++) {
 			if (replace == NULL &&
 			    list->shared[i]->context == fence->context) {
 				replace = list->shared[i];
@@ -426,7 +428,7 @@ reservation_object_add_shared_fence(struct reservation_object *robj,
 				prealloc->shared[i] = list->shared[i];
 			}
 		}
-		prealloc->shared_count = list->shared_count;
+		prealloc->shared_count = shared_count;
 
 		/* If we didn't find one, add it at the end.  */
 		if (replace == NULL)
@@ -443,11 +445,12 @@ reservation_object_add_shared_fence(struct reservation_object *robj,
 		reservation_object_write_commit(robj, &ticket);
 
 		/*
-		 * Free the old list when it is convenient.  (We are
-		 * not in a position at this point to sleep waiting for
-		 * activity on all CPUs.)
+		 * If there is an old list, free it when convenient.
+		 * (We are not in a position at this point to sleep
+		 * waiting for activity on all CPUs.)
 		 */
-		objlist_defer_free(list);
+		if (list != NULL)
+			objlist_defer_free(list);
 	}
 
 	/* Release a fence if we replaced it.  */
