@@ -136,13 +136,18 @@ alloc_ordered_workqueue(const char *name, int flags)
 
 	KASSERT(flags == 0);
 
-	wq = kmem_alloc(sizeof(*wq), KM_SLEEP);
+	wq = kmem_zalloc(sizeof(*wq), KM_SLEEP);
 
 	mutex_init(&wq->wq_lock, MUTEX_DEFAULT, IPL_NONE);
 	cv_init(&wq->wq_cv, name);
 	TAILQ_INIT(&wq->wq_delayed);
 	TAILQ_INIT(&wq->wq_queue);
 	wq->wq_current_work = NULL;
+	wq->wq_flags = 0;
+	wq->wq_lwp = NULL;
+	wq->wq_gen = 0;
+	wq->wq_requeued = false;
+	wq->wq_dying = false;
 
 	error = kthread_create(PRI_NONE,
 	    KTHREAD_MPSAFE|KTHREAD_TS|KTHREAD_MUSTJOIN, NULL,
@@ -194,6 +199,9 @@ destroy_workqueue(struct workqueue_struct *wq)
 	/* Wait for it to exit.  */
 	(void)kthread_join(wq->wq_lwp);
 
+	KASSERT(wq->wq_dying);
+	KASSERT(!wq->wq_requeued);
+	KASSERT(wq->wq_flags == 0);
 	KASSERT(wq->wq_current_work == NULL);
 	KASSERT(TAILQ_EMPTY(&wq->wq_queue));
 	KASSERT(TAILQ_EMPTY(&wq->wq_delayed));
