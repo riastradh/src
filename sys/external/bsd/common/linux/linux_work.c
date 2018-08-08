@@ -52,10 +52,10 @@ struct workqueue_struct {
 	TAILQ_HEAD(, work_struct)	wq_queue;
 	struct work_struct		*wq_current_work;
 	int				wq_flags;
-	struct lwp			*wq_lwp;
+	bool				wq_requeued;
+	bool				wq_dying;
 	uint64_t			wq_gen;
-	bool				wq_requeued:1;
-	bool				wq_dying:1;
+	struct lwp			*wq_lwp;
 };
 
 static void __dead	linux_workqueue_thread(void *);
@@ -166,10 +166,10 @@ alloc_ordered_workqueue(const char *name, int flags)
 	TAILQ_INIT(&wq->wq_queue);
 	wq->wq_current_work = NULL;
 	wq->wq_flags = 0;
-	wq->wq_lwp = NULL;
-	wq->wq_gen = 0;
 	wq->wq_requeued = false;
 	wq->wq_dying = false;
+	wq->wq_gen = 0;
+	wq->wq_lwp = NULL;
 
 	error = kthread_create(PRI_NONE,
 	    KTHREAD_MPSAFE|KTHREAD_TS|KTHREAD_MUSTJOIN, NULL,
