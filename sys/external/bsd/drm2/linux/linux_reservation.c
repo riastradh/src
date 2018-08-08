@@ -390,6 +390,11 @@ reservation_object_add_shared_fence(struct reservation_object *robj,
 
 	/* Check for a preallocated replacement list.  */
 	if (prealloc == NULL) {
+		/*
+		 * If there is no preallocated replacement list, then
+		 * there must be room in the current list.
+		 */
+		KASSERT(list != NULL);
 		KASSERT(list->shared_count < list->shared_max);
 
 		/* Begin an update.  */
@@ -411,8 +416,14 @@ reservation_object_add_shared_fence(struct reservation_object *robj,
 		/* Commit the update.  */
 		reservation_object_write_commit(robj, &ticket);
 	} else {
+		/*
+		 * There is a preallocated replacement list.  There may
+		 * not be a current list.  If not, treat it as a zero-
+		 * length list.
+		 */
 		uint32_t shared_count = (list == NULL? 0 : list->shared_count);
 
+		/* There had better be room in the preallocated list.  */
 		KASSERT(shared_count < prealloc->shared_max);
 
 		/*
