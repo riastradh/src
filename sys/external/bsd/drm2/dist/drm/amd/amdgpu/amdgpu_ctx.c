@@ -100,16 +100,19 @@ static int amdgpu_ctx_alloc(struct amdgpu_device *adev,
 	if (!ctx)
 		return -ENOMEM;
 
+	idr_preload(GFP_KERNEL);
 	mutex_lock(&mgr->lock);
 	r = idr_alloc(&mgr->ctx_handles, ctx, 1, 0, GFP_KERNEL);
 	if (r < 0) {
 		mutex_unlock(&mgr->lock);
+		idr_preload_end();
 		kfree(ctx);
 		return r;
 	}
 	*id = (uint32_t)r;
 	r = amdgpu_ctx_init(adev, false, ctx);
 	mutex_unlock(&mgr->lock);
+	idr_preload_end();
 
 	return r;
 }

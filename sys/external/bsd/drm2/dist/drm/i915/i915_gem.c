@@ -5472,6 +5472,7 @@ int i915_gem_init(struct drm_device *dev)
 	i915.enable_execlists = intel_sanitize_enable_execlists(dev,
 			i915.enable_execlists);
 
+	idr_preload(GFP_KERNEL);	/* gem context */
 	mutex_lock(&dev->struct_mutex);
 
 	if (IS_VALLEYVIEW(dev)) {
@@ -5530,6 +5531,7 @@ int i915_gem_init(struct drm_device *dev)
 out_unlock:
 	intel_uncore_forcewake_put(dev_priv, FORCEWAKE_ALL);
 	mutex_unlock(&dev->struct_mutex);
+	idr_preload_end();
 
 	return ret;
 }

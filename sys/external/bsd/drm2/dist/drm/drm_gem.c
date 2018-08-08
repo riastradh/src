@@ -723,8 +723,8 @@ drm_gem_flink_ioctl(struct drm_device *dev, void *data,
 	if (obj == NULL)
 		return -ENOENT;
 
-	mutex_lock(&dev->object_name_lock);
 	idr_preload(GFP_KERNEL);
+	mutex_lock(&dev->object_name_lock);
 	/* prevent races with concurrent gem_close. */
 	if (obj->handle_count == 0) {
 		ret = -ENOENT;
@@ -743,8 +743,8 @@ drm_gem_flink_ioctl(struct drm_device *dev, void *data,
 	ret = 0;
 
 err:
-	idr_preload_end();
 	mutex_unlock(&dev->object_name_lock);
+	idr_preload_end();
 	drm_gem_object_unreference_unlocked(obj);
 	return ret;
 }

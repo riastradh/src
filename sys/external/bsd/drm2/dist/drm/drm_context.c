@@ -82,10 +82,12 @@ static int drm_legacy_ctxbitmap_next(struct drm_device * dev)
 {
 	int ret;
 
+	idr_preload(GFP_KERNEL);
 	mutex_lock(&dev->struct_mutex);
 	ret = idr_alloc(&dev->ctx_idr, NULL, DRM_RESERVED_CONTEXTS, 0,
 			GFP_KERNEL);
 	mutex_unlock(&dev->struct_mutex);
+	idr_preload_end();
 	return ret;
 }
 
