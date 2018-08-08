@@ -40,7 +40,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/rcupdate.h>
 
-struct {
+static struct {
 	kmutex_t	lock;
 	kcondvar_t	cv;
 	struct rcu_head	*first;
