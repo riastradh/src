@@ -67,6 +67,8 @@ static void		release_work(struct work_struct *,
 			    struct workqueue_struct *);
 static void		dw_callout_init(struct workqueue_struct *,
 			    struct delayed_work *);
+static void		dw_callout_destroy(struct workqueue_struct *,
+			    struct delayed_work *);
 static void		cancel_delayed_work_done(struct workqueue_struct *,
 			    struct delayed_work *);
 
@@ -305,9 +307,7 @@ linux_workqueue_timeout(void *cookie)
 	case DELAYED_WORK_IDLE:
 		panic("delayed work callout uninitialized: %p", dw);
 	case DELAYED_WORK_SCHEDULED:
-		dw->dw_state = DELAYED_WORK_IDLE;
-		callout_destroy(&dw->dw_callout);
-		TAILQ_REMOVE(&wq->wq_delayed, dw, dw_entry);
+		dw_callout_destroy(wq, dw);
 		TAILQ_INSERT_TAIL(&wq->wq_queue, &dw->work, work_entry);
 		cv_broadcast(&wq->wq_cv);
 		break;
@@ -564,6 +564,26 @@ dw_callout_init(struct workqueue_struct *wq, struct delayed_work *dw)
 }
 
 /*
+ * dw_callout_destroy(wq, dw)
+ *
+ *	Destroy the callout of dw and transition to DELAYED_WORK_IDLE.
+ */
+static void
+dw_callout_destroy(struct workqueue_struct *wq, struct delayed_work *dw)
+{
+
+	KASSERT(mutex_owned(&wq->wq_lock));
+	KASSERT(dw->work.work_queue == wq);
+	KASSERT(dw->dw_state == DELAYED_WORK_SCHEDULED ||
+	    dw->dw_state == DELAYED_WORK_RESCHEDULED ||
+	    dw->dw_state == DELAYED_WORK_CANCELLED);
+
+	TAILQ_REMOVE(&wq->wq_delayed, dw, dw_entry);
+	callout_destroy(&dw->dw_callout);
+	dw->dw_state = DELAYED_WORK_IDLE;
+}
+
+/*
  * cancel_delayed_work_done(wq, dw)
  *
  *	Complete cancellation of a delayed work: transition from
@@ -577,9 +597,8 @@ cancel_delayed_work_done(struct workqueue_struct *wq, struct delayed_work *dw)
 	KASSERT(mutex_owned(&wq->wq_lock));
 	KASSERT(dw->work.work_queue == wq);
 	KASSERT(dw->dw_state == DELAYED_WORK_CANCELLED);
-	dw->dw_state = DELAYED_WORK_IDLE;
-	callout_destroy(&dw->dw_callout);
-	TAILQ_REMOVE(&wq->wq_delayed, dw, dw_entry);
+
+	dw_callout_destroy(wq, dw);
 	release_work(&dw->work, wq);
 	/* Can't touch dw after this point.  */
 }
@@ -862,10 +881,7 @@ mod_delayed_work(struct workqueue_struct *wq, struct delayed_work *dw,
 					 * queue, and signal the worker
 					 * thread.
 					 */
-					dw->dw_state = DELAYED_WORK_IDLE;
-					callout_destroy(&dw->dw_callout);
-					TAILQ_REMOVE(&wq->wq_delayed, dw,
-					    dw_entry);
+					dw_callout_destroy(wq, dw);
 					TAILQ_INSERT_TAIL(&wq->wq_queue,
 					    &dw->work, work_entry);
 					cv_broadcast(&wq->wq_cv);
