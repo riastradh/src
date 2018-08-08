@@ -45,7 +45,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "amdgpu_amdkfd.h"
 #include "amdgpu_drv.h"
 
-MODULE(MODULE_CLASS_DRIVER, amdgpu, "amdgpu,drmkms_pci"); /* XXX drmkms_i2c, drmkms_ttm */
+MODULE(MODULE_CLASS_DRIVER, amdgpu, "drmkms,drmkms_pci"); /* XXX drmkms_i2c, drmkms_ttm */
 
 #ifdef _MODULE
 #include "ioconf.c"
