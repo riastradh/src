@@ -72,6 +72,7 @@ struct delayed_work {
 	struct work_struct		work; /* Linux API name */
 	struct callout			dw_callout;
 	TAILQ_ENTRY(delayed_work)	dw_entry;
+	int				dw_resched;
 	enum {
 		DELAYED_WORK_IDLE,
 		DELAYED_WORK_SCHEDULED,
