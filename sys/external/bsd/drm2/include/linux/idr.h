@@ -33,9 +33,7 @@
 #define _LINUX_IDR_H_
 
 #include <sys/types.h>
-#include <sys/rwlock.h>
 #include <sys/rbtree.h>
-#include <sys/queue.h>
 
 #include <linux/gfp.h>
 
