@@ -964,8 +964,6 @@ cancel_delayed_work(struct delayed_work *dw)
 			}
 			break;
 		case DELAYED_WORK_SCHEDULED:
-		case DELAYED_WORK_RESCHEDULED:
-		case DELAYED_WORK_CANCELLED:
 			/*
 			 * If it is scheduled, mark it cancelled and
 			 * try to stop the callout before it starts.
@@ -981,6 +979,23 @@ cancel_delayed_work(struct delayed_work *dw)
 			cancelled_p = true;
 			if (!callout_stop(&dw->dw_callout))
 				cancel_delayed_work_done(wq, dw);
+			break;
+		case DELAYED_WORK_RESCHEDULED:
+			/*
+			 * If it is being rescheduled, the callout has
+			 * already fired.  We must ask it to cancel.
+			 */
+			dw->dw_state = DELAYED_WORK_CANCELLED;
+			cancelled_p = true;
+			break;
+		case DELAYED_WORK_CANCELLED:
+			/*
+			 * If it is being cancelled, the callout has
+			 * already fired.  There is nothing more for us
+			 * to do.  Someone else claims credit for
+			 * cancelling it.
+			 */
+			cancelled_p = false;
 			break;
 		default:
 			panic("invalid delayed work state: %d",
@@ -1029,8 +1044,6 @@ cancel_delayed_work_sync(struct delayed_work *dw)
 			}
 			break;
 		case DELAYED_WORK_SCHEDULED:
-		case DELAYED_WORK_RESCHEDULED:
-		case DELAYED_WORK_CANCELLED:
 			/*
 			 * If it is scheduled, mark it cancelled and
 			 * try to stop the callout before it starts.
@@ -1046,9 +1059,29 @@ cancel_delayed_work_sync(struct delayed_work *dw)
 			 * dissociate it from the workqueue ourselves.
 			 */
 			dw->dw_state = DELAYED_WORK_CANCELLED;
-			cancelled_p = true;
 			if (!callout_halt(&dw->dw_callout, &wq->wq_lock))
 				cancel_delayed_work_done(wq, dw);
+			cancelled_p = true;
+			break;
+		case DELAYED_WORK_RESCHEDULED:
+			/*
+			 * If it is being rescheduled, the callout has
+			 * already fired.  We must ask it to cancel and
+			 * wait for it to complete.
+			 */
+			dw->dw_state = DELAYED_WORK_CANCELLED;
+			(void)callout_halt(&dw->dw_callout, &wq->wq_lock);
+			cancelled_p = true;
+			break;
+		case DELAYED_WORK_CANCELLED:
+			/*
+			 * If it is being cancelled, the callout has
+			 * already fired.  We need only wait for it to
+			 * complete.  Someone else, however, claims
+			 * credit for cancelling it.
+			 */
+			(void)callout_halt(&dw->dw_callout, &wq->wq_lock);
+			cancelled_p = false;
 			break;
 		default:
 			panic("invalid delayed work state: %d",
