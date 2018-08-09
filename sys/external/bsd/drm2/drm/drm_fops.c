@@ -228,8 +228,10 @@ drm_close_file(struct drm_file *file)
 	if (drm_core_check_feature(dev, DRIVER_HAVE_DMA))
 		drm_legacy_reclaim_buffers(dev, file);
 	drm_events_release(file);
-	if (drm_core_check_feature(dev, DRIVER_MODESET))
+	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
 		drm_fb_release(file);
+		drm_property_destroy_user_blobs(dev, file);
+	}
 	if (drm_core_check_feature(dev, DRIVER_GEM))
 		drm_gem_release(dev, file);
 	drm_legacy_ctxbitmap_flush(dev, file);
@@ -237,11 +239,11 @@ drm_close_file(struct drm_file *file)
 
 	if (dev->driver->postclose)
 		(*dev->driver->postclose)(dev, file);
+
 #ifndef __NetBSD__		/* XXX drm prime */
 	if (drm_core_check_feature(dev, DRIVER_PRIME))
 		drm_prime_destroy_file_private(&file->prime);
 #endif
-
 
 	seldestroy(&file->event_selq);
 	DRM_DESTROY_WAITQUEUE(&file->event_wait);
