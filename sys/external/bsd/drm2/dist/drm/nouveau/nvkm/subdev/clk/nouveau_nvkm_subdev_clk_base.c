@@ -258,6 +258,15 @@ nvkm_pstate_calc(struct nvkm_clk *clk, bool wait)
 	schedule_work(&clk->work);
 	if (wait) {
 #ifdef __NetBSD__
+		if (cold) {
+			unsigned timo = 1000;
+			while (timo --> 0) {
+				if (atomic_read(&clk->waiting))
+					return 0;
+				DELAY(100);
+			}
+			return -ETIMEDOUT;
+		}
 		int ret;
 		spin_lock(&clk->lock);
 		DRM_SPIN_WAIT_NOINTR_UNTIL(ret, &clk->wait, &clk->lock,
