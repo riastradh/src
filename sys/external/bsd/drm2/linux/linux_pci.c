@@ -97,6 +97,7 @@ linux_pci_dev_init(struct pci_dev *pdev, device_t dev, device_t parent,
 			pdev->pd_resources[i].flags = 0;
 		}
 		pdev->pd_resources[i].kva = NULL;
+		pdev->pd_resources[i].mapped = false;
 	}
 }
 
