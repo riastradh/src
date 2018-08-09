@@ -877,7 +877,7 @@ linux_pci_dev_destroy(struct pci_dev *pdev)
 		pdev->pd_rom_vaddr = 0;
 	}
 	for (i = 0; i < __arraycount(pdev->pd_resources); i++) {
-		if (pdev->pd_resources[i].mapped)
+		if (!pdev->pd_resources[i].mapped)
 			continue;
 		bus_space_unmap(pdev->pd_resources[i].bst,
 		    pdev->pd_resources[i].bsh, pdev->pd_resources[i].size);
