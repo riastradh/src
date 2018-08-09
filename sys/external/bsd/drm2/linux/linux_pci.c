@@ -57,6 +57,8 @@ linux_pci_dev_init(struct pci_dev *pdev, device_t dev, device_t parent,
 	    PCI_SUBSYS_ID_REG);
 	unsigned i;
 
+	memset(pdev, 0, sizeof(*pdev)); /* paranoia */
+
 	pdev->pd_pa = *pa;
 	pdev->pd_kludges = kludges;
 	pdev->pd_rom_vaddr = NULL;
