@@ -26,6 +26,7 @@ SRCS+=	linux_idr.c
 SRCS+=	linux_kmap.c
 SRCS+=	linux_list_sort.c
 SRCS+=	linux_module.c
+SRCS+=	linux_pci.c
 SRCS+=	linux_rcu.c
 SRCS+=	linux_reservation.c
 SRCS+=	linux_work.c		# XXX Move me to linux.kmod.
