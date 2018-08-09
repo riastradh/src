@@ -118,6 +118,7 @@ nvkm_dma_oclass_new(struct nvkm_device *device,
 	if (collision != dmaobj)
 		/* XXX Don't we have to free this?  */
 		return -EEXIST;
+	dmaobj->on_tree = true;
 #else
 	while (*ptr) {
 		struct nvkm_dmaobj *obj = container_of(*ptr, typeof(*obj), rb);
