@@ -281,7 +281,7 @@ nvkm_udevice_child_get(struct nvkm_object *object, int index,
 	const struct nvkm_device_oclass *sclass = NULL;
 	int i;
 
-	for (; i = __ffs64(mask), mask && !sclass; mask &= ~(1ULL << i)) {
+	for (; mask && !sclass && (i = __ffs64(mask), 1); mask &= ~(1ULL << i)) {
 		if (!(engine = nvkm_device_engine(device, i)) ||
 		    !(engine->func->base.sclass))
 			continue;
