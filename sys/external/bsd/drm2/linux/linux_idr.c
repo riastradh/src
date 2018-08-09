@@ -265,7 +265,7 @@ idr_preload(gfp_t gfp)
 		/* lwp_setspecific must be sleepable.  */
 		if (!ISSET(gfp, __GFP_WAIT))
 			return;
-		cache = kmem_alloc(sizeof(*cache), kmflag);
+		cache = kmem_zalloc(sizeof(*cache), kmflag);
 		if (cache == NULL)
 			return;
 		lwp_setspecific(idr_cache_key, cache);
