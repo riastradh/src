@@ -83,6 +83,8 @@ nvkm_event_fini(struct nvkm_event *event)
 		kfree(event->refs);
 		event->refs = NULL;
 	}
+	spin_lock_destroy(&event->list_lock);
+	spin_lock_destroy(&event->refs_lock);
 }
 
 int
