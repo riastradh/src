@@ -44,6 +44,15 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/spinlock.h>
 
 /*
+ * linux_fence_trace
+ *
+ *	True if we print FENCE_TRACE messages, false if not.  These are
+ *	extremely noisy, too much even for AB_VERBOSE and AB_DEBUG in
+ *	boothowto.
+ */
+int	linux_fence_trace = 0;
+
+/*
  * fence_referenced_p(fence)
  *
  *	True if fence has a positive reference count.  True after

@@ -97,6 +97,8 @@ struct fence_cb {
 #define	fence_wait_any_timeout	linux_fence_wait_any_timeout
 #define	fence_wait_timeout	linux_fence_wait_timeout
 
+extern int	linux_fence_trace;
+
 void	fence_init(struct fence *, const struct fence_ops *, spinlock_t *,
 	    unsigned, unsigned);
 void	fence_destroy(struct fence *);
@@ -130,10 +132,12 @@ FENCE_TRACE(struct fence *f, const char *fmt, ...)
 {
 	va_list va;
 
-	va_start(va, fmt);
-	printf("fence %u@%u: ", f->context, f->seqno);
-	vprintf(fmt, va);
-	va_end(va);
+	if (__predict_false(linux_fence_trace)) {
+		va_start(va, fmt);
+		printf("fence %u@%u: ", f->context, f->seqno);
+		vprintf(fmt, va);
+		va_end(va);
+	}
 }
 
 #endif	/* _LINUX_FENCE_H_ */
