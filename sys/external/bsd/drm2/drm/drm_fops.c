@@ -56,6 +56,8 @@ drm_open_file(struct drm_file *file, void *fp, struct drm_minor *minor)
 	file->is_master = false;
 	file->stereo_allowed = false;
 	file->universal_planes = false;
+	file->atomic = false;
+	file->allowed_master = false;
 	file->magic = 0;
 	INIT_LIST_HEAD(&file->lhead);
 	file->minor = minor;
@@ -67,10 +69,12 @@ drm_open_file(struct drm_file *file, void *fp, struct drm_minor *minor)
 	file->master = NULL;
 	INIT_LIST_HEAD(&file->fbs);
 	linux_mutex_init(&file->fbs_lock);
+	INIT_LIST_HEAD(&file->blobs);
 	DRM_INIT_WAITQUEUE(&file->event_wait, "drmevent");
 	selinit(&file->event_selq);
 	INIT_LIST_HEAD(&file->event_list);
 	file->event_space = 0x1000; /* XXX cargo-culted from Linux */
+	/* file->prime is initialized by drm_prime_init_file_private.  */
 
 	if (drm_core_check_feature(dev, DRIVER_GEM))
 		drm_gem_open(dev, file);
