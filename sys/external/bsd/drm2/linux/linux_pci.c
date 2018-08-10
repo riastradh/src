@@ -711,6 +711,9 @@ linux_pci_enable_device(struct pci_dev *pdev)
 
 	s = splhigh();
 	csr = pci_conf_read(pa->pa_pc, pa->pa_tag, PCI_COMMAND_STATUS_REG);
+	/* If someone else (firmware) already enabled it, credit them.  */
+	if (csr & (PCI_COMMAND_IO_ENABLE|PCI_COMMAND_MEM_ENABLE))
+		pdev->pd_enablecnt++;
 	csr |= PCI_COMMAND_IO_ENABLE;
 	csr |= PCI_COMMAND_MEM_ENABLE;
 	pci_conf_write(pa->pa_pc, pa->pa_tag, PCI_COMMAND_STATUS_REG, csr);
