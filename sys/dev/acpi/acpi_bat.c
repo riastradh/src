@@ -252,7 +252,7 @@ acpibat_attach(device_t parent, device_t self, void *aux)
 	if (sc->sc_sensor == NULL)
 		return;
 
-	acpibat_init_envsys(self);
+	config_interrupts(self, acpibat_init_envsys);
 
 	/*
 	 * If this is ever seen, the driver should be extended.
