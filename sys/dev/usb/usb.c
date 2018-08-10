@@ -430,14 +430,16 @@ usb_add_task(struct usbd_device *dev, struct usb_task *task, int queue)
 /*
  * usb_rem_task(dev, task)
  *
- *	If task is queued to run, remove it from the queue.
+ *	If task is queued to run, remove it from the queue.  Return
+ *	true if it successfully removed the task from the queue, false
+ *	if not.
  *
  *	Caller is _not_ guaranteed that the task is not running when
  *	this is done.
  *
  *	Never sleeps.
  */
-void
+bool
 usb_rem_task(struct usbd_device *dev, struct usb_task *task)
 {
 	unsigned queue;
@@ -451,10 +453,12 @@ usb_rem_task(struct usbd_device *dev, struct usb_task *task)
 			TAILQ_REMOVE(&taskq->tasks, task, next);
 			task->queue = USB_NUM_TASKQS;
 			mutex_exit(&taskq->lock);
-			break;
+			return true; /* removed from the queue */
 		}
 		mutex_exit(&taskq->lock);
 	}
+
+	return false;		/* was not removed from the queue */
 }
 
 /*
