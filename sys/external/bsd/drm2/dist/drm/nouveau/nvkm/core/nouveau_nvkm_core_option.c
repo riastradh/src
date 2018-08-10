@@ -101,6 +101,8 @@ nvkm_dbgopt(const char *optstr, const char *sub)
 {
 	int mode = 1, level = CONFIG_NOUVEAU_DEBUG_DEFAULT;
 
+	return NV_DBG_DEBUG;
+
 	while (optstr) {
 		int len = strcspn(optstr, ",=");
 		switch (optstr[len]) {
