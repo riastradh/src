@@ -496,6 +496,7 @@ usbd_free_xfer(struct usbd_xfer *xfer)
 
 	/* Wait for any straggling timeout to complete. */
 	mutex_enter(xfer->ux_bus->ub_lock);
+	xfer->ux_timeout_reset = false; /* do not resuscitate */
 	callout_halt(&xfer->ux_callout, xfer->ux_bus->ub_lock);
 	usb_rem_task_wait(xfer->ux_pipe->up_dev, &xfer->ux_aborttask,
 	    USB_TASKQ_HC, xfer->ux_bus->ub_lock);

@@ -288,6 +288,19 @@ struct usbd_xfer {
 
 	struct usb_task		ux_aborttask;
 	struct callout		ux_callout;
+
+	/*
+	 * Protected by bus lock.
+	 *
+	 * - ux_timeout_set: The timeout is scheduled as a callout or
+	 *   usb task, and has not yet acquired the bus lock.
+	 *
+	 * - ux_timeout_reset: The xfer completed, and was resubmitted
+	 *   before the callout or task was able to acquire the bus
+	 *   lock, so one or the other needs to schedule a new callout.
+	 */
+	bool			ux_timeout_set;
+	bool			ux_timeout_reset;
 };
 
 void usbd_init(void);
