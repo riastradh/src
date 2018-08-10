@@ -493,12 +493,14 @@ usbd_free_xfer(struct usbd_xfer *xfer)
 	if (xfer->ux_buf) {
 		usbd_free_buffer(xfer);
 	}
-#if defined(DIAGNOSTIC)
-	if (callout_pending(&xfer->ux_callout)) {
-		callout_stop(&xfer->ux_callout);
-		printf("usbd_free_xfer: timeout_handle pending\n");
-	}
-#endif
+
+	/* Wait for any straggling timeout to complete. */
+	mutex_enter(xfer->ux_bus->ub_lock);
+	callout_halt(&xfer->ux_callout, xfer->ux_bus->ub_lock);
+	usb_rem_task_wait(xfer->ux_pipe->up_dev, &xfer->ux_aborttask,
+	    USB_TASKQ_HC, xfer->ux_bus->ub_lock);
+	mutex_exit(xfer->ux_bus->ub_lock);
+
 	cv_destroy(&xfer->ux_cv);
 	xfer->ux_bus->ub_methods->ubm_freex(xfer->ux_bus, xfer);
 	return USBD_NORMAL_COMPLETION;
