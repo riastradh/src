@@ -529,6 +529,21 @@ usb_rem_task_wait(struct usbd_device *dev, struct usb_task *task, int queue,
 	return removed;
 }
 
+/*
+ * usb_task_pending(dev, task)
+ *
+ *	True if task is queued, false if not.  Note that if task is
+ *	already running, it is not considered queued.
+ *
+ *	For diagnostic assertions only.
+ */
+bool
+usb_task_pending(struct usbd_device *dev, struct usb_task *task)
+{
+
+	return task->queue != USB_NUM_TASKQS;
+}
+
 void
 usb_event_thread(void *arg)
 {
