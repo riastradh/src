@@ -2831,7 +2831,7 @@ static int dce_v8_0_crtc_init(struct amdgpu_device *adev, int index)
 
 	drm_mode_crtc_set_gamma_size(&amdgpu_crtc->base, 256);
 	amdgpu_crtc->crtc_id = index;
-	amdgpu_crtc->pflip_queue = create_singlethread_workqueue("amdgpu-pageflip-queue");
+	amdgpu_crtc->pflip_queue = create_singlethread_workqueue("amdgpu-pageflip");
 	adev->mode_info.crtcs[index] = amdgpu_crtc;
 
 	amdgpu_crtc->max_cursor_width = CIK_CURSOR_WIDTH;
