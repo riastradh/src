@@ -30,6 +30,14 @@
 #ifndef __AMDGPU_H__
 #define __AMDGPU_H__
 
+#ifdef _KERNEL_OPT
+#include "opt_amdgpu_cik.h"
+#endif
+
+#ifdef AMDGPU_CIK
+#define	CONFIG_DRM_AMDGPU_CIK	1
+#endif
+
 #include <linux/atomic.h>
 #include <linux/wait.h>
 #include <linux/list.h>
