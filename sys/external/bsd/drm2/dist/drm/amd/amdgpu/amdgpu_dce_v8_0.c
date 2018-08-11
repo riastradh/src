@@ -1703,7 +1703,7 @@ static void dce_v8_0_afmt_update_avi_infoframe(struct drm_encoder *encoder,
 	struct amdgpu_encoder *amdgpu_encoder = to_amdgpu_encoder(encoder);
 	struct amdgpu_encoder_atom_dig *dig = amdgpu_encoder->enc_priv;
 	uint32_t offset = dig->afmt->offset;
-	uint8_t *frame = buffer + 3;
+	uint8_t *frame = (char *)buffer + 3;
 	uint8_t *header = buffer;
 
 	WREG32(mmAFMT_AVI_INFO0 + offset,

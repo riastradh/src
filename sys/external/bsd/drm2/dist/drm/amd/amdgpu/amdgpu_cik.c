@@ -1080,6 +1080,7 @@ static void cik_print_gpu_status_regs(struct amdgpu_device *adev)
  * mask to be used by cik_gpu_soft_reset().
  * Returns a mask of the blocks to be reset.
  */
+u32 amdgpu_cik_gpu_check_soft_reset(struct amdgpu_device *adev); /* XXX put this in a header file */
 u32 amdgpu_cik_gpu_check_soft_reset(struct amdgpu_device *adev)
 {
 	u32 reset_mask = 0;

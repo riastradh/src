@@ -159,9 +159,9 @@ static const struct kfd2kgd_calls kfd2kgd = {
 	.get_fw_version = get_fw_version
 };
 
-struct kfd2kgd_calls *amdgpu_amdkfd_gfx_7_get_functions()
+struct kfd2kgd_calls *amdgpu_amdkfd_gfx_7_get_functions(void)
 {
-	return (struct kfd2kgd_calls *)&kfd2kgd;
+	return (struct kfd2kgd_calls *)__UNCONST(&kfd2kgd); /* XXX */
 }
 
 static inline struct amdgpu_device *get_amdgpu_device(struct kgd_dev *kgd)
