@@ -136,7 +136,7 @@ arch_phys_wc_del(int id)
 	mutex_spin_enter(&linux_writecomb.lock);
 	mtrr = idr_find(&linux_writecomb.idr, id);
 	idr_remove(&linux_writecomb.idr, id);
-	mutex_spin_enter(&linux_writecomb.lock);
+	mutex_spin_exit(&linux_writecomb.lock);
 
 	if (mtrr != NULL) {
 		mtrr->type = 0;
