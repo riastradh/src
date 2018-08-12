@@ -112,8 +112,8 @@ fail1:	KASSERT(id < 0);
 	mtrr->flags = 0;
 	/* XXX errno NetBSD->Linux */
 	ret = -mtrr_set(mtrr, &n, NULL, MTRR_GETSET_KERNEL);
-	KASSERT(ret == 0);
-	KASSERT(n == 1);
+	KASSERTMSG(ret == 0, "mtrr_set failed to delete: %d", -ret);
+	KASSERTMSG(n == 1, "mtrr_set returned wrong number: %d", n);
 	ret = id;
 fail0:	KASSERT(ret < 0);
 	kmem_free(mtrr, sizeof(*mtrr));
@@ -143,8 +143,8 @@ arch_phys_wc_del(int id)
 		mtrr->flags = 0;
 		/* XXX errno NetBSD->Linux */
 		ret = -mtrr_set(mtrr, &n, NULL, MTRR_GETSET_KERNEL);
-		KASSERT(ret == 0);
-		KASSERT(n == 1);
+		KASSERTMSG(ret == 0, "mtrr_set failed to delete: %d", -ret);
+		KASSERTMSG(n == 1, "mtrr_set returned wrong number: %d", n);
 		kmem_free(mtrr, sizeof(*mtrr));
 	}
 #endif
