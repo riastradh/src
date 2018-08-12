@@ -732,12 +732,15 @@ err_minors:
 	drm_fs_inode_free(dev->anon_inode);
 err_free:
 #ifdef __NetBSD__
-	linux_mutex_destroy(&dev->struct_mutex);
-	linux_mutex_destroy(&dev->ctxlist_mutex);
 	linux_mutex_destroy(&dev->master_mutex);
+	linux_mutex_destroy(&dev->ctxlist_mutex);
+	linux_mutex_destroy(&dev->struct_mutex);
 	spin_lock_destroy(&dev->event_lock);
+	spin_lock_destroy(&dev->buf_lock);
 #else
 	mutex_destroy(&dev->master_mutex);
+	mutex_destroy(&dev->ctxlist_mutex);
+	mutex_destroy(&dev->struct_mutex);
 #endif
 	kfree(dev);
 	return NULL;
@@ -760,12 +763,15 @@ static void drm_dev_release(struct kref *ref)
 	drm_minor_free(dev, DRM_MINOR_CONTROL);
 
 #ifdef __NetBSD__
-	linux_mutex_destroy(&dev->struct_mutex);
-	linux_mutex_destroy(&dev->ctxlist_mutex);
 	linux_mutex_destroy(&dev->master_mutex);
+	linux_mutex_destroy(&dev->ctxlist_mutex);
+	linux_mutex_destroy(&dev->struct_mutex);
 	spin_lock_destroy(&dev->event_lock);
+	spin_lock_destroy(&dev->buf_lock);
 #else
 	mutex_destroy(&dev->master_mutex);
+	mutex_destroy(&dev->ctxlist_mutex);
+	mutex_destroy(&dev->struct_mutex);
 #endif
 	kfree(dev->unique);
 	kfree(dev);
