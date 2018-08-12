@@ -454,6 +454,7 @@ void ttm_mem_global_release(struct ttm_mem_global *glob)
 		kobject_put(&zone->kobj);
 #endif
 			}
+	spin_lock_destroy(&glob->lock);
 #ifdef __NetBSD__
 	kfree(glob);
 #else
