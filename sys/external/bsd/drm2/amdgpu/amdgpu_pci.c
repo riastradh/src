@@ -116,7 +116,7 @@ amdgpu_match(device_t parent, cfdata_t match, void *aux)
 	if (!amdgpu_pci_lookup(pa, NULL))
 		return 0;
 
-	return 6;		/* XXX Beat genfb_pci...  */
+	return 7;		/* beat genfb_pci and radeon  */
 }
 
 static void
