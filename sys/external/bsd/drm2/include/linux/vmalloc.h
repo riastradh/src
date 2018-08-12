@@ -72,6 +72,8 @@ vzalloc(unsigned long size)
 static inline void
 vfree(void *ptr)
 {
+	if (ptr == NULL)
+		return;
 	return free(ptr, M_TEMP);
 }
 
