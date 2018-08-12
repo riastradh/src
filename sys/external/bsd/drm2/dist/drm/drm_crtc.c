@@ -1295,6 +1295,7 @@ void drm_plane_cleanup(struct drm_plane *plane)
 	WARN_ON(plane->state && !plane->funcs->atomic_destroy_state);
 	if (plane->state && plane->funcs->atomic_destroy_state)
 		plane->funcs->atomic_destroy_state(plane, plane->state);
+	drm_modeset_lock_fini(&plane->mutex);
 
 	memset(plane, 0, sizeof(*plane));
 }
