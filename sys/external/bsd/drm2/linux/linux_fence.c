@@ -222,6 +222,8 @@ void
 fence_put(struct fence *fence)
 {
 
+	if (fence == NULL)
+		return;
 	KASSERT(fence_referenced_p(fence));
 	kref_put(&fence->refcount, &fence_release);
 }
