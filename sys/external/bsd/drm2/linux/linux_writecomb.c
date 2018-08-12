@@ -128,7 +128,7 @@ arch_phys_wc_del(int id)
 {
 #if defined(MTRR)
 	struct mtrr *mtrr;
-	int n;
+	int n = 1;
 	int ret __diagused;
 
 	KASSERT(0 <= id);
