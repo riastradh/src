@@ -903,6 +903,7 @@ int drm_connector_init(struct drm_device *dev,
 
 	connector->base.properties = &connector->properties;
 	connector->dev = dev;
+	connector->kdev = dev->dev;
 	connector->funcs = funcs;
 	connector->connector_type = connector_type;
 	connector->connector_type_id =
