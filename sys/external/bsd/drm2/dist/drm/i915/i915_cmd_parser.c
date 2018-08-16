@@ -867,7 +867,6 @@ static u32 *vmap_batch(struct drm_i915_gem_object *obj,
 	vaddr_t va = 0;
 	int error;
 
-	/* XXX errno NetBSD->Linux */
 	error = uvm_map(kernel_map, &va, len, obj->base.filp, start,
 	    sizeof(u32), UVM_MAPFLAG(UVM_PROT_RW, UVM_PROT_RW, UVM_INH_NONE,
 		UVM_ADV_SEQUENTIAL, UVM_FLAG_NOWAIT));
