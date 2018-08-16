@@ -873,6 +873,9 @@ static u32 *vmap_batch(struct drm_i915_gem_object *obj,
 	if (error)
 		return NULL;
 
+	/* uvm_map consumes a reference on success.  */
+	uao_reference(obj->base.filp);
+
 	return (void *)va;
 #else
 	int i;

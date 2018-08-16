@@ -121,6 +121,8 @@ static int render_state_setup(struct render_state *so)
 		UVM_ADV_NORMAL, 0));
 	if (ret)
 		return ret;
+	/* uvm_map consumes a reference on success.  */
+	uao_reference(so->obj->base.filp);
 	d = (void *)kva;
 #else
 	page = sg_page(so->obj->pages->sgl);
