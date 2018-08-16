@@ -205,6 +205,7 @@ static void drm_update_vblank_count(struct drm_device *dev, unsigned int pipe,
 	int framedur_ns = vblank->framedur_ns;
 
 	assert_spin_locked(&dev->vbl_lock);
+	assert_spin_locked(&dev->vblank_time_lock);
 
 	/*
 	 * Interrupts were disabled prior to this call, so deal with counter
