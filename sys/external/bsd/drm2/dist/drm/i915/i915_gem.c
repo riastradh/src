@@ -1448,6 +1448,7 @@ int __i915_wait_request(struct drm_i915_gem_request *req,
 	((wedged = (reset_counter !=					      \
 		atomic_read(&dev_priv->gpu_error.reset_counter))) ||	      \
 	    i915_gem_request_completed(req, false))
+	spin_lock(&dev_priv->irq_lock);
 	if (timeout) {
 		int ticks = missed_irq(dev_priv, ring) ? 1 :
 		    nsecs_to_jiffies_timeout(*timeout);
@@ -1474,6 +1475,7 @@ int __i915_wait_request(struct drm_i915_gem_request *req,
 		}
 		/* ret is negative on failure or zero on success.  */
 	}
+	spin_unlock(&dev_priv->irq_lock);
 	if (wedged) {
 		ret = i915_gem_check_wedge(&dev_priv->gpu_error, interruptible);
 		if (ret == 0)
