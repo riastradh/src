@@ -1042,6 +1042,11 @@ enum intel_sbi_destination {
 #define QUIRK_PIPEB_FORCE (1<<4)
 #define QUIRK_PIN_SWIZZLED_PAGES (1<<5)
 
+#ifdef __NetBSD__
+/* NetBSD hack to note version was called and thus mmap flags valid. */
+#define QUIRK_NETBSD_VERSION_CALLED (1ul<<31)
+#endif
+
 struct intel_fbdev;
 struct intel_fbc_work;
 

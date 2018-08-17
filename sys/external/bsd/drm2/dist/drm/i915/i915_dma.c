@@ -160,6 +160,9 @@ static int i915_getparam(struct drm_device *dev, void *data,
 		value = 1;
 		break;
 	case I915_PARAM_MMAP_VERSION:
+#ifdef __NetBSD__
+		dev_priv->quirks |= QUIRK_NETBSD_VERSION_CALLED;
+#endif
 		value = 1;
 		break;
 	case I915_PARAM_SUBSLICE_TOTAL:

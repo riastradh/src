@@ -1930,7 +1930,11 @@ i915_gem_mmap_ioctl(struct drm_device *dev, void *data,
 	struct drm_gem_object *obj;
 	unsigned long addr;
 #ifdef __NetBSD__
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	int ret;
+
+	if ((dev_priv->quirks & QUIRK_NETBSD_VERSION_CALLED) == 0)
+		args->flags = 0;
 #endif
 
 	if (args->flags & ~(I915_MMAP_WC))
