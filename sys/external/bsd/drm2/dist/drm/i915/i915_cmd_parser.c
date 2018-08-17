@@ -982,7 +982,7 @@ static u32 *copy_batch(struct drm_i915_gem_object *dest_obj,
 
 unmap_src:
 #ifdef __NetBSD__
-	uvm_unmap(kernel_map, srcva, srclen);
+	uvm_unmap(kernel_map, srcva, srcva + srclen);
 #else
 	vunmap(src_base);
 #endif
@@ -1239,7 +1239,7 @@ int i915_parse_cmds(struct intel_engine_cs *ring,
 
 #ifdef __NetBSD__
 	uvm_unmap(kernel_map, (vaddr_t)batch_base,
-	    roundup(batch_len, PAGE_SIZE));
+	    (vaddr_t)batch_base + roundup(batch_len, PAGE_SIZE));
 #else
 	vunmap(batch_base);
 #endif
