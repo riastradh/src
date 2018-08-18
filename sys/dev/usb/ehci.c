@@ -3470,13 +3470,16 @@ ehci_probe_timeout(struct usbd_xfer *xfer)
 	} else if (xfer->ux_status != USBD_IN_PROGRESS) {
 		/*
 		 * The xfer has completed by hardware completion or by
-		 * software abort.  The timeout is no longer valid.
+		 * software abort, and has not been resubmitted, so the
+		 * timeout must be unset, and is no longer valid for
+		 * the caller.
 		 */
+		xfer->ux_timeout_set = false;
 		valid = false;
 	} else {
 		/*
-		 * The xfer has completed, but has not been
-		 * resubmitted, so the timeout is valid.
+		 * The xfer has not yet completed, so the timeout is
+		 * valid.
 		 */
 		valid = true;
 	}
@@ -3485,10 +3488,17 @@ ehci_probe_timeout(struct usbd_xfer *xfer)
 	KASSERT(!xfer->ux_timeout_reset);
 
 	/*
-	 * Neither callout nor task may be pending; they execute
-	 * alternately in lock step.
+	 * Either we claim the timeout is set, or the callout is idle.
+	 * If the timeout is still set, we may be handing off to the
+	 * task instead, so this is an if but not an iff.
 	 */
-	KASSERT(!callout_pending(&xfer->ux_callout));
+	KASSERT(xfer->ux_timeout_set || !callout_pending(&xfer->ux_callout));
+
+	/*
+	 * The task must be idle now.  If the caller is the callout,
+	 * _and_ the timeout is still valid, the caller will schedule
+	 * it, but it hasn't been scheduled yet.
+	 */
 	KASSERT(!usb_task_pending(xfer->ux_pipe->up_dev, &xfer->ux_aborttask));
 
 	KASSERT(sc->sc_bus.ub_usepolling || mutex_owned(&sc->sc_lock));
