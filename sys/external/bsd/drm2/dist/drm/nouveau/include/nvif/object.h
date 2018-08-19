@@ -60,7 +60,7 @@ nvif_rd08(struct nvif_object *obj, uint64_t offset)
 	else
 		return nvif_object_rd(obj, 1, offset);
 }
-static inline uint8_t
+static inline uint16_t
 nvif_rd16(struct nvif_object *obj, uint64_t offset)
 {
 	if (obj->map.ptr)
@@ -69,7 +69,7 @@ nvif_rd16(struct nvif_object *obj, uint64_t offset)
 	else
 		return nvif_object_rd(obj, 2, offset);
 }
-static inline uint8_t
+static inline uint32_t
 nvif_rd32(struct nvif_object *obj, uint64_t offset)
 {
 	if (obj->map.ptr)
