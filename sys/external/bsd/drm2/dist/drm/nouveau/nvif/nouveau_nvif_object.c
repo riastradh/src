@@ -185,6 +185,8 @@ nvif_object_unmap(struct nvif_object *object)
 		if (object->map.ptr) {
 			client->driver->unmap(client, object->map.tag,
 						      object->map.handle,
+						      object->map.addr,
+						      object->map.ptr,
 						      object->map.size);
 			object->map.ptr = NULL;
 		}
@@ -216,6 +218,8 @@ nvif_object_map(struct nvif_object *object)
 	if (ret == 0) {
 		object->map.size = args.map.length;
 #ifdef __NetBSD__
+		object->map.tag = args.map.tag;
+		object->map.addr = args.map.handle;
 		ret = client->driver->map(client, args.map.tag,
 		    args.map.handle, object->map.size, &object->map.handle,
 		    &object->map.ptr);

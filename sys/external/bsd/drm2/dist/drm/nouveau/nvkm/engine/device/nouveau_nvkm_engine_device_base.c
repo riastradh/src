@@ -2570,6 +2570,7 @@ nvkm_device_ctor(const struct nvkm_device_func *func,
 		}
 		device->mmiot = mmiot;
 		device->mmioh = mmioh;
+		device->mmioaddr = mmio_base;
 		device->mmiosz = mmio_size;
 #else
 		device->pri = ioremap(mmio_base, mmio_size);

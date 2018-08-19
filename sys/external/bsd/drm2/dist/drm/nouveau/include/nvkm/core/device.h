@@ -77,6 +77,7 @@ struct nvkm_device {
 #ifdef __NetBSD__
 	bus_space_tag_t mmiot;
 	bus_space_handle_t mmioh;
+	bus_addr_t mmioaddr;
 	bus_size_t mmiosz;
 #else
 	void __iomem *pri;

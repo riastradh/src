@@ -20,7 +20,8 @@ struct nvif_driver {
 	int (*map)(void *priv, bus_space_tag_t tag, u64 handle, u32 size,
 	    bus_space_handle_t *handlep, void __iomem **ptrp);
 	void (*unmap)(void *priv, bus_space_tag_t tag,
-	    bus_space_handle_t handle, u32 size);
+	    bus_space_handle_t handle, bus_addr_t addr, void __iomem *ptr,
+	    u32 size);
 #else
 	void __iomem *(*map)(void *priv, u64 handle, u32 size);
 	void (*unmap)(void *priv, void __iomem *ptr, u32 size);

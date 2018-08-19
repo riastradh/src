@@ -467,6 +467,18 @@ nouveau_drm_load(struct drm_device *dev, unsigned long flags)
 		nvxx_client(&drm->client.base)->vm = drm->client.vm;
 	}
 
+#ifdef __NetBSD__
+    {
+	/* XXX Kludge to make register subregion mapping work.  */
+	struct nvkm_client *client = nvxx_client(&drm->client.base);
+	struct nvkm_device *device = nvxx_device(&drm->device);
+	client->mmiot = device->mmiot;
+	client->mmioh = device->mmioh;
+	client->mmioaddr = device->mmioaddr;
+	client->mmiosz = device->mmiosz;
+    }
+#endif
+
 	ret = nouveau_ttm_init(drm);
 	if (ret)
 		goto fail_ttm;

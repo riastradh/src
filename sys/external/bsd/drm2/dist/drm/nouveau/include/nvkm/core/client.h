@@ -24,6 +24,13 @@ struct nvkm_client {
 	int (*ntfy)(const void *, u32, const void *, u32);
 
 	struct nvkm_vm *vm;
+
+#ifdef __NetBSD__
+	bus_space_tag_t mmiot;
+	bus_space_handle_t mmioh;
+	bus_addr_t mmioaddr;
+	bus_size_t mmiosz;
+#endif
 };
 
 extern const rb_tree_ops_t nvkm_client_dmatree_ops;
