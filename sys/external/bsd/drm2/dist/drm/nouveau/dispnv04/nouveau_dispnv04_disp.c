@@ -54,7 +54,11 @@ nv04_display_create(struct drm_device *dev)
 	if (!disp)
 		return -ENOMEM;
 
-	nvif_object_map(&drm->device.object);
+	ret = nvif_object_map(&drm->device.object);
+	if (ret) {
+		NV_ERROR(drm, "nvif_object_map, %d\n", ret);
+		return ret;
+	}
 
 	nouveau_display(dev)->priv = disp;
 	nouveau_display(dev)->dtor = nv04_display_destroy;

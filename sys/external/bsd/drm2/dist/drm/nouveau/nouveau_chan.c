@@ -305,7 +305,11 @@ nouveau_channel_init(struct nouveau_channel *chan, u32 vram, u32 gart)
 	struct nv_dma_v0 args = zero_args;
 	int ret, i;
 
-	nvif_object_map(&chan->user);
+	ret = nvif_object_map(&chan->user);
+	if (ret) {
+		NV_PRINTK(err, cli, "nvif_object_map, %d\n", ret);
+		return ret;
+	}
 
 	/* allocate dma objects to cover all allowed vram, and gart */
 	if (device->info.family < NV_DEVICE_INFO_V0_FERMI) {

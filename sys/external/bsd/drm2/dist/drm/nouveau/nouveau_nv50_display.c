@@ -107,8 +107,15 @@ nv50_chan_create(struct nvif_device *device, struct nvif_object *disp,
 			if (sclass[i].oclass == oclass[0]) {
 				ret = nvif_object_init(disp, 0, oclass[0],
 						       data, size, &chan->user);
-				if (ret == 0)
-					nvif_object_map(&chan->user);
+				if (ret == 0) {
+					ret = nvif_object_map(&chan->user);
+					if (ret) {
+						printk(KERN_ERR "%s:%d"
+						    ": nvif_object_map, %d\n",
+						    __func__, __LINE__, ret);
+						nvif_object_fini(&chan->user);
+					}
+				}
 				nvif_object_sclass_put(&sclass);
 				return ret;
 			}
