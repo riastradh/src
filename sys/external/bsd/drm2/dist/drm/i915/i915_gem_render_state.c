@@ -114,15 +114,17 @@ static int render_state_setup(struct render_state *so)
 
 #ifdef __NetBSD__
 	CTASSERT(PAGE_SIZE == 4096);
+	/* Acquire a reference for uvm_map to consume.  */
+	uao_reference(so->obj->base.filp);
 	kva = 0;		/* hint */
 	/* XXX errno NetBSD->Linux */
 	ret = -uvm_map(kernel_map, &kva, PAGE_SIZE, so->obj->base.filp, 0,
 	    sizeof(*d), UVM_MAPFLAG(UVM_PROT_W, UVM_PROT_W, UVM_INH_NONE,
 		UVM_ADV_NORMAL, 0));
-	if (ret)
+	if (ret) {
+		uao_detach(so->obj->base.filp);
 		return ret;
-	/* uvm_map consumes a reference on success.  */
-	uao_reference(so->obj->base.filp);
+	}
 	d = (void *)kva;
 #else
 	page = sg_page(so->obj->pages->sgl);
