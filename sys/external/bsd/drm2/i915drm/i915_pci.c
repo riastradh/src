@@ -249,6 +249,9 @@ i915drmkms_suspend(device_t self, const pmf_qual_t *qual)
 	ret = i915_drm_suspend(dev);
 	if (ret)
 		return false;
+	ret = i915_drm_suspend_late(dev, false);
+	if (ret)
+		return false;
 
 	return true;
 }

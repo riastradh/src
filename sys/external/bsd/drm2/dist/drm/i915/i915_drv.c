@@ -712,7 +712,7 @@ int i915_drm_suspend(struct drm_device *dev)
 	return 0;
 }
 
-static int i915_drm_suspend_late(struct drm_device *drm_dev, bool hibernation)
+int i915_drm_suspend_late(struct drm_device *drm_dev, bool hibernation)
 {
 	struct drm_i915_private *dev_priv = drm_dev->dev_private;
 	int ret;

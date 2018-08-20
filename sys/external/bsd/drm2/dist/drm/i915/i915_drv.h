@@ -2718,6 +2718,7 @@ extern int i915_suspend_switcheroo(struct drm_device *dev, pm_message_t state);
 extern int i915_resume_switcheroo(struct drm_device *dev);
 
 extern int i915_drm_suspend(struct drm_device *dev);
+extern int i915_drm_suspend_late(struct drm_device *dev, bool hibernation);
 extern int i915_drm_resume_early(struct drm_device *dev);
 extern int i915_drm_resume(struct drm_device *dev);
 
