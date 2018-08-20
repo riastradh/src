@@ -164,17 +164,24 @@ intel_gtt_insert_sg_entries(bus_dmamap_t dmamap, unsigned va_page,
 
 	for (seg = 0; seg < dmamap->dm_nsegs; seg++) {
 		const bus_addr_t addr = dmamap->dm_segs[seg].ds_addr;
+		bus_size_t len;
 
-		KASSERT(dmamap->dm_segs[seg].ds_len == PAGE_SIZE);
-
-		/* XXX Respect flags.  */
-		error = agp_i810_write_gtt_entry(isc, va, addr, gtt_flags);
-		if (error)
-			device_printf(agp_i810_sc->as_dev,
-			    "write gtt entry"
-			    " %"PRIxMAX" -> %"PRIxMAX" failed: %d\n",
-			    (uintmax_t)va, (uintmax_t)(addr | 1), error);
-		va += PAGE_SIZE;
+		for (len = dmamap->dm_segs[seg].ds_len;
+		     len >= PAGE_SIZE;
+		     len -= PAGE_SIZE, va += PAGE_SIZE) {
+			/* XXX Respect flags.  */
+			error = agp_i810_write_gtt_entry(isc, va, addr,
+			    gtt_flags);
+			if (error)
+				device_printf(agp_i810_sc->as_dev,
+				    "write gtt entry"
+				    " %"PRIxMAX" -> %"PRIxMAX" failed: %d\n",
+				    (uintmax_t)va, (uintmax_t)(addr | 1),
+				    error);
+		}
+		KASSERTMSG(len == 0,
+		    "segment length not divisible by PAGE_SIZE: %jx",
+		    dmamap->dm_segs[seg].ds_len);
 	}
 	agp_i810_post_gtt_entry(isc, (va - PAGE_SIZE));
 	intel_gtt_chipset_flush();
