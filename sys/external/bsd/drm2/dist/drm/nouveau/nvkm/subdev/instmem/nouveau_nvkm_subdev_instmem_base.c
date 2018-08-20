@@ -95,7 +95,7 @@ nvkm_instobj_acquire(struct nvkm_memory *memory)
 #  define	iowrite32_native	fake_iowrite32_native
 
 static inline uint32_t
-fake_ioread32_native(const void __iomem *ptr)
+ioread32_native(const void __iomem *ptr)
 {
 	uint32_t v;
 
@@ -106,7 +106,7 @@ fake_ioread32_native(const void __iomem *ptr)
 }
 
 static inline void
-fake_iowrite32_native(uint32_t v, void __iomem *ptr)
+iowrite32_native(uint32_t v, void __iomem *ptr)
 {
 
 	membar_producer();

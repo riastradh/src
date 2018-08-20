@@ -308,7 +308,7 @@ nvkm_fifo_chan_rd32(struct nvkm_object *object, u64 addr, u32 *data)
 	if (unlikely(addr + 4 > chan->size))
 		return -EINVAL;
 #ifdef __NetBSD__
-	*data = bus_space_read_4(chan->bst, chan->bsh, addr);
+	*data = bus_space_read_stream_4(chan->bst, chan->bsh, addr);
 #else
 	*data = ioread32_native(chan->user + addr);
 #endif
