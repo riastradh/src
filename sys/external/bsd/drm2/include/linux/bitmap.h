@@ -61,7 +61,7 @@ bitmap_empty(const unsigned long *bitmap, size_t nbits)
 {
 	const size_t bpl = NBBY * sizeof(*bitmap);
 
-	for (; bpl <= nbits; nbits -= bpl) {
+	for (; nbits >= bpl; nbits -= bpl) {
 		if (*bitmap++)
 			return false;
 	}
@@ -85,7 +85,7 @@ bitmap_weight(const unsigned long *bitmap, size_t nbits)
 	const size_t bpl = NBBY * sizeof(*bitmap);
 	int weight = 0;
 
-	for (; bpl <= nbits; nbits -= bpl)
+	for (; nbits >= bpl; nbits -= bpl)
 		weight += popcountl(*bitmap++);
 	if (nbits)
 		weight += popcountl(*bitmap & ~(~0UL << nbits));
