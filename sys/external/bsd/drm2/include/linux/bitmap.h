@@ -46,8 +46,9 @@ static inline void
 bitmap_zero(unsigned long *bitmap, size_t nbits)
 {
 	const size_t bpl = NBBY * sizeof(*bitmap);
+	size_t n = howmany(nbits, bpl);
 
-	memset(bitmap, 0, howmany(nbits, bpl) * sizeof(*bitmap));
+	memset(bitmap, 0, n * sizeof(*bitmap));
 }
 
 /*
