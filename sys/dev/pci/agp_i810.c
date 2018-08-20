@@ -1490,17 +1490,24 @@ agp_i810_unbind_memory(struct agp_softc *sc, struct agp_memory *mem)
 	return 0;
 }
 
+void
+agp_i810_reset(struct agp_i810_softc *isc)
+{
+
+	/* Restore the page table control register.  */
+	bus_space_write_4(isc->bst, isc->bsh, AGP_I810_PGTBL_CTL,
+	    isc->pgtblctl);
+
+	agp_flush_cache();
+}
+
 static bool
 agp_i810_resume(device_t dv, const pmf_qual_t *qual)
 {
 	struct agp_softc *sc = device_private(dv);
 	struct agp_i810_softc *isc = sc->as_chipc;
 
-	/*
-	 * XXX Nothing uses this!  Save on suspend, restore on resume?
-	 */
-	isc->pgtblctl_resume_hack = READ4(AGP_I810_PGTBL_CTL);
-	agp_flush_cache();
+	agp_i810_reset(isc);
 
 	return true;
 }

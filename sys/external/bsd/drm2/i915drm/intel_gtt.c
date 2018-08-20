@@ -125,8 +125,14 @@ intel_gmch_remove(void)
 bool
 intel_enable_gtt(void)
 {
+	struct agp_softc *sc = agp_i810_sc;
+	struct agp_i810_softc *isc;
 
-	return (agp_i810_sc != NULL);
+	if (sc == NULL)
+		return false;
+	isc = sc->as_chipc;
+	agp_i810_reset(isc);
+	return true;
 }
 
 void
