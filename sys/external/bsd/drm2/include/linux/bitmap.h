@@ -144,30 +144,32 @@ bitmap_clear(unsigned long *bitmap, size_t startbit, size_t nbits)
  *
  *	Set dst to be the bitwise AND of src1 and src2, all bitmaps
  *	allocated to have nbits bits.  Yes, this modifies bits past
- *	nbits.
+ *	nbits.  Any pair of {dst, src1, src2} may be aliases.
  */
 static inline void
 bitmap_and(unsigned long *dst, const unsigned long *src1,
     const unsigned long *src2, size_t nbits)
 {
-	size_t n = howmany(nbits, NBBY * sizeof(unsigned long));
+	const size_t bpl = NBBY * sizeof(unsigned long);
+	size_t n = howmany(nbits, bpl);
 
 	while (n --> 0)
 		*dst++ = *src1++ & *src2++;
 }
 
 /*
- * bitmap_and(dst, src1, src2, nbits)
+ * bitmap_or(dst, src1, src2, nbits)
  *
  *	Set dst to be the bitwise inclusive-OR of src1 and src2, all
  *	bitmaps allocated to have nbits bits.  Yes, this modifies bits
- *	past nbits.
+ *	past nbits.  Any pair of {dst, src1, src2} may be aliases.
  */
 static inline void
 bitmap_or(unsigned long *dst, const unsigned long *src1,
     const unsigned long *src2, size_t nbits)
 {
-	size_t n = howmany(nbits, NBBY * sizeof(unsigned long));
+	const size_t bpl = NBBY * sizeof(unsigned long);
+	size_t n = howmany(nbits, bpl);
 
 	while (n --> 0)
 		*dst++ = *src1++ | *src2++;
