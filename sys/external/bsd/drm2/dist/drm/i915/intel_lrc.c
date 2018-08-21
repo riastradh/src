@@ -745,18 +745,15 @@ intel_logical_ring_advance_and_submit(struct drm_i915_gem_request *request)
 
 static void __wrap_ring_buffer(struct intel_ringbuffer *ringbuf)
 {
-#ifdef __NetBSD__
-	bus_size_t tail;
-	int rem = ringbuf->size - ringbuf->tail;
-
-	tail = ringbuf->tail;
-	rem /= 4;
-	for (; rem --> 0; tail += 4)
-		bus_space_write_4(ringbuf->bst, ringbuf->bsh, tail, MI_NOOP);
-#else
+#ifndef __NetBSD__
 	uint32_t __iomem *virt;
+#endif
 	int rem = ringbuf->size - ringbuf->tail;
 
+#ifdef __NetBSD__
+	bus_space_set_region_4(ringbuf->bst, ringbuf->bsh, ringbuf->tail,
+	    MI_NOOP, rem/4);
+#else
 	virt = ringbuf->virtual_start + ringbuf->tail;
 	rem /= 4;
 	while (rem--)
