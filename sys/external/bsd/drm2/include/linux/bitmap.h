@@ -105,16 +105,28 @@ bitmap_set(unsigned long *bitmap, size_t startbit, size_t nbits)
 {
 	const size_t bpl = NBBY * sizeof(*bitmap);
 	unsigned long *p = bitmap + startbit/bpl;
-	unsigned long mask;
-	unsigned sz;
+	unsigned initial = startbit%bpl;
 
-	for (sz = bpl - (startbit%bpl), mask = ~0UL << (startbit%bpl);
-	     nbits >= sz;
-	     nbits -= sz, sz = bpl, mask = ~0UL)
-		*p++ |= mask;
+	/* Handle an initial odd word if any.  */
+	if (initial) {
+		/* Does the whole thing fit in a single word?  */
+		if (nbits <= bpl - initial) {
+			/* Yes: just set nbits starting at initial.  */
+			*p |= ~(~0ULL << nbits) << initial;
+			return;
+		}
+		/* Nope: set all bits above initial, and advance.  */
+		*p++ |= ~0ULL << initial;
+		nbits -= bpl - initial;
+	}
 
+	/* Set the middle part to all bits 1.  */
+	for (; nbits >= bpl; nbits -= bpl)
+		*p++ = ~0UL;
+
+	/* Handle a final odd word if any by setting its low nbits.  */
 	if (nbits)
-		*p |= mask & ~(~0UL << (nbits + bpl - sz));
+		*p |= ~(~0ULL << nbits);
 }
 
 /*
@@ -128,16 +140,28 @@ bitmap_clear(unsigned long *bitmap, size_t startbit, size_t nbits)
 {
 	const size_t bpl = NBBY * sizeof(*bitmap);
 	unsigned long *p = bitmap + startbit/bpl;
-	unsigned long mask;
-	unsigned sz;
+	unsigned initial = startbit%bpl;
 
-	for (sz = bpl - (startbit%bpl), mask = ~(~0UL << (startbit%bpl));
-	     nbits >= sz;
-	     nbits -= sz, sz = bpl, mask = 0UL)
-		*p++ &= mask;
+	/* Handle an initial odd word if any.  */
+	if (initial) {
+		/* Does the whole thing fit in a single word?  */
+		if (nbits <= bpl - initial) {
+			/* Yes: just clear nbits starting at initial.  */
+			*p &= ~(~(~0ULL << nbits) << initial);
+			return;
+		}
+		/* Nope: clear all bits above initial, and advance.  */
+		*p++ &= ~(~0ULL << initial);
+		nbits -= bpl - initial;
+	}
 
+	/* Zero the middle part.  */
+	for (; nbits >= bpl; nbits -= bpl)
+		*p++ = 0UL;
+
+	/* Handle a final odd word if any by clearing its low nbits.  */
 	if (nbits)
-		*p &= mask | (~0UL << (nbits + bpl - sz));
+		*p &= ~0ULL << nbits;
 }
 
 /*
