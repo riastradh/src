@@ -2677,6 +2677,34 @@ void i915_handle_error(struct drm_device *dev, bool wedged,
 	}
 
 	i915_reset_and_wakeup(dev);
+
+    do {
+	struct i915_error_state_file_priv error_priv;
+	struct drm_i915_error_state_buf error_str;
+	int ret;
+
+	memset(&error_priv, 0, sizeof(error_priv));
+
+	ret = i915_error_state_buf_init(&error_str, dev_priv, 512*1024, 0);
+	if (ret) {
+		DRM_ERROR("Failed to initialize error buf: %d\n", ret);
+		break;
+	}
+	error_priv.dev = dev;
+	i915_error_state_get(dev, &error_priv);
+
+	ret = i915_error_state_to_str(&error_str, &error_priv);
+	if (ret) {
+		DRM_ERROR("Failed to format error buf: %d\n", ret);
+		i915_error_state_put(&error_priv);
+	}
+
+	error_str.buf[MIN(error_str.size - 1, error_str.bytes)] = '\0';
+	DRM_ERROR("Error state:\n%s\n", error_str.buf);
+
+	i915_error_state_buf_release(&error_str);
+	i915_error_state_put(&error_priv);
+    } while (0);
 }
 
 /* Called from drm generic code, passed 'crtc' which

@@ -751,8 +751,8 @@ static void __wrap_ring_buffer(struct intel_ringbuffer *ringbuf)
 
 	tail = ringbuf->tail;
 	rem /= 4;
-	while (rem--)
-		bus_space_write_4(ringbuf->bst, ringbuf->bsh, tail++, MI_NOOP);
+	for (; rem --> 0; tail += 4)
+		bus_space_write_4(ringbuf->bst, ringbuf->bsh, tail, MI_NOOP);
 #else
 	uint32_t __iomem *virt;
 	int rem = ringbuf->size - ringbuf->tail;
