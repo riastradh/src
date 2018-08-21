@@ -16,7 +16,9 @@ struct nvkm_dmaobj {
 	u64 limit;
 
 	struct rb_node rb;
+#ifdef __NetBSD__
 	bool on_tree;
+#endif
 	u64 handle; /*XXX HANDLE MERGE */
 };
 

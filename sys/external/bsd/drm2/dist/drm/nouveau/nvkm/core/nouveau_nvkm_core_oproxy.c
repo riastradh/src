@@ -41,12 +41,20 @@ nvkm_oproxy_ntfy(struct nvkm_object *object, u32 mthd,
 	return nvkm_object_ntfy(nvkm_oproxy(object)->object, mthd, pevent);
 }
 
+#ifdef __NetBSD__
 static int
 nvkm_oproxy_map(struct nvkm_object *object, bus_space_tag_t *tagp, u64 *addr,
     u32 *size)
 {
 	return nvkm_object_map(nvkm_oproxy(object)->object, tagp, addr, size);
 }
+#else
+static int
+nvkm_oproxy_map(struct nvkm_object *object, u64 *addr, u32 *size)
+{
+	return nvkm_object_map(nvkm_oproxy(object)->object, addr, size);
+}
+#endif
 
 static int
 nvkm_oproxy_rd08(struct nvkm_object *object, u64 addr, u8 *data)
