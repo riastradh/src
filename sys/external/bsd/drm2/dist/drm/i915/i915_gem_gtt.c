@@ -1776,7 +1776,8 @@ static void gen6_write_pde(struct i915_page_directory *pd,
 	pd_entry |= GEN6_PDE_VALID;
 
 #ifdef __NetBSD__
-	bus_space_write_4(bst, bsh, pd_base + pde, pd_entry);
+	CTASSERT(sizeof(gen6_pte_t) == 4);
+	bus_space_write_4(bst, bsh, pd_base + 4*pde, pd_entry);
 #else
 	writel(pd_entry, ppgtt->pd_addr + pde);
 #endif
