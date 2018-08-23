@@ -869,8 +869,12 @@ queue_delayed_work(struct workqueue_struct *wq, struct delayed_work *dw,
 			 * Scheduled and the callout began, but it was
 			 * cancelled.  Reschedule it.
 			 */
-			dw->dw_state = DELAYED_WORK_RESCHEDULED;
-			dw->dw_resched = MIN(INT_MAX, ticks);
+			if (ticks == 0) {
+				dw->dw_state = DELAYED_WORK_SCHEDULED;
+			} else {
+				dw->dw_state = DELAYED_WORK_RESCHEDULED;
+				dw->dw_resched = MIN(INT_MAX, ticks);
+			}
 			newly_queued = true;
 			break;
 		default:
