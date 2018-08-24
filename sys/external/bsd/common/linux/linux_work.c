@@ -333,14 +333,12 @@ linux_workqueue_thread(void *cookie)
 		 * Wait until there's activity.  If there's no work and
 		 * we're dying, stop here.
 		 */
-		while (TAILQ_EMPTY(&wq->wq_queue) &&
-		    TAILQ_EMPTY(&wq->wq_dqueue) &&
-		    !wq->wq_dying)
+		if (TAILQ_EMPTY(&wq->wq_queue) &&
+		    TAILQ_EMPTY(&wq->wq_dqueue)) {
+			if (wq->wq_dying)
+				break;
 			cv_wait(&wq->wq_cv, &wq->wq_lock);
-		if (wq->wq_dying) {
-			KASSERT(TAILQ_EMPTY(&wq->wq_queue));
-			KASSERT(TAILQ_EMPTY(&wq->wq_dqueue));
-			break;
+			continue;
 		}
 
 		/* Grab a batch of work off the queue.  */
