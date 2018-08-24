@@ -361,10 +361,11 @@ idr_alloc(struct idr *idr, void *data, int start, int end, gfp_t gfp)
 out:	mutex_spin_exit(&idr->idr_lock);
 
 	/* Discard the node on failure.  */
-	if (id < 0)
+	if (id < 0) {
 		cache->ic_node = node;
-	else
+	} else {
 		SDT_PROBE3(sdt, linux, idr, alloc,  idr, id, data);
+	}
 	return id;
 }
 
