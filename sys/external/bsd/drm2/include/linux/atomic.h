@@ -229,6 +229,8 @@ struct atomic64 {
 
 typedef struct atomic64 atomic64_t;
 
+#define	ATOMIC64_INIT(v)	{ .a_v = (v) }
+
 int		linux_atomic64_init(void);
 void		linux_atomic64_fini(void);
 
