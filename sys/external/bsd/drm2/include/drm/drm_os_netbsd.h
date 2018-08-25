@@ -57,8 +57,10 @@
 #define CONFIG_PNP
 #endif
 
+#if defined(__i386__) || defined(__x86_64__)
 #if defined(_KERNEL_OPT)
 #include "opt_mtrr.h"
+#endif
 #endif
 
 #ifdef MTRR
