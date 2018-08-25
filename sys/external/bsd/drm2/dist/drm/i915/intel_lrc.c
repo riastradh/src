@@ -140,6 +140,8 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <drm/drmP.h>
 #include <drm/i915_drm.h>
 #include "i915_drv.h"
+#include "i915_trace.h"
+#include "intel_drv.h"
 #include "intel_mocs.h"
 
 #define GEN9_LR_CONTEXT_RENDER_SIZE (22 * PAGE_SIZE)

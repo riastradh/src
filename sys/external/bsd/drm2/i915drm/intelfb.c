@@ -42,6 +42,7 @@ __KERNEL_RCSID(0, "$NetBSD: intelfb.c,v 1.14 2016/12/12 19:45:56 maya Exp $");
 
 #include "i915_drv.h"
 #include "i915_pci.h"
+#include "intel_drv.h"
 #include "intelfb.h"
 
 static int	intelfb_match(device_t, cfdata_t, void *);

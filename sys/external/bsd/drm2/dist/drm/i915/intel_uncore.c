@@ -29,6 +29,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "i915_drv.h"
 #include "intel_drv.h"
 #include "i915_vgpu.h"
+#include "i915_trace.h"
 
 #include <linux/err.h>
 #include <linux/pm_runtime.h>

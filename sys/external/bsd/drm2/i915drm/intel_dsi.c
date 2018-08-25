@@ -32,7 +32,7 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include "i915_drv.h"
+#include "intel_drv.h"
 
 void
 intel_dsi_init(struct drm_device *dev)

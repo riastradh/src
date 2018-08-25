@@ -30,6 +30,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/module.h>
 #include "i915_drv.h"
 #include "i915_reg.h"
+#include "intel_drv.h"
 
 /**
  * DOC: csr support for dmc

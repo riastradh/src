@@ -29,6 +29,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <drm/drmP.h>
 #include <drm/i915_drm.h>
 #include "i915_drv.h"
+#include "intel_drv.h"
 
 /**
  * DOC: fence register handling

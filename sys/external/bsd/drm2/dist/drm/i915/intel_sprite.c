@@ -43,6 +43,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "intel_drv.h"
 #include <drm/i915_drm.h>
 #include "i915_drv.h"
+#include "i915_trace.h"
 
 static bool
 format_is_yuv(uint32_t format)

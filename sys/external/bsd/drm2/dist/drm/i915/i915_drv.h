@@ -2709,8 +2709,6 @@ struct drm_i915_cmd_table {
 #define GT_FREQUENCY_MULTIPLIER 50
 #define GEN9_FREQ_SCALER 3
 
-#include "i915_trace.h"
-
 extern const struct drm_ioctl_desc i915_ioctls[];
 extern int i915_max_ioctl;
 

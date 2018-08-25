@@ -34,6 +34,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/cpufreq.h>
 #include <linux/export.h>
 #include "i915_drv.h"
+#include "i915_trace.h"
 #include "intel_drv.h"
 #ifndef __NetBSD__
 #include "../../../platform/x86/intel_ips.h"
