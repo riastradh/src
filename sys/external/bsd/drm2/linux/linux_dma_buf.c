@@ -167,9 +167,9 @@ dma_buf_put(struct dma_buf *dmabuf)
 	if (atomic_dec_uint_nv(&dmabuf->db_refcnt) != 0)
 		return;
 
-	if (dmabuf->resv == &dmabuf->db_resv_int[0])
-		reservation_object_fini(dmabuf->resv);
+	mutex_destroy(&dmabuf->db_lock);
 	if (dmabuf->resv == &dmabuf->db_resv_int[0]) {
+		reservation_object_fini(dmabuf->resv);
 		kmem_free(dmabuf, offsetof(struct dma_buf, db_resv_int[1]));
 	} else {
 		kmem_free(dmabuf, sizeof(*dmabuf));
