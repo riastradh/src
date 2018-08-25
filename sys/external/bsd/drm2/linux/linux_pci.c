@@ -606,10 +606,14 @@ pci_iomap(struct pci_dev *pdev, unsigned i, bus_size_t size)
 	    size, BUS_SPACE_MAP_LINEAR | pdev->pd_resources[i].flags,
 	    &pdev->pd_resources[i].bsh);
 	if (error) {
+#ifdef CONFIG_AGP
 		/* Horrible hack: try asking the fake AGP device.  */
 		if (!agp_i810_borrow(pdev->pd_resources[i].addr, size,
 			&pdev->pd_resources[i].bsh))
 			return NULL;
+#else
+		return NULL;
+#endif
 	}
 	pdev->pd_resources[i].bst = pdev->pd_pa.pa_memt;
 	pdev->pd_resources[i].kva = bus_space_vaddr(pdev->pd_resources[i].bst,
