@@ -46,8 +46,6 @@ __KERNEL_RCSID(0, "$NetBSD: linux_kmap.c,v 1.12 2015/01/01 01:15:43 mrg Exp $");
 
 #include <linux/highmem.h>
 
-#undef	linux_kmap		/* symbol vs trace point namespace clash */
-
 SDT_PROBE_DEFINE2(sdt, linux, kmap, map,
     "paddr_t"/*paddr*/, "vaddr_t"/*vaddr*/);
 SDT_PROBE_DEFINE2(sdt, linux, kmap, unmap,
@@ -202,7 +200,7 @@ kunmap_atomic(void *addr)
 }
 
 void *
-linux_kmap(struct page *page)
+kmap(struct page *page)
 {
 	const paddr_t paddr = VM_PAGE_TO_PHYS(&page->p_vmp);
 	vaddr_t vaddr;
