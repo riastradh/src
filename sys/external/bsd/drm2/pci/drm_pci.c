@@ -299,7 +299,8 @@ drm_pci_set_unique(struct drm_device *dev, struct drm_master *master,
 
 	/* Make sure it matches what we expect.  */
 	snprintf(kbuf, sizeof kbuf, "PCI:%d:%ld:%ld", dev->pdev->bus->number,
-	    PCI_SLOT(dev->pdev->devfn), PCI_FUNC(dev->pdev->devfn));
+	    (long)PCI_SLOT(dev->pdev->devfn),
+	    (long)PCI_FUNC(dev->pdev->devfn));
 	if (strncmp(kbuf, ubuf, sizeof(kbuf)) != 0)
 		return -EINVAL;
 
