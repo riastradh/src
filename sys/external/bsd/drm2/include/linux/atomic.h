@@ -229,6 +229,11 @@ struct atomic64 {
 
 typedef struct atomic64 atomic64_t;
 
+int		linux_atomic64_init(void);
+void		linux_atomic64_fini(void);
+
+#ifdef __HAVE_ATOMIC64_OPS
+
 static inline uint64_t
 atomic64_read(const struct atomic64 *a)
 {
@@ -285,6 +290,24 @@ atomic64_cmpxchg(struct atomic64 *atomic, uint64_t expect, uint64_t new)
 
 	return old;
 }
+
+#else  /* !defined(__HAVE_ATOMIC64_OPS) */
+
+#define	atomic64_read		linux_atomic64_read
+#define	atomic64_set		linux_atomic64_set
+#define	atomic64_add		linux_atomic64_add
+#define	atomic64_sub		linux_atomic64_sub
+#define	atomic64_xchg		linux_atomic64_xchg
+#define	atomic64_cmpxchg	linux_atomic64_cmpxchg
+
+uint64_t	atomic64_read(const struct atomic64 *);
+void		atomic64_set(struct atomic64 *, uint64_t);
+void		atomic64_add(long long, struct atomic64 *);
+void		atomic64_sub(long long, struct atomic64 *);
+uint64_t	atomic64_xchg(struct atomic64 *, uint64_t);
+uint64_t	atomic64_cmpxchg(struct atomic64 *, uint64_t, uint64_t);
+
+#endif
 
 struct atomic_long {
 	volatile unsigned long	al_v;
