@@ -164,6 +164,18 @@ atomic64_sub(int64_t delta, struct atomic64 *a)
 	atomic64_unlock(a);
 }
 
+int64_t
+atomic64_add_return(int64_t delta, struct atomic64 *a)
+{
+	int64_t v;
+
+	atomic64_lock(a);
+	v = (int64_t)(a->a_v += delta);
+	atomic64_unlock(a);
+
+	return v;
+}
+
 uint64_t
 atomic64_xchg(struct atomic64 *a, uint64_t new)
 {
