@@ -224,7 +224,6 @@ EXPORT_SYMBOL(drm_gem_private_object_init);
 static void
 drm_gem_remove_prime_handles(struct drm_gem_object *obj, struct drm_file *filp)
 {
-#ifndef __NetBSD__		/* XXX drm prime */
 	/*
 	 * Note: obj->dma_buf can't disappear as long as we still hold a
 	 * handle reference in obj->handle_count.
@@ -235,7 +234,6 @@ drm_gem_remove_prime_handles(struct drm_gem_object *obj, struct drm_file *filp)
 						   obj->dma_buf);
 	}
 	mutex_unlock(&filp->prime.lock);
-#endif
 }
 
 /**
@@ -822,10 +820,8 @@ drm_gem_object_release_handle(int id, void *ptr, void *data)
 	if (dev->driver->gem_close_object)
 		dev->driver->gem_close_object(obj, file_priv);
 
-#ifndef __NetBSD__			/* XXX drm prime */
 	if (drm_core_check_feature(dev, DRIVER_PRIME))
 		drm_gem_remove_prime_handles(obj, file_priv);
-#endif
 	drm_vma_node_revoke(&obj->vma_node, file_priv->filp);
 
 	drm_gem_object_handle_unreference_unlocked(obj);

@@ -59,5 +59,6 @@ const struct linux_module_param_desc PARAMETER ## _desc = { \
 __link_set_add_rodata(linux_module_param_desc, PARAMETER ## _desc)
 
 #define	THIS_MODULE	0
+#define	KBUILD_MODNAME	__file__
 
 #endif  /* _LINUX_MODULE_H_ */

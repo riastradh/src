@@ -55,6 +55,7 @@ typedef unsigned int drm_handle_t;
 #ifdef __NetBSD__
 #include <sys/ioccom.h>
 #include <sys/types.h>
+#include <sys/fcntl.h>
 #ifndef _KERNEL
 typedef int8_t   __s8;
 typedef uint8_t  __u8;

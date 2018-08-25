@@ -84,7 +84,7 @@ file	external/bsd/drm2/dist/drm/radeon/radeon_ni_dma.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_ni_dpm.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_object.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_pm.c	radeon
-#file	external/bsd/drm2/dist/drm/radeon/radeon_prime.c	radeon	# XXX radeon prime
+file	external/bsd/drm2/dist/drm/radeon/radeon_prime.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_r100.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_r200.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_r300.c	radeon

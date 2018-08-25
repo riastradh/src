@@ -39,7 +39,7 @@ file	external/bsd/drm2/dist/drm/i915/i915_gem.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_batch_pool.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_context.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_debug.c	i915drmkms
-#file	external/bsd/drm2/dist/drm/i915/i915_gem_dmabuf.c	i915drmkms	# XXX i915 prime
+file	external/bsd/drm2/dist/drm/i915/i915_gem_dmabuf.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_evict.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_execbuffer.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_gem_fence.c	i915drmkms

@@ -2188,6 +2188,7 @@ struct drm_i915_gem_object {
 #ifdef __NetBSD__
 	struct pglist pageq;
 	bus_dmamap_t pages;	/* expedient misnomer */
+	struct sg_table *sg;	/* drm prime */
 #else
 	struct sg_table *pages;
 #endif

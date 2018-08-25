@@ -52,10 +52,8 @@ nouveau_gem_object_del(struct drm_gem_object *gem)
 	if (WARN_ON(ret < 0 && ret != -EACCES))
 		return;
 
-#ifndef __NetBSD__		/* XXX drm prime */
 	if (gem->import_attach)
 		drm_prime_gem_destroy(gem, nvbo->bo.sg);
-#endif
 
 	drm_gem_object_release(gem);
 

@@ -5107,10 +5107,8 @@ void i915_gem_free_object(struct drm_gem_object *gem_obj)
 
 	BUG_ON(obj->pages);
 
-#ifndef __NetBSD__		/* XXX drm prime */
 	if (obj->base.import_attach)
 		drm_prime_gem_destroy(&obj->base, NULL);
-#endif
 
 	if (obj->ops->release)
 		obj->ops->release(obj);
