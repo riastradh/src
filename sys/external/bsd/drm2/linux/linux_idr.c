@@ -68,7 +68,7 @@ SDT_PROBE_DEFINE4(sdt, linux, idr, replace,
 SDT_PROBE_DEFINE3(sdt, linux, idr, remove,
     "struct idr *"/*idr*/, "int"/*id*/, "void *"/*data*/);
 SDT_PROBE_DEFINE0(sdt, linux, idr, preload);
-SDT_PROBE_DEFINE0(sdt, linux, idr, preload_end);
+SDT_PROBE_DEFINE0(sdt, linux, idr, preload__end);
 SDT_PROBE_DEFINE3(sdt, linux, idr, alloc,
     "struct idr *"/*idr*/, "int"/*id*/, "void *"/*data*/);
 
@@ -374,7 +374,7 @@ idr_preload_end(void)
 {
 	struct idr_cache *cache;
 
-	SDT_PROBE0(sdt, linux, idr, preload_end);
+	SDT_PROBE0(sdt, linux, idr, preload__end);
 
 	/* Get the cache, or bail if it's not there.  */
 	cache = lwp_getspecific(idr_cache_key);
