@@ -147,7 +147,7 @@ atomic64_set(struct atomic64 *a, uint64_t value)
 }
 
 void
-atomic64_add(long long delta, struct atomic64 *a)
+atomic64_add(int64_t delta, struct atomic64 *a)
 {
 
 	atomic64_lock(a);
@@ -156,7 +156,7 @@ atomic64_add(long long delta, struct atomic64 *a)
 }
 
 void
-atomic64_sub(long long delta, struct atomic64 *a)
+atomic64_sub(int64_t delta, struct atomic64 *a)
 {
 
 	atomic64_lock(a);
