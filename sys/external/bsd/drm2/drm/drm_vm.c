@@ -35,6 +35,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_vm.c,v 1.7 2014/12/31 08:55:18 mrg Exp $");
 #include <sys/types.h>
 #include <sys/conf.h>
 
+#include <uvm/uvm.h>
 #include <uvm/uvm_extern.h>
 #include <uvm/uvm_device.h>
 

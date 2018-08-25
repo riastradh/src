@@ -36,6 +36,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifdef __NetBSD__
+#include <uvm/uvm.h>
+#endif
+
 /**
  * This structure defines the drm_mm memory object, which will be used by the
  * DRM for its buffer objects.
