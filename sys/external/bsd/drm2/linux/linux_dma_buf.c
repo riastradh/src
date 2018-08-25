@@ -119,6 +119,7 @@ dma_buf_fd(struct dma_buf *dmabuf, int flags)
 	fd_affix(curproc, file, fd);
 
 	fd_putfile(fd);
+	ret = fd;
 out0:	return ret;
 }
 
