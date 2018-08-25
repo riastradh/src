@@ -92,7 +92,7 @@ ww_acquire_init(struct ww_acquire_ctx *ctx, struct ww_class *class)
 
 	ctx->wwx_class = class;
 	ctx->wwx_owner = curlwp;
-	ctx->wwx_ticket = atomic_inc_64_nv(&class->wwc_ticket);
+	ctx->wwx_ticket = atomic64_inc_return(&class->wwc_ticket);
 	ctx->wwx_acquired = 0;
 	ctx->wwx_acquire_done = false;
 }
