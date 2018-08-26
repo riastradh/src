@@ -38,6 +38,8 @@
 
 #ifdef FDT
 
+#include <dev/fdt/fdtvar.h>
+
 struct regulator {
 	struct fdtbus_regulator	regulator;
 };
@@ -56,13 +58,12 @@ regulator_get_voltage(struct regulator *reg)
 	}
 
 	KASSERTMSG(uvolt <= INT_MAX, "high voltage: %u uV", uvolt);
-	return (int)uvol;
+	return (int)uvolt;
 }
 
 static inline int
 regulator_set_voltage(struct regulator *reg, int min_uvolt, int max_uvolt)
 {
-	unsigned v;
 
 	if (min_uvolt < 0 || max_uvolt < 0)
 		return -EINVAL;
