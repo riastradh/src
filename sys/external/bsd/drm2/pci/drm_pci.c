@@ -96,10 +96,12 @@ drm_pci_attach(device_t self, const struct pci_attach_args *pa,
 
 	/* Set up the bus space and bus DMA tags.  */
 	dev->bst = pa->pa_memt;
-	/* XXX Let the driver say something about 32-bit vs 64-bit DMA?  */
 	dev->bus_dmat = (pci_dma64_available(pa)? pa->pa_dmat64 : pa->pa_dmat);
+	dev->bus_dmat32 = pa->pa_dmat;
 	dev->dmat = dev->bus_dmat;
 	dev->dmat_subregion_p = false;
+	dev->dmat_subregion_min = 0;
+	dev->dmat_subregion_max = __type_max(bus_addr_t);
 
 	/* Find all the memory maps.  */
 	CTASSERT(PCI_NUM_RESOURCES < (SIZE_MAX / sizeof(dev->bus_maps[0])));
