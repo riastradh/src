@@ -204,7 +204,7 @@ alloc_ordered_workqueue(const char *name, int flags)
 
 	wq = kmem_zalloc(sizeof(*wq), KM_SLEEP);
 
-	mutex_init(&wq->wq_lock, MUTEX_DEFAULT, IPL_NONE);
+	mutex_init(&wq->wq_lock, MUTEX_DEFAULT, IPL_VM);
 	cv_init(&wq->wq_cv, name);
 	TAILQ_INIT(&wq->wq_delayed);
 	TAILQ_INIT(&wq->wq_queue);
