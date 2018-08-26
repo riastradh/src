@@ -84,7 +84,7 @@ file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_kv_smc.c	amdgpu & amdgpu_cik
 file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_object.c	amdgpu
 file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_pll.c	amdgpu
 file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_pm.c	amdgpu
-#file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_prime.c	amdgpu  # XXX amdgpu prime
+file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_prime.c	amdgpu
 file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_ring.c	amdgpu
 file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_sa.c	amdgpu
 file	external/bsd/drm2/dist/drm/amd/amdgpu/amdgpu_sched.c	amdgpu
