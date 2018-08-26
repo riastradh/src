@@ -1035,7 +1035,7 @@ record:
 	rcu_read_unlock();
 	mutex_enter(&rpoll->rp_lock);
 	selrecord(curlwp, &rpoll->rp_selq);
-	if (rpoll->rp_claimed)
+	if (!rpoll->rp_claimed)
 		claimed = rpoll->rp_claimed = true;
 	mutex_exit(&rpoll->rp_lock);
 	recorded = true;
