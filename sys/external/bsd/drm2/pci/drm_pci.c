@@ -153,8 +153,9 @@ fail2: __unused
 fail1:	drm_pci_agp_destroy(dev);
 	dev->bus_nmaps = 0;
 	kmem_free(dev->bus_maps, PCI_NUM_RESOURCES * sizeof(dev->bus_maps[0]));
-	if (dev->dmat_subregion_p)
+	if (dev->dmat_subregion_p) {
 		bus_dmatag_destroy(dev->dmat);
+	}
 	drm_dev_unref(dev);
 fail0:	return ret;
 }
@@ -174,8 +175,9 @@ drm_pci_detach(struct drm_device *dev, int flags __unused)
 	kmem_free(dev->bus_maps, PCI_NUM_RESOURCES * sizeof(dev->bus_maps[0]));
 
 	/* Tear down bus space and bus DMA tags.  */
-	if (dev->dmat_subregion_p)
+	if (dev->dmat_subregion_p) {
 		bus_dmatag_destroy(dev->dmat);
+	}
 
 	drm_dev_unref(dev);
 
