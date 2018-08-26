@@ -42,7 +42,7 @@ drm_gem_cma_create_internal(struct drm_device *ddev, size_t size,
 	int error, nsegs;
 
 	obj = kmem_zalloc(sizeof(*obj), KM_SLEEP);
-	obj->dmat = ddev->bus_dmat;
+	obj->dmat = ddev->dmat;
 	obj->dmasize = size;
 
 	if (sgt) {
