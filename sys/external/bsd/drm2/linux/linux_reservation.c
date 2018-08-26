@@ -851,8 +851,15 @@ reservation_poll_cb(struct fence *fence, struct fence_cb *fcb)
 /*
  * reservation_object_poll(robj, events, rpoll)
  *
- *	POLLOUT		wait for all fences shared and exclusive
- *	POLLIN		wait for the exclusive fence
+ *	Poll for reservation object events using the reservation poll
+ *	state in rpoll:
+ *
+ *	- POLLOUT	wait for all fences shared and exclusive
+ *	- POLLIN	wait for the exclusive fence
+ *
+ *	Return the subset of events in events that are ready.  If any
+ *	are requested but not ready, arrange to be notified with
+ *	selnotify when they are.
  */
 int
 reservation_object_poll(struct reservation_object *robj, int events,
