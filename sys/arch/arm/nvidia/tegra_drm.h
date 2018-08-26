@@ -148,9 +148,9 @@ struct tegra_fbdev {
 
 int	tegra_drm_mode_init(struct drm_device *);
 int	tegra_drm_fb_init(struct drm_device *);
-u32	tegra_drm_get_vblank_counter(struct drm_device *, int);
-int	tegra_drm_enable_vblank(struct drm_device *, int);
-void	tegra_drm_disable_vblank(struct drm_device *, int);
+u32	tegra_drm_get_vblank_counter(struct drm_device *, unsigned int);
+int	tegra_drm_enable_vblank(struct drm_device *, unsigned int);
+void	tegra_drm_disable_vblank(struct drm_device *, unsigned int);
 int	tegra_drm_framebuffer_init(struct drm_device *,
 	    struct tegra_framebuffer *);
 
