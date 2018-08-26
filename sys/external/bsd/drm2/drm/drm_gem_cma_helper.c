@@ -254,6 +254,8 @@ drm_gem_cma_prime_import_sg_table(struct drm_device *ddev,
 	struct drm_gem_cma_object *obj;
 
 	obj = drm_gem_cma_create_internal(ddev, size, sgt);
+	if (obj == NULL)
+		return ERR_PTR(-ENOMEM);
 
 	return &obj->base;
 }
