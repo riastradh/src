@@ -84,7 +84,7 @@ static int amdgpu_cgs_gmap_kmem(void *cgs_device, void *kmem,
 				uint64_t min_offset, uint64_t max_offset,
 				cgs_handle_t *kmem_handle, uint64_t *mcaddr)
 {
-#ifdef __NetBSD__		/* XXX drm prime */
+#ifdef __NetBSD__		/* XXX unused */
 	return -ENOSYS;
 #else
 	CGS_FUNC_ADEV;
@@ -114,7 +114,7 @@ static int amdgpu_cgs_gmap_kmem(void *cgs_device, void *kmem,
 
 static int amdgpu_cgs_gunmap_kmem(void *cgs_device, cgs_handle_t kmem_handle)
 {
-#ifdef __NetBSD__		/* XXX drm prime */
+#ifdef __NetBSD__		/* XXX unused */
 	panic("not implemented");
 #else
 	struct amdgpu_bo *obj = (struct amdgpu_bo *)kmem_handle;
