@@ -259,10 +259,11 @@ trace_i915_reg_rw(bool write, uint32_t reg, uint64_t value, size_t len,
 {
 	if (!trace)
 		return;
-	if (write)
+	if (write) {
 		TRACE3(i915,, register__read,  reg, value, len);
-	else
+	} else {
 		TRACE3(i915,, register__write,  reg, value, len);
+	}
 }
 
 DEFINE_TRACE5(i915,, vma__bind,
