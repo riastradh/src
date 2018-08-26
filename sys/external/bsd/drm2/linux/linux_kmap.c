@@ -166,7 +166,10 @@ kmap_atomic(struct page *page)
 	pmap_kenter_pa(vaddr, paddr, (VM_PROT_READ | VM_PROT_WRITE), 0);
 	pmap_update(pmap_kernel());
 
-out:	SDT_PROBE2(sdt, linux, kmap, map__atomic,  paddr, vaddr);
+#ifdef __HAVE_MM_MD_DIRECT_MAPPED_PHYS
+out:
+#endif
+	SDT_PROBE2(sdt, linux, kmap, map__atomic,  paddr, vaddr);
 	return (void *)vaddr;
 }
 
@@ -231,7 +234,10 @@ kmap(struct page *page)
 	pmap_kenter_pa(vaddr, paddr, (VM_PROT_READ | VM_PROT_WRITE), 0);
 	pmap_update(pmap_kernel());
 
-out:	SDT_PROBE2(sdt, linux, kmap, map,  paddr, vaddr);
+#ifdef __HAVE_MM_MD_DIRECT_MAPPED_PHYS
+out:
+#endif
+	SDT_PROBE2(sdt, linux, kmap, map,  paddr, vaddr);
 	return (void *)vaddr;
 }
 
@@ -265,5 +271,8 @@ kunmap(struct page *page)
 
 	uvm_km_free(kernel_map, vaddr, PAGE_SIZE, UVM_KMF_VAONLY);
 
-out:	SDT_PROBE2(sdt, linux, kmap, unmap,  paddr, vaddr);
+#ifdef __HAVE_MM_MD_DIRECT_MAPPED_PHYS
+out:
+#endif
+	SDT_PROBE2(sdt, linux, kmap, unmap,  paddr, vaddr);
 }
