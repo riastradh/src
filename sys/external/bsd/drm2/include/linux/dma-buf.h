@@ -88,7 +88,7 @@ struct dma_buf {
 
 	kmutex_t			db_lock;
 	volatile unsigned		db_refcnt;
-	struct selinfo			db_selq;
+	struct reservation_poll		db_resv_poll;
 	struct reservation_object	db_resv_int[];
 };
 

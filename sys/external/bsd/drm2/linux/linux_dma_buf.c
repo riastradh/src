@@ -87,6 +87,7 @@ dma_buf_export(struct dma_buf_export_info *info)
 
 	mutex_init(&dmabuf->db_lock, MUTEX_DEFAULT, IPL_NONE);
 	dmabuf->db_refcnt = 1;
+	reservation_poll_init(&dmabuf->db_resv_poll);
 
 	if (dmabuf->resv == NULL) {
 		dmabuf->resv = &dmabuf->db_resv_int[0];
@@ -167,6 +168,7 @@ dma_buf_put(struct dma_buf *dmabuf)
 	if (atomic_dec_uint_nv(&dmabuf->db_refcnt) != 0)
 		return;
 
+	reservation_poll_fini(&dmabuf->db_resv_poll);
 	mutex_destroy(&dmabuf->db_lock);
 	if (dmabuf->resv == &dmabuf->db_resv_int[0]) {
 		reservation_object_fini(dmabuf->resv);
@@ -239,27 +241,21 @@ dmabuf_fop_close(struct file *file)
 static int
 dmabuf_fop_poll(struct file *file, int events)
 {
-#ifdef notyet
 	struct dma_buf_file *dbf = file->f_data;
 	struct dma_buf *dmabuf = dbf->dbf_dmabuf;
+	struct reservation_poll *rpoll = &dmabuf->db_resv_poll;
 
-	return reservation_object_poll(dmabuf->resv, events);
-#else
-	return -ENOSYS;
-#endif
+	return reservation_object_poll(dmabuf->resv, events, rpoll);
 }
 
 static int
-dmabuf_fop_kqfilter(struct file *file, struct knote *knote)
+dmabuf_fop_kqfilter(struct file *file, struct knote *kn)
 {
-#ifdef notyet
 	struct dma_buf_file *dbf = file->f_data;
 	struct dma_buf *dmabuf = dbf->dbf_dmabuf;
+	struct reservation_poll *rpoll = &dmabuf->db_resv_poll;
 
-	return reservation_object_kqfilter(dmabuf->resv, knote);
-#else
-	return -ENOSYS;
-#endif
+	return reservation_object_kqfilter(dmabuf->resv, kn, rpoll);
 }
 
 static int
