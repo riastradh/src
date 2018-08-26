@@ -54,7 +54,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
  */
 
 struct sg_table {
-	struct vm_page	**sgt_pgs;
+	paddr_t		*sgt_pgs;
 	unsigned	sgt_npgs;
 };
 
@@ -73,7 +73,7 @@ sg_alloc_table_from_pages(struct sg_table *sgt, struct page **pages,
 	sgt->sgt_npgs = npages;
 
 	for (i = 0; i < npages; i++)
-		sgt->sgt_pgs[i] = &pages[i]->p_vmp;
+		sgt->sgt_pgs[i] = VM_PAGE_TO_PHYS(&pages[i]->p_vmp);
 
 	return 0;
 }
@@ -96,7 +96,7 @@ sg_alloc_table_from_pglist(struct sg_table *sgt, const struct pglist *pglist,
 	i = 0;
 	TAILQ_FOREACH(pg, pglist, pageq.queue) {
 		KASSERT(i < npages);
-		sgt->sgt_pgs[i] = pg;
+		sgt->sgt_pgs[i] = VM_PAGE_TO_PHYS(pg);
 	}
 	KASSERT(i == npages);
 
