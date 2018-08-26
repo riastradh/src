@@ -5,6 +5,7 @@
 # `drm' interface attribute, which is where PCI-based fake graphics
 # drivers, a.k.a. `UMS' (user mode-setting), attach.
 define	drmkms_pci: drmkms
+defflag	opt_drmkms_pci.h	DRMKMS_PCI
 
 #file	external/bsd/drm2/dist/drm/ati_pcigart.c	drmkms_pci
 file	external/bsd/drm2/dist/drm/drm_agpsupport.c	drmkms_pci & agp

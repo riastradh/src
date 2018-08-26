@@ -97,7 +97,7 @@ file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/cipher/nouveau_nvkm_engine_c
 file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/device/nouveau_nvkm_engine_device_acpi.c	nouveau
 file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/device/nouveau_nvkm_engine_device_base.c	nouveau
 file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/device/nouveau_nvkm_engine_device_ctrl.c	nouveau
-file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/device/nouveau_nvkm_engine_device_pci.c	nouveau
+file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/device/nouveau_nvkm_engine_device_pci.c	nouveau_pci
 file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/device/nouveau_nvkm_engine_device_tegra.c	nouveau
 file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/device/nouveau_nvkm_engine_device_user.c	nouveau
 file	external/bsd/drm2/dist/drm/nouveau/nvkm/engine/disp/nouveau_nvkm_engine_disp_base.c	nouveau

@@ -39,8 +39,8 @@ __KERNEL_RCSID(0, "$NetBSD: drm_pci.c,v 1.18 2017/07/27 02:11:24 nonaka Exp $");
 #include <dev/pci/pcivar.h>
 
 #include <drm/drmP.h>
-#include <drm/drm_legacy.h>
 #include <drm/drm_internal.h>
+#include <drm/drm_legacy.h>
 
 struct drm_bus_irq_cookie {
 	pci_intr_handle_t *intr_handles;
@@ -276,14 +276,7 @@ drm_pci_set_busid(struct drm_device *dev, struct drm_master *master)
 }
 
 int
-drm_irq_by_busid(struct drm_device *dev, void *data, struct drm_file *file)
-{
-
-	return -ENODEV;
-}
-
-int
-drm_pci_set_unique(struct drm_device *dev, struct drm_master *master,
+drm_pci_set_unique_impl(struct drm_device *dev, struct drm_master *master,
     struct drm_unique *unique)
 {
 	char kbuf[64], ubuf[64];

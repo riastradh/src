@@ -36,6 +36,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_pci_module.c,v 1.4 2015/03/06 01:24:24 riastradh
 #include <sys/once.h>
 
 #include <drm/drmP.h>
+#include <drm/drm_internal.h>
 
 MODULE(MODULE_CLASS_MISC, drmkms_pci, "drmkms,pci");
 
@@ -54,6 +55,9 @@ const struct drm_agp_hooks drmkms_pci_agp_hooks = {
 };
 #endif
 
+static int (*drm_pci_set_unique_save)(struct drm_device *, struct drm_master *,
+    struct drm_unique *);
+
 static int
 drmkms_pci_agp_init(void)
 {
@@ -64,6 +68,9 @@ drmkms_pci_agp_init(void)
 	if (error)
 		return error;
 #endif
+
+	drm_pci_set_unique_save = drm_pci_set_unique_impl;
+	drm_pci_set_unique_hook(&drm_pci_set_unique_save);
 
 	return 0;
 }
@@ -83,6 +90,9 @@ drmkms_pci_agp_guarantee_initialized(void)
 static void
 drmkms_pci_agp_fini(void)
 {
+
+	drm_pci_set_unique_hook(&drm_pci_set_unique_save);
+	KASSERT(drm_pci_set_unique_save == drm_pci_set_unique_impl);
 
 #ifdef CONFIG_AGP
 	drm_agp_deregister(&drmkms_pci_agp_hooks);
