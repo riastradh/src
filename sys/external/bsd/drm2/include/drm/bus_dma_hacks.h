@@ -46,8 +46,33 @@
 #  define	PHYS_TO_BUS_MEM(dmat, paddr)	((bus_addr_t)(paddr))
 #  define	BUS_MEM_TO_PHYS(dmat, baddr)	((paddr_t)(baddr))
 #elif defined(__arm__) || defined(__aarch64__)
-#  define	PHYS_TO_BUS_MEM(dmat, paddr)	((bus_addr_t)(paddr))
-#  define	BUS_MEM_TO_PHYS(dmat, baddr)	((paddr_t)(baddr))
+static inline bus_addr_t
+PHYS_TO_BUS_MEM(bus_dma_tag_t dmat, paddr_t pa)
+{
+	unsigned i;
+
+	for (i = 0; i < dmat->_nranges; i++) {
+		const struct arm32_dma_range *dr = &dmat->_ranges[i];
+
+		if (dr->dr_sysbase <= pa && pa - dr->dr_sysbase <= dr->dr_len)
+			return dr->dr_busbase + (dr->dr_sysbase - pa);
+	}
+	panic("paddr has no bus address in dma tag %p: %"PRIxPADDR, dmat, pa);
+}
+static inline paddr_t
+BUS_MEM_TO_PHYS(bus_dma_tag_t dmat, bus_addr_t ba)
+{
+	unsigned i;
+
+	for (i = 0; i < dmat->_nranges; i++) {
+		const struct arm32_dma_range *dr = &dmat->_ranges[i];
+
+		if (dr->dr_busbase <= ba && ba - dr->dr_busbase <= dr->dr_len)
+			return dr->dr_sysbase + (dr->dr_busbase - ba);
+	}
+	panic("bus addr has no bus address in dma tag %p: %"PRIxPADDR, dmat,
+	    ba);
+}
 #elif defined(__sparc__) || defined(__sparc64__)
 #  define	PHYS_TO_BUS_MEM(dmat, paddr)	((bus_addr_t)(paddr))
 #  define	BUS_MEM_TO_PHYS(dmat, baddr)	((paddr_t)(baddr))
