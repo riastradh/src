@@ -928,6 +928,18 @@ out1:	kfree(segs);
 out0:	return ret;
 }
 
+bool
+drm_prime_sg_importable(bus_dma_tag_t dmat, struct sg_table *sgt)
+{
+	unsigned i;
+
+	for (i = 0; i < sgt->sgt_npgs; i++) {
+		if (bus_dmatag_bounces_paddr(dmat, sgt->sgt_pgs[i]))
+			return false;
+	}
+	return true;
+}
+
 #else  /* !__NetBSD__ */
 
 /**

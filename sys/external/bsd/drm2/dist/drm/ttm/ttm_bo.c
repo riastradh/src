@@ -41,6 +41,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <uvm/uvm_object.h>
 #endif
 
+#include <drm/drmP.h>
 #include <drm/ttm/ttm_module.h>
 #include <drm/ttm/ttm_bo_driver.h>
 #include <drm/ttm/ttm_placement.h>
@@ -1139,6 +1140,11 @@ int ttm_bo_init(struct ttm_bo_device *bdev,
 	unsigned long num_pages;
 	struct ttm_mem_global *mem_glob = bdev->glob->mem_glob;
 	bool locked;
+
+	if (sg && !drm_prime_sg_importable(bdev->dmat, sg)) {
+		pr_err("DRM prime buffer violates DMA constraints\n");
+		return -EIO;
+	}
 
 	ret = ttm_mem_global_alloc(mem_glob, acc_size, false, false);
 	if (ret) {
