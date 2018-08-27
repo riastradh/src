@@ -34,6 +34,8 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/pci.h>
 
+#include <drm/drm_agp_netbsd.h>
+
 device_t
 pci_dev_dev(struct pci_dev *pdev)
 {
