@@ -1,9 +1,9 @@
 /*	$NetBSD$	*/
 
+// SPDX-License-Identifier: GPL-2.0 OR MIT
 /**************************************************************************
  *
- * Copyright © 2009-2014 VMware, Inc., Palo Alto, CA., USA
- * All Rights Reserved.
+ * Copyright 2009-2014 VMware, Inc., Palo Alto, CA., USA
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -43,7 +43,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #define VMW_OVERLAY_CAP_MASK (SVGA_FIFO_CAP_VIDEO | SVGA_FIFO_CAP_ESCAPE)
 
 struct vmw_stream {
-	struct vmw_dma_buffer *buf;
+	struct vmw_buffer_object *buf;
 	bool claimed;
 	bool paused;
 	struct drm_vmw_control_stream_arg saved;
@@ -99,7 +99,7 @@ static inline void fill_flush(struct vmw_escape_video_flush *cmd,
  * -ERESTARTSYS if interrupted by a signal.
  */
 static int vmw_overlay_send_put(struct vmw_private *dev_priv,
-				struct vmw_dma_buffer *buf,
+				struct vmw_buffer_object *buf,
 				struct drm_vmw_control_stream_arg *arg,
 				bool interruptible)
 {
@@ -230,16 +230,16 @@ static int vmw_overlay_send_stop(struct vmw_private *dev_priv,
  * used with GMRs instead of being locked to vram.
  */
 static int vmw_overlay_move_buffer(struct vmw_private *dev_priv,
-				   struct vmw_dma_buffer *buf,
+				   struct vmw_buffer_object *buf,
 				   bool pin, bool inter)
 {
 	if (!pin)
-		return vmw_dmabuf_unpin(dev_priv, buf, inter);
+		return vmw_bo_unpin(dev_priv, buf, inter);
 
 	if (dev_priv->active_display_unit == vmw_du_legacy)
-		return vmw_dmabuf_pin_in_vram(dev_priv, buf, inter);
+		return vmw_bo_pin_in_vram(dev_priv, buf, inter);
 
-	return vmw_dmabuf_pin_in_vram_or_gmr(dev_priv, buf, inter);
+	return vmw_bo_pin_in_vram_or_gmr(dev_priv, buf, inter);
 }
 
 /**
@@ -283,7 +283,7 @@ static int vmw_overlay_stop(struct vmw_private *dev_priv,
 	}
 
 	if (!pause) {
-		vmw_dmabuf_unreference(&stream->buf);
+		vmw_bo_unreference(&stream->buf);
 		stream->paused = false;
 	} else {
 		stream->paused = true;
@@ -302,7 +302,7 @@ static int vmw_overlay_stop(struct vmw_private *dev_priv,
  * -ERESTARTSYS if interrupted.
  */
 static int vmw_overlay_update_stream(struct vmw_private *dev_priv,
-				     struct vmw_dma_buffer *buf,
+				     struct vmw_buffer_object *buf,
 				     struct drm_vmw_control_stream_arg *arg,
 				     bool interruptible)
 {
@@ -352,7 +352,7 @@ static int vmw_overlay_update_stream(struct vmw_private *dev_priv,
 	}
 
 	if (stream->buf != buf)
-		stream->buf = vmw_dmabuf_reference(buf);
+		stream->buf = vmw_bo_reference(buf);
 	stream->saved = *arg;
 	/* stream is no longer stopped/paused */
 	stream->paused = false;
@@ -471,7 +471,7 @@ int vmw_overlay_ioctl(struct drm_device *dev, void *data,
 	struct vmw_overlay *overlay = dev_priv->overlay_priv;
 	struct drm_vmw_control_stream_arg *arg =
 	    (struct drm_vmw_control_stream_arg *)data;
-	struct vmw_dma_buffer *buf;
+	struct vmw_buffer_object *buf;
 	struct vmw_resource *res;
 	int ret;
 
@@ -489,13 +489,13 @@ int vmw_overlay_ioctl(struct drm_device *dev, void *data,
 		goto out_unlock;
 	}
 
-	ret = vmw_user_dmabuf_lookup(tfile, arg->handle, &buf, NULL);
+	ret = vmw_user_bo_lookup(tfile, arg->handle, &buf, NULL);
 	if (ret)
 		goto out_unlock;
 
 	ret = vmw_overlay_update_stream(dev_priv, buf, arg, true);
 
-	vmw_dmabuf_unreference(&buf);
+	vmw_bo_unreference(&buf);
 
 out_unlock:
 	mutex_unlock(&overlay->mutex);

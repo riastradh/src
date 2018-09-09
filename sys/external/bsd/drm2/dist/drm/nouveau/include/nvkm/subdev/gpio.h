@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_GPIO_H__
 #define __NVKM_GPIO_H__
 #include <core/subdev.h>

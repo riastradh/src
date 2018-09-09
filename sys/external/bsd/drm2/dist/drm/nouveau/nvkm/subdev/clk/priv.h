@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_CLK_PRIV_H__
 #define __NVKM_CLK_PRIV_H__
 #define nvkm_clk(p) container_of((p), struct nvkm_clk, subdev)

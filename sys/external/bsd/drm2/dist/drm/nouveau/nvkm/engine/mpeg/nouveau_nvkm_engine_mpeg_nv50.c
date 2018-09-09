@@ -29,6 +29,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "priv.h"
 
 #include <core/gpuobj.h>
+#include <core/object.h>
 #include <subdev/timer.h>
 
 #include <nvif/class.h>
@@ -135,6 +136,5 @@ nv50_mpeg = {
 int
 nv50_mpeg_new(struct nvkm_device *device, int index, struct nvkm_engine **pmpeg)
 {
-	return nvkm_engine_new_(&nv50_mpeg, device, index, 0x00400002,
-				true, pmpeg);
+	return nvkm_engine_new_(&nv50_mpeg, device, index, true, pmpeg);
 }
