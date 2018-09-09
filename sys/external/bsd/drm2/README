@@ -4,11 +4,11 @@ To import a new version, follow the instructions at the top of
 prepare-import.sh.  TODO(riastradh): Elaborate.
 
 prepare-import.sh       script to add RCS tags and stuff
+amdgpu/
+  amdgpu2netbsd         script to uniquify amdgpu files and emit files.amdgpu
 drm/
   drm2netbsd            script to generate files.drmkms draft
 nouveau/
   nouveau2netbsd        script to uniquify nouveau files and emit files.nouveau
-
-TODO(riastradh): Uniquify the radeon and amdgpu file names like we do
-with nouveau, because currently radeon and amdgpu fight over some
-files.
+radeon/
+  radeon2netbsd         script to uniquify radeon files and emit files.radeon
