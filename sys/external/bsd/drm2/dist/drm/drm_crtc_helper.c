@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_crtc_helper.c,v 1.5 2018/08/27 04:58:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006-2008 Intel Corporation
@@ -32,7 +32,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_crtc_helper.c,v 1.5 2018/08/27 04:58:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/kernel.h>
 #include <linux/export.h>

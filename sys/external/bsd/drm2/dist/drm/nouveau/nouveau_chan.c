@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_chan.c,v 1.5 2018/08/27 14:48:21 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_chan.c,v 1.5 2018/08/27 14:48:21 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <nvif/os.h>
 #include <nvif/class.h>

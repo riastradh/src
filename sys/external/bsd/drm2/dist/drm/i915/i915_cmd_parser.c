@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_cmd_parser.c,v 1.18 2018/09/09 03:04:43 pgoyette Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2013 Intel Corporation
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_cmd_parser.c,v 1.18 2018/09/09 03:04:43 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "i915_drv.h"
 

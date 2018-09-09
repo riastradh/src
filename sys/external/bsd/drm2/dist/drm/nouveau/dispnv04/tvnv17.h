@@ -1,4 +1,4 @@
-/*	$NetBSD: tvnv17.h,v 1.3 2018/08/27 04:58:29 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2009 Francisco Jerez.

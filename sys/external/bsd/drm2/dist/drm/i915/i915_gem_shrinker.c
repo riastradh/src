@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_shrinker.c,v 1.6 2018/08/27 07:19:01 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008-2015 Intel Corporation
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem_shrinker.c,v 1.6 2018/08/27 07:19:01 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/oom.h>
 #include <linux/shmem_fs.h>

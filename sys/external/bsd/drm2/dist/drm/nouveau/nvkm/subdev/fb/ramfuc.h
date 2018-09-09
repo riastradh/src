@@ -1,4 +1,4 @@
-/*	$NetBSD: ramfuc.h,v 1.2 2018/08/27 04:58:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVKM_FBRAM_FUC_H__
 #define __NVKM_FBRAM_FUC_H__

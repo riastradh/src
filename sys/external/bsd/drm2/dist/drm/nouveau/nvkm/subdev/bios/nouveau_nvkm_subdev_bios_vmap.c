@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_bios_vmap.c,v 1.2 2018/08/27 04:58:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Nouveau Community
@@ -24,7 +24,7 @@
  * Authors: Martin Peres
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_bios_vmap.c,v 1.2 2018/08/27 04:58:33 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <subdev/bios.h>
 #include <subdev/bios/bit.h>

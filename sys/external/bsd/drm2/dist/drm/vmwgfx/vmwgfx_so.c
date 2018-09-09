@@ -1,4 +1,4 @@
-/*	$NetBSD: vmwgfx_so.c,v 1.2 2018/08/27 04:58:37 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  * Copyright © 2014-2015 VMware, Inc., Palo Alto, CA., USA
@@ -27,7 +27,7 @@
  **************************************************************************/
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: vmwgfx_so.c,v 1.2 2018/08/27 04:58:37 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "vmwgfx_drv.h"
 #include "vmwgfx_resource_priv.h"

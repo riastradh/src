@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_instmem_nv40.c,v 1.7 2018/08/29 15:52:27 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_instmem_nv40.c,v 1.7 2018/08/29 15:52:27 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define nv40_instmem(p) container_of((p), struct nv40_instmem, base)
 #include "priv.h"

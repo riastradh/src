@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_dsi.c,v 1.4 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2013 Intel Corporation
@@ -26,7 +26,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_dsi.c,v 1.4 2018/08/27 04:58:24 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_atomic_helper.h>

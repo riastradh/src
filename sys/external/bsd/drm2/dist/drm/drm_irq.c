@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_irq.c,v 1.15 2018/08/27 14:43:32 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * drm_irq.c IRQ and vblank support
@@ -35,7 +35,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_irq.c,v 1.15 2018/08/27 14:43:32 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include "drm_trace.h"

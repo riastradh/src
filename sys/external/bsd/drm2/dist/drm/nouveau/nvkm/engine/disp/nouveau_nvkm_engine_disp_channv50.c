@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_disp_channv50.c,v 1.5 2018/08/27 14:54:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_disp_channv50.c,v 1.5 2018/08/27 14:54:33 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "channv50.h"
 #include "rootnv50.h"

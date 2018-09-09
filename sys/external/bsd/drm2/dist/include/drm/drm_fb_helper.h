@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_fb_helper.h,v 1.8 2018/08/27 13:36:14 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006-2009 Red Hat Inc.

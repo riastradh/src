@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_ring.c,v 1.3 2018/08/27 04:58:36 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -29,7 +29,7 @@
  *          Christian König
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_ring.c,v 1.3 2018/08/27 04:58:36 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/jiffies.h>
 #include <drm/drmP.h>

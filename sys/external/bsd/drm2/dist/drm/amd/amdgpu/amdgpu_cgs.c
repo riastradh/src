@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_cgs.c,v 1.4 2018/08/27 15:26:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2015 Advanced Micro Devices, Inc.
@@ -24,7 +24,7 @@
  *
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_cgs.c,v 1.4 2018/08/27 15:26:33 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <asm/byteorder.h>
 #include <linux/list.h>

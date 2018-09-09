@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_i2c_bus.c,v 1.3 2018/08/27 07:38:42 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2015 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs <bskeggs@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_i2c_bus.c,v 1.3 2018/08/27 07:38:42 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "bus.h"
 #include "pad.h"

@@ -1,4 +1,4 @@
-/*	$NetBSD: bit.h,v 1.2 2018/08/27 04:58:30 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVBIOS_BIT_H__
 #define __NVBIOS_BIT_H__

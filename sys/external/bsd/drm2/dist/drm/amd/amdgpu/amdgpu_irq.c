@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_irq.c,v 1.4 2018/08/27 14:04:50 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -28,7 +28,7 @@
  *          Jerome Glisse
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_irq.c,v 1.4 2018/08/27 14:04:50 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/irq.h>
 #include <drm/drmP.h>

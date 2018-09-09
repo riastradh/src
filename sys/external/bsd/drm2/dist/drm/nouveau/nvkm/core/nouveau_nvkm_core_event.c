@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_core_event.c,v 1.3 2018/08/27 14:16:17 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013-2014 Red Hat Inc.
@@ -22,7 +22,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_core_event.c,v 1.3 2018/08/27 14:16:17 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <core/event.h>
 #include <core/notify.h>

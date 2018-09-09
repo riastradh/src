@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_crtc.c,v 1.11 2018/08/27 14:40:30 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006-2008 Intel Corporation
@@ -32,7 +32,7 @@
  *      Jesse Barnes <jesse.barnes@intel.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_crtc.c,v 1.11 2018/08/27 14:40:30 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/err.h>
 #include <linux/spinlock.h>

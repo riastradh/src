@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_atombios_i2c.c,v 1.1 2018/08/27 14:10:14 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2011 Advanced Micro Devices, Inc.
@@ -25,7 +25,7 @@
  *
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_atombios_i2c.c,v 1.1 2018/08/27 14:10:14 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/amdgpu_drm.h>

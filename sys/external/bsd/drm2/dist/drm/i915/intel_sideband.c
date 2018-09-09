@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_sideband.c,v 1.3 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2013 Intel Corporation
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_sideband.c,v 1.3 2018/08/27 04:58:24 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "i915_drv.h"
 #include "intel_drv.h"

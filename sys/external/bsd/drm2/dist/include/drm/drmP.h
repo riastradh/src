@@ -1,4 +1,4 @@
-/*	$NetBSD: drmP.h,v 1.34 2018/08/28 03:41:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Internal Header for the Direct Rendering Manager

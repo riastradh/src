@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_gem.c,v 1.4 2018/08/27 15:22:54 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -28,7 +28,7 @@
  *          Jerome Glisse
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_gem.c,v 1.4 2018/08/27 15:22:54 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/ktime.h>
 #include <drm/drmP.h>

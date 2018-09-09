@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_bios.h,v 1.3 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2007-2008 Nouveau Project

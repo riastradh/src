@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_mxm_mxms.c,v 1.3 2018/08/27 07:41:00 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_mxm_mxms.c,v 1.3 2018/08/27 07:41:00 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "mxms.h"
 

@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_irq.c,v 1.16 2018/08/27 14:52:56 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* i915_irq.c -- IRQ support for the I915 -*- linux-c -*-
  */
@@ -29,7 +29,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_irq.c,v 1.16 2018/08/27 14:52:56 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 

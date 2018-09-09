@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_fbcon.c,v 1.5 2018/08/27 07:57:34 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2007 David Airlie
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_fbcon.c,v 1.5 2018/08/27 07:57:34 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/module.h>
 #include <linux/kernel.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_core_oproxy.c,v 1.4 2018/08/27 14:54:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2015 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs <bskeggs@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_core_oproxy.c,v 1.4 2018/08/27 14:54:33 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <core/oproxy.h>
 

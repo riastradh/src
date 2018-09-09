@@ -1,4 +1,4 @@
-/*	$NetBSD: qxl_gem.c,v 1.2 2018/08/27 04:58:35 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Red Hat Inc.
@@ -26,7 +26,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: qxl_gem.c,v 1.2 2018/08/27 04:58:35 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "drmP.h"
 #include "drm/drm.h"

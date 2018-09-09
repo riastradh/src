@@ -1,4 +1,4 @@
-/*	$NetBSD: sis_drv.c,v 1.3 2018/08/28 03:41:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* sis.c -- sis driver -*- linux-c -*-
  *
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: sis_drv.c,v 1.3 2018/08/28 03:41:39 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/module.h>
 

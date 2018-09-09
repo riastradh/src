@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_overlay.c,v 1.8 2018/08/27 07:26:59 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2009
@@ -28,7 +28,7 @@
  * Derived from Xorg ddx, xf86-video-intel, src/i830_video.c
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_overlay.c,v 1.8 2018/08/27 07:26:59 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/kernel.h>
 #include <asm/io.h>

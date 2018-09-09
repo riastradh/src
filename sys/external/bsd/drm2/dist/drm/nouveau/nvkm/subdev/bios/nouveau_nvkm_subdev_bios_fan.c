@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_bios_fan.c,v 1.3 2018/08/27 07:38:56 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2014 Martin Peres
@@ -24,7 +24,7 @@
  * Authors: Martin Peres
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_bios_fan.c,v 1.3 2018/08/27 07:38:56 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <subdev/bios.h>
 #include <subdev/bios/bit.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_core_subdev.c,v 1.3 2018/08/27 07:39:20 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_core_subdev.c,v 1.3 2018/08/27 07:39:20 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <core/subdev.h>
 #include <core/device.h>

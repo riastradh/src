@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_mm.c,v 1.5 2018/08/27 06:56:50 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  *
@@ -44,7 +44,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_mm.c,v 1.5 2018/08/27 06:56:50 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_mm.h>

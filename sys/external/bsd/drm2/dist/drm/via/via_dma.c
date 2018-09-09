@@ -1,4 +1,4 @@
-/*	$NetBSD: via_dma.c,v 1.3 2018/08/27 04:58:37 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* via_dma.c -- DMA support for the VIA Unichrome/Pro
  *
@@ -37,7 +37,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: via_dma.c,v 1.3 2018/08/27 04:58:37 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/via_drm.h>

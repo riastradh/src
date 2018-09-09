@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_drv.c,v 1.15 2018/08/27 15:22:54 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* i915_drv.c -- i830,i845,i855,i865,i915 driver -*- linux-c -*-
  */
@@ -30,7 +30,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_drv.c,v 1.15 2018/08/27 15:22:54 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/device.h>
 #include <linux/acpi.h>

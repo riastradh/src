@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gpu_error.c,v 1.10 2018/08/27 16:14:55 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2008 Intel Corporation
@@ -30,7 +30,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gpu_error.c,v 1.10 2018/08/27 16:14:55 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <sys/param.h>
 

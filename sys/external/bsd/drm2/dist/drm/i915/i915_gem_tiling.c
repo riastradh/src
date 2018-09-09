@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_tiling.c,v 1.6 2018/08/27 06:25:06 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008 Intel Corporation
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem_tiling.c,v 1.6 2018/08/27 06:25:06 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/string.h>
 #include <linux/bitops.h>

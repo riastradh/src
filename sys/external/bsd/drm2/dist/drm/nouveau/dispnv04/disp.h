@@ -1,4 +1,4 @@
-/*	$NetBSD: disp.h,v 1.2 2018/08/27 04:58:29 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NV04_DISPLAY_H__
 #define __NV04_DISPLAY_H__

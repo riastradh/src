@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_benchmark.c,v 1.3 2018/08/27 04:58:36 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2009 Jerome Glisse.
@@ -24,7 +24,7 @@
  * Authors: Jerome Glisse
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_benchmark.c,v 1.3 2018/08/27 04:58:36 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/radeon_drm.h>

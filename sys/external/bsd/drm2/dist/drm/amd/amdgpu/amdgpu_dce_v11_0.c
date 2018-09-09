@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_dce_v11_0.c,v 1.2 2018/08/27 14:39:20 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2014 Advanced Micro Devices, Inc.
@@ -23,7 +23,7 @@
  *
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_dce_v11_0.c,v 1.2 2018/08/27 14:39:20 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "drmP.h"
 #include "amdgpu.h"

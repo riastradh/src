@@ -1,4 +1,4 @@
-/*	$NetBSD: via_mm.c,v 1.4 2018/08/27 14:14:29 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2006 Tungsten Graphics Inc., Bismarck, ND., USA.
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: via_mm.c,v 1.4 2018/08/27 14:14:29 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/via_drm.h>

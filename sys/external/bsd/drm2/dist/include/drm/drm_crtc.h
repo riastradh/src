@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_crtc.h,v 1.7 2018/08/27 06:46:02 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2006 Keith Packard

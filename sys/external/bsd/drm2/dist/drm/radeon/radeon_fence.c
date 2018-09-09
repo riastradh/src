@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_fence.c,v 1.15 2018/08/29 14:53:46 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2009 Jerome Glisse.
@@ -31,7 +31,7 @@
  *    Dave Airlie
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_fence.c,v 1.15 2018/08/29 14:53:46 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/seq_file.h>
 #include <linux/atomic.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_agp.c,v 1.4 2018/08/27 04:58:36 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Red Hat Inc.
@@ -27,7 +27,7 @@
  *    Jerome Glisse <glisse@freedesktop.org>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_agp.c,v 1.4 2018/08/27 04:58:36 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include "radeon.h"

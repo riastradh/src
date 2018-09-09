@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_irq.h,v 1.3 2018/08/27 14:04:50 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2014 Advanced Micro Devices, Inc.

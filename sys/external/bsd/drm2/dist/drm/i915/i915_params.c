@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_params.c,v 1.3 2018/08/27 04:58:23 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2014 Intel Corporation
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_params.c,v 1.3 2018/08/27 04:58:23 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/module.h>
 #include <linux/moduleparam.h>

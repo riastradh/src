@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_i2c.c,v 1.16 2018/08/27 06:16:37 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006 Dave Airlie <airlied@linux.ie>
@@ -29,7 +29,7 @@
  *	Chris Wilson <chris@chris-wilson.co.uk>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_i2c.c,v 1.16 2018/08/27 06:16:37 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>

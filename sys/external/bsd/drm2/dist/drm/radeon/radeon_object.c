@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_object.c,v 1.6 2018/08/27 07:49:58 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2009 Jerome Glisse.
@@ -32,7 +32,7 @@
  *    Dave Airlie
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_object.c,v 1.6 2018/08/27 07:49:58 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/list.h>
 #include <linux/slab.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_plane_helper.h,v 1.3 2018/08/27 04:58:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2011-2013 Intel Corporation

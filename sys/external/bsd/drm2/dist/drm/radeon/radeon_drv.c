@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_drv.c,v 1.9 2018/08/28 03:41:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**
  * \file radeon_drv.c
@@ -32,7 +32,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_drv.c,v 1.9 2018/08/28 03:41:39 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/radeon_drm.h>

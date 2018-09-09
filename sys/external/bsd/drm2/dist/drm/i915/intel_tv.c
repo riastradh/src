@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_tv.c,v 1.7 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2006-2008 Intel Corporation
@@ -33,7 +33,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_tv.c,v 1.7 2018/08/27 04:58:24 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/math64.h>
 #include <drm/drmP.h>

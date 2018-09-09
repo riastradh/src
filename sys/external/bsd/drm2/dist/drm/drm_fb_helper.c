@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_fb_helper.c,v 1.12 2018/08/27 13:37:21 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006-2009 Red Hat Inc.
@@ -30,7 +30,7 @@
  *      Jesse Barnes <jesse.barnes@intel.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_fb_helper.c,v 1.12 2018/08/27 13:37:21 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 

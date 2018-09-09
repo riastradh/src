@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_bo.c,v 1.12 2018/08/27 15:22:54 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2007 Dave Airlied
@@ -30,7 +30,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_bo.c,v 1.12 2018/08/27 15:22:54 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/dma-mapping.h>
 #include <linux/swiotlb.h>

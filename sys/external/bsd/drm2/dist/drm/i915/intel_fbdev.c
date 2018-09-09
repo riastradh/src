@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_fbdev.c,v 1.9 2018/08/27 07:55:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2007 David Airlie
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_fbdev.c,v 1.9 2018/08/27 07:55:39 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/async.h>
 #include <linux/module.h>

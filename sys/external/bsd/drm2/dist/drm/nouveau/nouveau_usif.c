@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_usif.c,v 1.5 2018/08/27 07:43:16 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2014 Red Hat Inc.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_usif.c,v 1.5 2018/08/27 07:43:16 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "nouveau_drm.h"
 #include "nouveau_usif.h"

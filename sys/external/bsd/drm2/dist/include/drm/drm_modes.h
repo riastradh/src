@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_modes.h,v 1.4 2018/08/27 04:58:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2006 Keith Packard

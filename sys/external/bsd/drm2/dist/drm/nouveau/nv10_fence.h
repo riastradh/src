@@ -1,4 +1,4 @@
-/*	$NetBSD: nv10_fence.h,v 1.2 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NV10_FENCE_H_
 #define __NV10_FENCE_H_

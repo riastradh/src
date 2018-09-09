@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_sdvo.c,v 1.10 2018/08/27 06:16:50 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2006 Dave Airlie <airlied@linux.ie>
@@ -28,7 +28,7 @@
  *	Eric Anholt <eric@anholt.net>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_sdvo.c,v 1.10 2018/08/27 06:16:50 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/i2c.h>
 #include <linux/slab.h>

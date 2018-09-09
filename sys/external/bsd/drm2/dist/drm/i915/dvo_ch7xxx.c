@@ -1,4 +1,4 @@
-/*	$NetBSD: dvo_ch7xxx.c,v 1.5 2018/08/27 04:58:23 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
 
@@ -29,7 +29,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **************************************************************************/
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: dvo_ch7xxx.c,v 1.5 2018/08/27 04:58:23 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "dvo.h"
 

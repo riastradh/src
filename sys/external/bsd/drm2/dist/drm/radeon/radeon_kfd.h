@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_kfd.h,v 1.4 2018/08/27 06:45:07 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2014 Advanced Micro Devices, Inc.

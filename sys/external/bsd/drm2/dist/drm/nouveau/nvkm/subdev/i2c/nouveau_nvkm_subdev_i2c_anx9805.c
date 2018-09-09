@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_i2c_anx9805.c,v 1.2 2018/08/27 04:58:34 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs <bskeggs@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_i2c_anx9805.c,v 1.2 2018/08/27 04:58:34 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define anx9805_pad(p) container_of((p), struct anx9805_pad, base)
 #define anx9805_bus(p) container_of((p), struct anx9805_bus, base)

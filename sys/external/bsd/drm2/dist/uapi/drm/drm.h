@@ -1,4 +1,4 @@
-/*	$NetBSD: drm.h,v 1.8 2018/08/27 15:22:54 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**
  * \file drm.h

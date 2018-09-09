@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_edid.c,v 1.6 2018/08/27 04:58:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006 Luc Verhaegen (quirks list)
@@ -30,7 +30,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_edid.c,v 1.6 2018/08/27 04:58:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/kernel.h>
 #include <linux/slab.h>

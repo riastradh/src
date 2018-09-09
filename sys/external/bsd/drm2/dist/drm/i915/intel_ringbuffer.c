@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_ringbuffer.c,v 1.8 2018/08/27 07:29:50 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008-2010 Intel Corporation
@@ -30,7 +30,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_ringbuffer.c,v 1.8 2018/08/27 07:29:50 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <asm/param.h>
 #include <drm/drmP.h>

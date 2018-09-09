@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_opregion.c,v 1.14 2018/08/27 13:54:48 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Intel Corporation <hong.liu@intel.com>
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_opregion.c,v 1.14 2018/08/27 13:54:48 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/printk.h>
 #include <linux/acpi.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_fbcon.h,v 1.3 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2008 Maarten Maathuis.

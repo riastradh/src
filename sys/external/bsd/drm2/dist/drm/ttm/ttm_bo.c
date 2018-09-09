@@ -1,4 +1,4 @@
-/*	$NetBSD: ttm_bo.c,v 1.14 2018/08/27 15:32:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  *
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: ttm_bo.c,v 1.14 2018/08/27 15:32:39 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define pr_fmt(fmt) "[TTM] " fmt
 

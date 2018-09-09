@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_pm.c,v 1.15 2018/08/27 15:09:35 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2012 Intel Corporation
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_pm.c,v 1.15 2018/08/27 15:09:35 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/bitops.h>
 #include <linux/cpufreq.h>

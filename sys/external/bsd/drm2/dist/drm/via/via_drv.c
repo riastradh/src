@@ -1,4 +1,4 @@
-/*	$NetBSD: via_drv.c,v 1.7 2018/08/28 03:41:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: via_drv.c,v 1.7 2018/08/28 03:41:39 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/module.h>
 

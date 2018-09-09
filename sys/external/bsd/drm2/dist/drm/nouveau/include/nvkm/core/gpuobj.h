@@ -1,4 +1,4 @@
-/*	$NetBSD: gpuobj.h,v 1.3 2018/08/27 07:36:18 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVKM_GPUOBJ_H__
 #define __NVKM_GPUOBJ_H__

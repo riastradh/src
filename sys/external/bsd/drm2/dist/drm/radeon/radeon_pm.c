@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_pm.c,v 1.5 2018/08/27 07:50:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,7 +23,7 @@
  *          Alex Deucher <alexdeucher@gmail.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_pm.c,v 1.5 2018/08/27 07:50:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include "radeon.h"

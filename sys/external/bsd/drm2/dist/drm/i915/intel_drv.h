@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_drv.h,v 1.10 2018/08/27 06:18:30 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006 Dave Airlie <airlied@linux.ie>

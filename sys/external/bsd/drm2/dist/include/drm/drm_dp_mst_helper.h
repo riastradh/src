@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_dp_mst_helper.h,v 1.6 2018/08/27 06:56:02 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2014 Red Hat.

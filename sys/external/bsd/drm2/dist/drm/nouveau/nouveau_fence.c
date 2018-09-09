@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_fence.c,v 1.13 2018/08/28 20:59:21 mrg Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2007 Ben Skeggs.
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_fence.c,v 1.13 2018/08/28 20:59:21 mrg Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 

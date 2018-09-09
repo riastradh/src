@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_bios.c,v 1.7 2018/08/27 07:19:55 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2006 Intel Corporation
@@ -27,7 +27,7 @@
  *
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_bios.c,v 1.7 2018/08/27 07:19:55 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/dmi.h>
 #include <drm/drm_dp_helper.h>

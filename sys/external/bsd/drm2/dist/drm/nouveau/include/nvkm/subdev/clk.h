@@ -1,4 +1,4 @@
-/*	$NetBSD: clk.h,v 1.3 2018/08/27 07:43:06 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVKM_CLK_H__
 #define __NVKM_CLK_H__

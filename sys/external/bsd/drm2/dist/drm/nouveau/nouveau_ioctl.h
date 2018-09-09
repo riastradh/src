@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_ioctl.h,v 1.2 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NOUVEAU_IOCTL_H__
 #define __NOUVEAU_IOCTL_H__

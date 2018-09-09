@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_device_tegra.c,v 1.2 2018/08/27 04:58:31 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2014, NVIDIA CORPORATION. All rights reserved.
@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_device_tegra.c,v 1.2 2018/08/27 04:58:31 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <core/tegra.h>
 #ifdef CONFIG_NOUVEAU_PLATFORM_DRIVER

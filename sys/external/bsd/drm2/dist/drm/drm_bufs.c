@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_bufs.c,v 1.9 2018/08/27 06:44:14 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Legacy: Generic DRM Buffer Management
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_bufs.c,v 1.9 2018/08/27 06:44:14 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/vmalloc.h>
 #include <linux/slab.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_atombios_crtc.c,v 1.1 2018/08/27 14:38:20 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2007-8 Advanced Micro Devices, Inc.
@@ -26,7 +26,7 @@
  *          Alex Deucher
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_atombios_crtc.c,v 1.1 2018/08/27 14:38:20 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_crtc_helper.h>

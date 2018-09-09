@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_usif.h,v 1.2 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NOUVEAU_USIF_H__
 #define __NOUVEAU_USIF_H__

@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_acpi.c,v 1.2 2018/08/27 04:58:36 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Advanced Micro Devices, Inc.
@@ -24,7 +24,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_acpi.c,v 1.2 2018/08/27 04:58:36 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/pci.h>
 #include <linux/acpi.h>

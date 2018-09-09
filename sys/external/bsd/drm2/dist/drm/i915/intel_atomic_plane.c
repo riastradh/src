@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_atomic_plane.c,v 1.3 2018/08/27 07:19:44 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2014 Intel Corporation
@@ -34,7 +34,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_atomic_plane.c,v 1.3 2018/08/27 07:19:44 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_atomic_helper.h>

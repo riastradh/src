@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_plane_helper.c,v 1.3 2018/08/27 04:58:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2014 Intel Corporation
@@ -26,7 +26,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_plane_helper.c,v 1.3 2018/08/27 04:58:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/list.h>
 #include <linux/export.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_fbc.c,v 1.3 2018/08/27 07:21:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2014 Intel Corporation
@@ -41,7 +41,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_fbc.c,v 1.3 2018/08/27 07:21:33 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "intel_drv.h"
 #include "i915_drv.h"

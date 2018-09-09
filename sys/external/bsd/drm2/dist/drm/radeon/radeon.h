@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon.h,v 1.6 2018/08/27 06:38:51 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.

@@ -1,4 +1,4 @@
-/*	$NetBSD: pmu.h,v 1.3 2018/08/27 07:35:31 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVKM_PMU_H__
 #define __NVKM_PMU_H__

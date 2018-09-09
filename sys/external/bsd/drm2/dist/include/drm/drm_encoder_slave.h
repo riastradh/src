@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_encoder_slave.h,v 1.2 2018/08/27 04:58:37 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2009 Francisco Jerez.

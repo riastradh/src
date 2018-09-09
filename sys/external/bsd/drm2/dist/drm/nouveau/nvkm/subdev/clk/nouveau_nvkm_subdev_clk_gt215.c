@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_clk_gt215.c,v 1.3 2018/08/27 07:38:56 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -25,7 +25,7 @@
  *          Roy Spliet
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_clk_gt215.c,v 1.3 2018/08/27 07:38:56 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define gt215_clk(p) container_of((p), struct gt215_clk, base)
 #include "gt215.h"

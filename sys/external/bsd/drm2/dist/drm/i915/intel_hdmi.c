@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_hdmi.c,v 1.7 2018/08/27 07:23:10 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2006 Dave Airlie <airlied@linux.ie>
@@ -29,7 +29,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_hdmi.c,v 1.7 2018/08/27 07:23:10 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/i2c.h>
 #include <linux/slab.h>

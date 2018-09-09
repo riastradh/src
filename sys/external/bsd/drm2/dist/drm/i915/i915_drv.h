@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_drv.h,v 1.27 2018/08/27 15:22:54 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* i915_drv.h -- Private header for the I915 driver -*- linux-c -*-
  */

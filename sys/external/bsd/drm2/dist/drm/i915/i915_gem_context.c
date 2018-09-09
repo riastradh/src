@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_context.c,v 1.9 2018/08/27 14:14:29 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2011-2012 Intel Corporation
@@ -88,7 +88,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem_context.c,v 1.9 2018/08/27 14:14:29 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/err.h>
 #include <drm/drmP.h>

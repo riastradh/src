@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_prime.c,v 1.7 2018/08/27 15:32:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2012 Red Hat
@@ -29,7 +29,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_prime.c,v 1.7 2018/08/27 15:32:39 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/export.h>
 #include <linux/dma-buf.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: gf100.h,v 1.2 2018/08/27 04:58:31 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2010 Red Hat Inc.

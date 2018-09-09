@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_stolen.c,v 1.10 2018/08/27 07:20:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008-2012 Intel Corporation
@@ -29,7 +29,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem_stolen.c,v 1.10 2018/08/27 07:20:39 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/printk.h>
 #include <linux/err.h>

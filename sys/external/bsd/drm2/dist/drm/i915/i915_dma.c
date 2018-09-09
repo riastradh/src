@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_dma.c,v 1.25 2018/08/28 03:41:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* i915_dma.c -- DMA support for the I915 -*- linux-c -*-
  */
@@ -29,7 +29,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_dma.c,v 1.25 2018/08/28 03:41:38 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 

@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_core_ioctl.c,v 1.4 2018/08/27 07:39:20 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2014 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs <bskeggs@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_core_ioctl.c,v 1.4 2018/08/27 07:39:20 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <core/ioctl.h>
 #include <core/client.h>

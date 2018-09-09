@@ -1,7 +1,7 @@
-/*	$NetBSD: nouveau_vga.c,v 1.2 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_vga.c,v 1.2 2018/08/27 04:58:24 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/vgaarb.h>
 #include <linux/vga_switcheroo.h>

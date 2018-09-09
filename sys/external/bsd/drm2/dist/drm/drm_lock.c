@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_lock.c,v 1.2 2018/08/27 04:58:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**
  * \file drm_lock.c
@@ -36,7 +36,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_lock.c,v 1.2 2018/08/27 04:58:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/export.h>
 #include <drm/drmP.h>

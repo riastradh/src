@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_irq_kms.c,v 1.4 2018/08/27 07:03:26 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -28,7 +28,7 @@
  *          Jerome Glisse
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_irq_kms.c,v 1.4 2018/08/27 07:03:26 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_crtc_helper.h>

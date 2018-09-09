@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_ibus_gf117.c,v 1.2 2018/08/27 04:58:34 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2015 Samuel Pitosiet
@@ -24,7 +24,7 @@
  * Authors: Samuel Pitoiset
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_ibus_gf117.c,v 1.2 2018/08/27 04:58:34 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "priv.h"
 

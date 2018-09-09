@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_mmu_base.c,v 1.4 2018/09/01 04:38:22 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2010 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_mmu_base.c,v 1.4 2018/09/01 04:38:22 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "priv.h"
 

@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_gtt.c,v 1.15 2018/08/27 14:53:54 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2010 Daniel Vetter
@@ -26,7 +26,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem_gtt.c,v 1.15 2018/08/27 14:53:54 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/bitmap.h>
 #include <linux/err.h>

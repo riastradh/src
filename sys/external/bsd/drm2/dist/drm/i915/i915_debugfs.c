@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_debugfs.c,v 1.3 2018/08/27 04:58:23 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008 Intel Corporation
@@ -29,7 +29,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_debugfs.c,v 1.3 2018/08/27 04:58:23 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/seq_file.h>
 #include <linux/circ_buf.h>

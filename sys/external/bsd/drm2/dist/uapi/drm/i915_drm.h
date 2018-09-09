@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_drm.h,v 1.3 2018/08/27 04:58:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2003 Tungsten Graphics, Inc., Cedar Park, Texas.

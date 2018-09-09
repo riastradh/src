@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_ringbuffer.h,v 1.6 2018/08/27 07:24:12 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef _INTEL_RINGBUFFER_H_
 #define _INTEL_RINGBUFFER_H_

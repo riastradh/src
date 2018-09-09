@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_bios_shadowpci.c,v 1.3 2018/08/27 07:42:02 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -23,7 +23,7 @@
  *
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_bios_shadowpci.c,v 1.3 2018/08/27 07:42:02 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "priv.h"
 

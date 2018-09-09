@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_gr_gf104.c,v 1.2 2018/08/27 04:58:32 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs <bskeggs@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_gr_gf104.c,v 1.2 2018/08/27 04:58:32 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "gf100.h"
 #include "ctxgf100.h"

@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_disp_basegk110.c,v 1.2 2018/08/27 04:58:31 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2015 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs <bskeggs@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_disp_basegk110.c,v 1.2 2018/08/27 04:58:31 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "dmacnv50.h"
 #include "rootnv50.h"

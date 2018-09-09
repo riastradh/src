@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_dispnv04_overlay.c,v 1.3 2018/08/27 04:58:29 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Ilia Mirkin
@@ -26,7 +26,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_dispnv04_overlay.c,v 1.3 2018/08/27 04:58:29 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_crtc.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: nv04.h,v 1.2 2018/08/27 04:58:34 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NV04_MMU_PRIV__
 #define __NV04_MMU_PRIV__

@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_fifo_chan.c,v 1.9 2018/09/09 03:12:51 pgoyette Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_fifo_chan.c,v 1.9 2018/09/09 03:12:51 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "chan.h"
 

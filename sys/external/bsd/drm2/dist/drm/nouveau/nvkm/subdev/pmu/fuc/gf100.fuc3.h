@@ -1,4 +1,4 @@
-/*	$NetBSD: gf100.fuc3.h,v 1.2 2018/08/27 04:58:35 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 uint32_t gf100_pmu_data[] = {
 /* 0x0000: proc_kern */
