@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVBIOS_CONN_H__
 #define __NVBIOS_CONN_H__
 enum dcb_connector_type {
@@ -20,6 +21,7 @@ enum dcb_connector_type {
 	DCB_CONNECTOR_HDMI_C = 0x63,
 	DCB_CONNECTOR_DMS59_DP0 = 0x64,
 	DCB_CONNECTOR_DMS59_DP1 = 0x65,
+	DCB_CONNECTOR_WFD	= 0x70,
 	DCB_CONNECTOR_NONE = 0xff
 };
 

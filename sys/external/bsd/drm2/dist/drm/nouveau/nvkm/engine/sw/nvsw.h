@@ -1,9 +1,10 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_NVSW_H__
 #define __NVKM_NVSW_H__
 #define nvkm_nvsw(p) container_of((p), struct nvkm_nvsw, object)
-#include "priv.h"
+#include <core/object.h>
 
 struct nvkm_nvsw {
 	struct nvkm_object object;

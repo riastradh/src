@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef _VM_BASIC_TYPES_H_
 #define _VM_BASIC_TYPES_H_
 #include <linux/kernel.h>

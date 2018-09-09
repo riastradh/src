@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVBIOS_P0260_H__
 #define __NVBIOS_P0260_H__
 u32 nvbios_P0260Te(struct nvkm_bios *,

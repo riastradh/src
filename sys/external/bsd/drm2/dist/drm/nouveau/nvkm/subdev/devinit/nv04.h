@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NV04_DEVINIT_H__
 #define __NV04_DEVINIT_H__
 #define nv04_devinit(p) container_of((p), struct nv04_devinit, base)

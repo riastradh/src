@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_MSVLD_H__
 #define __NVKM_MSVLD_H__
 #include <engine/falcon.h>

@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_PM_NV40_H__
 #define __NVKM_PM_NV40_H__
 #define nv40_pm(p) container_of((p), struct nv40_pm, base)

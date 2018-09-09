@@ -29,7 +29,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "nvsw.h"
 #include "chan.h"
 
-#include <nvif/class.h>
+#include <nvif/if0004.h>
 
 static int
 nvkm_nvsw_mthd_(struct nvkm_object *object, u32 mthd, void *data, u32 size)
@@ -46,7 +46,7 @@ nvkm_nvsw_ntfy_(struct nvkm_object *object, u32 mthd,
 {
 	struct nvkm_nvsw *nvsw = nvkm_nvsw(object);
 	switch (mthd) {
-	case NVSW_NTFY_UEVENT:
+	case NV04_NVSW_NTFY_UEVENT:
 		*pevent = &nvsw->chan->event;
 		return 0;
 	default:
