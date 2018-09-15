@@ -30,6 +30,88 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <core/client.h>
 #include <core/engine.h>
 
+struct nvkm_object *
+nvkm_object_search(struct nvkm_client *client, u64 handle,
+		   const struct nvkm_object_func *func)
+{
+	struct nvkm_object *object;
+
+	if (handle) {
+#ifdef __NetBSD__
+		object = rb_tree_find_node(&client->objtree, &handle);
+		if (object)
+			goto done;
+#else
+		struct rb_node *node = client->objroot.rb_node;
+		while (node) {
+			object = rb_entry(node, typeof(*object), node);
+			if (handle < object->object)
+				node = node->rb_left;
+			else
+			if (handle > object->object)
+				node = node->rb_right;
+			else
+				goto done;
+		}
+#endif
+		return ERR_PTR(-ENOENT);
+	} else {
+		object = &client->object;
+	}
+
+done:
+	if (unlikely(func && object->func != func))
+		return ERR_PTR(-EINVAL);
+	return object;
+}
+
+void
+nvkm_object_remove(struct nvkm_object *object)
+{
+#ifdef __NetBSD__
+	if (object->on_tree) {
+		rb_tree_remove_node(&object->client->objtree, object);
+		object->on_tree = false;
+	}
+#else
+	if (!RB_EMPTY_NODE(&object->node))
+		rb_erase(&object->node, &object->client->objroot);
+#endif
+}
+
+bool
+nvkm_object_insert(struct nvkm_object *object)
+{
+#ifdef __NetBSD__
+	struct nvkm_object *collision;
+
+	collision = rb_tree_insert_node(&object->client->objtree, object);
+	if (collision != object)
+		return false;
+	object->on_tree = true;
+	return true;
+#else
+	struct rb_node **ptr = &object->client->objroot.rb_node;
+	struct rb_node *parent = NULL;
+
+	while (*ptr) {
+		struct nvkm_object *this = rb_entry(*ptr, typeof(*this), node);
+		parent = *ptr;
+		if (object->object < this->object)
+			ptr = &parent->rb_left;
+		else
+		if (object->object > this->object)
+			ptr = &parent->rb_right;
+		else
+			return false;
+	}
+
+	rb_link_node(&object->node, parent, ptr);
+	rb_insert_color(&object->node, &object->client->objroot);
+	return true;
+#endif
+}
+
 int
 nvkm_object_mthd(struct nvkm_object *object, u32 mthd, void *data, u32 size)
 {
@@ -50,7 +132,7 @@ nvkm_object_ntfy(struct nvkm_object *object, u32 mthd,
 #ifdef __NetBSD__
 int
 nvkm_object_map(struct nvkm_object *object, bus_space_tag_t *tagp, u64 *addr,
-    u32 *size)
+    u64 *size)
 {
 	if (likely(object->func->map))
 		return object->func->map(object, tagp, addr, size);
@@ -58,13 +140,22 @@ nvkm_object_map(struct nvkm_object *object, bus_space_tag_t *tagp, u64 *addr,
 }
 #else
 int
-nvkm_object_map(struct nvkm_object *object, u64 *addr, u32 *size)
+nvkm_object_map(struct nvkm_object *object, void *argv, u32 argc,
+		enum nvkm_object_map *type, u64 *addr, u64 *size)
 {
 	if (likely(object->func->map))
-		return object->func->map(object, addr, size);
+		return object->func->map(object, argv, argc, type, addr, size);
 	return -ENODEV;
 }
 #endif
+
+int
+nvkm_object_unmap(struct nvkm_object *object)
+{
+	if (likely(object->func->unmap))
+		return object->func->unmap(object);
+	return -ENODEV;
+}
 
 int
 nvkm_object_rd08(struct nvkm_object *object, u64 addr, u8 *data)
@@ -216,6 +307,7 @@ nvkm_object_dtor(struct nvkm_object *object)
 	}
 
 	nvif_debug(object, "destroy running...\n");
+	nvkm_object_unmap(object);
 	if (object->func->dtor)
 		data = object->func->dtor(object);
 	nvkm_engine_unref(&object->engine);
@@ -230,7 +322,7 @@ nvkm_object_del(struct nvkm_object **pobject)
 	struct nvkm_object *object = *pobject;
 	if (object && !WARN_ON(!object->func)) {
 		*pobject = nvkm_object_dtor(object);
-		nvkm_client_remove(object->client, object);
+		nvkm_object_remove(object);
 		list_del(&object->head);
 		kfree(*pobject);
 		*pobject = NULL;
@@ -246,6 +338,9 @@ nvkm_object_ctor(const struct nvkm_object_func *func,
 	object->engine = nvkm_engine_ref(oclass->engine);
 	object->oclass = oclass->base.oclass;
 	object->handle = oclass->handle;
+	object->route  = oclass->route;
+	object->token  = oclass->token;
+	object->object = oclass->object;
 	INIT_LIST_HEAD(&object->head);
 	INIT_LIST_HEAD(&object->tree);
 #ifdef __NetBSD__
@@ -253,7 +348,7 @@ nvkm_object_ctor(const struct nvkm_object_func *func,
 #else
 	RB_CLEAR_NODE(&object->node);
 #endif
-	WARN_ON(oclass->engine && !object->engine);
+	WARN_ON(IS_ERR(object->engine));
 }
 
 int

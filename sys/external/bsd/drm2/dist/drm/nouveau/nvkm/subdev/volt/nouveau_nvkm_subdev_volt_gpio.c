@@ -30,6 +30,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <subdev/bios.h>
 #include <subdev/bios/gpio.h>
 #include <subdev/gpio.h>
+#include "priv.h"
 
 #include "priv.h"
 

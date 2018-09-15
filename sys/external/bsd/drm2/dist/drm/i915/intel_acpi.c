@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Intel ACPI functions
  *
@@ -109,21 +110,9 @@ acpi_check_dsm(ACPI_HANDLE handle, const uint8_t *uuid, int rev, uint64_t funcs)
 #define INTEL_DSM_REVISION_ID 1 /* For Calpella anyway... */
 #define INTEL_DSM_FN_PLATFORM_MUX_INFO 1 /* No args */
 
-static struct intel_dsm_priv {
-#ifdef __NetBSD__
-	ACPI_HANDLE dhandle;
-#else
-	acpi_handle dhandle;
-#endif
-} intel_dsm_priv;
-
-static const u8 intel_dsm_guid[] = {
-	0xd3, 0x73, 0xd8, 0x7e,
-	0xd0, 0xc2,
-	0x4f, 0x4e,
-	0xa8, 0x54,
-	0x0f, 0x13, 0x17, 0xb0, 0x1c, 0x2c
-};
+static const guid_t intel_dsm_guid =
+	GUID_INIT(0x7ed873d3, 0xc2d0, 0x4e4f,
+		  0xa8, 0x54, 0x0f, 0x13, 0x17, 0xb0, 0x1c, 0x2c);
 
 static const char *intel_dsm_port_name(u8 id)
 {
@@ -177,7 +166,7 @@ static const char *intel_dsm_mux_type(u8 type)
 	}
 }
 
-static void intel_dsm_platform_mux_info(void)
+static void intel_dsm_platform_mux_info(acpi_handle dhandle)
 {
 	int i;
 #ifdef __NetBSD__
@@ -186,7 +175,7 @@ static void intel_dsm_platform_mux_info(void)
 	union acpi_object *pkg, *connector_count;
 #endif
 
-	pkg = acpi_evaluate_dsm_typed(intel_dsm_priv.dhandle, intel_dsm_guid,
+	pkg = acpi_evaluate_dsm_typed(dhandle, &intel_dsm_guid,
 			INTEL_DSM_REVISION_ID, INTEL_DSM_FN_PLATFORM_MUX_INFO,
 			NULL, ACPI_TYPE_PACKAGE);
 	if (!pkg) {
@@ -237,9 +226,9 @@ static void intel_dsm_platform_mux_info(void)
 }
 
 #ifdef __NetBSD__
-static bool intel_dsm_pci_probe(ACPI_HANDLE dhandle)
+static ACPI_HANDLE intel_dsm_pci_probe(ACPI_HANDLE dhandle)
 #else
-static bool intel_dsm_pci_probe(struct pci_dev *pdev)
+static acpi_handle intel_dsm_pci_probe(struct pci_dev *pdev)
 #endif
 {
 #ifndef __NetBSD__
@@ -248,18 +237,17 @@ static bool intel_dsm_pci_probe(struct pci_dev *pdev)
 	dhandle = ACPI_HANDLE(&pdev->dev);
 #endif
 	if (!dhandle)
-		return false;
+		return NULL;
 
-	if (!acpi_check_dsm(dhandle, intel_dsm_guid, INTEL_DSM_REVISION_ID,
+	if (!acpi_check_dsm(dhandle, &intel_dsm_guid, INTEL_DSM_REVISION_ID,
 			    1 << INTEL_DSM_FN_PLATFORM_MUX_INFO)) {
 		DRM_DEBUG_KMS("no _DSM method for intel device\n");
-		return false;
+		return NULL;
 	}
 
-	intel_dsm_priv.dhandle = dhandle;
-	intel_dsm_platform_mux_info();
+	intel_dsm_platform_mux_info(dhandle);
 
-	return true;
+	return dhandle;
 }
 
 #ifdef __NetBSD__
@@ -284,8 +272,8 @@ intel_dsm_vga_match(const struct pci_attach_args *pa)
 	vga_count++;
 	struct acpi_devnode *node = acpi_pcidev_find(0 /*XXX segment*/,
 	    pa->pa_bus, pa->pa_device, pa->pa_function);
-	if (node != NULL)
-		has_dsm |= intel_dsm_pci_probe(node->ad_handle);
+	if (node != NULL && intel_dsm_pci_probe(node->ad_handle) != NULL)
+		has_dsm = true;
 	return 0;
 }
 
@@ -310,19 +298,19 @@ static bool intel_dsm_detect(struct drm_device *dev)
 #else
 static bool intel_dsm_detect(void)
 {
+	acpi_handle dhandle = NULL;
 	char acpi_method_name[255] = { 0 };
 	struct acpi_buffer buffer = {sizeof(acpi_method_name), acpi_method_name};
 	struct pci_dev *pdev = NULL;
-	bool has_dsm = false;
 	int vga_count = 0;
 
 	while ((pdev = pci_get_class(PCI_CLASS_DISPLAY_VGA << 8, pdev)) != NULL) {
 		vga_count++;
-		has_dsm |= intel_dsm_pci_probe(pdev);
+		dhandle = intel_dsm_pci_probe(pdev) ?: dhandle;
 	}
 
-	if (vga_count == 2 && has_dsm) {
-		acpi_get_name(intel_dsm_priv.dhandle, ACPI_FULL_PATHNAME, &buffer);
+	if (vga_count == 2 && dhandle) {
+		acpi_get_name(dhandle, ACPI_FULL_PATHNAME, &buffer);
 		DRM_DEBUG_DRIVER("vga_switcheroo: detected DSM switching method %s handle\n",
 				 acpi_method_name);
 		return true;

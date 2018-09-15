@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NOUVEAU_VGA_H__
 #define __NOUVEAU_VGA_H__
 

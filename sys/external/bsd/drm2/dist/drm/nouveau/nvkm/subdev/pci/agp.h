@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #include "priv.h"
 #if 0 && (defined(CONFIG_AGP) || (defined(CONFIG_AGP_MODULE) && defined(MODULE))) /* XXX nouveau agp */
 #ifndef __NVKM_PCI_AGP_H__

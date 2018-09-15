@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_I2C_PRIV_H__
 #define __NVKM_I2C_PRIV_H__
 #define nvkm_i2c(p) container_of((p), struct nvkm_i2c, subdev)

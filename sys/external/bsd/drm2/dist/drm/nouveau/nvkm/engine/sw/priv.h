@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_SW_PRIV_H__
 #define __NVKM_SW_PRIV_H__
 #define nvkm_sw(p) container_of((p), struct nvkm_sw, engine)

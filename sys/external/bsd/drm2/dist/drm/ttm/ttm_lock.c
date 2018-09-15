@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 OR MIT */
 /**************************************************************************
  *
  * Copyright (c) 2007-2009 VMware, Inc., Palo Alto, CA., USA
@@ -38,7 +39,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/atomic.h>
 #include <linux/errno.h>
 #include <linux/wait.h>
-#include <linux/sched.h>
+#include <linux/sched/signal.h>
 #include <linux/module.h>
 
 #define TTM_WRITE_LOCK_PENDING    (1 << 0)

@@ -117,7 +117,7 @@ read_pll_src(struct nv50_clk *clk, u32 base)
 		M    = (coef & 0x000000ff) >> 0;
 		break;
 	default:
-		BUG_ON(1);
+		BUG();
 		M = 0;		/* XXX GCC is stupid */
 		N = 0;		/* XXX GCC is stupid */
 		P = 0;		/* XXX GCC is stupid */

@@ -33,29 +33,11 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <core/enum.h>
 #include <engine/fifo.h>
 
-int
-nv50_fb_memtype[0x80] = {
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0,
-	1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 0, 0,
-	0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 2, 2, 2, 2,
-	1, 0, 2, 0, 1, 0, 2, 0, 1, 1, 2, 2, 1, 1, 0, 0
-};
-
 static int
 nv50_fb_ram_new(struct nvkm_fb *base, struct nvkm_ram **pram)
 {
 	struct nv50_fb *fb = nv50_fb(base);
 	return fb->func->ram_new(&fb->base, pram);
-}
-
-static bool
-nv50_fb_memtype_valid(struct nvkm_fb *fb, u32 memtype)
-{
-	return nv50_fb_memtype[(memtype & 0xff00) >> 8] != 0;
 }
 
 static const struct nvkm_enum vm_dispatch_subclients[] = {
@@ -137,7 +119,7 @@ static const struct nvkm_enum vm_engine[] = {
 	{ 0x0000000b, "PCOUNTER" },
 	{ 0x0000000c, "SEMAPHORE_BG" },
 	{ 0x0000000d, "PCE0" },
-	{ 0x0000000e, "PDAEMON" },
+	{ 0x0000000e, "PMU" },
 	{}
 };
 
@@ -215,68 +197,11 @@ nv50_fb_intr(struct nvkm_fb *base)
 	nvkm_fifo_chan_put(fifo, flags, &chan);
 }
 
-static void
-nv50_fb_init(struct nvkm_fb *base)
+static int
+nv50_fb_oneinit(struct nvkm_fb *base)
 {
 	struct nv50_fb *fb = nv50_fb(base);
 	struct nvkm_device *device = fb->base.subdev.device;
-
-	/* Not a clue what this is exactly.  Without pointing it at a
-	 * scratch page, VRAM->GART blits with M2MF (as in DDX DFS)
-	 * cause IOMMU "read from address 0" errors (rh#561267)
-	 */
-	nvkm_wr32(device, 0x100c08, fb->r100c08 >> 8);
-
-	/* This is needed to get meaningful information from 100c90
-	 * on traps. No idea what these values mean exactly. */
-	nvkm_wr32(device, 0x100c90, fb->func->trap);
-}
-
-static void *
-nv50_fb_dtor(struct nvkm_fb *base)
-{
-	struct nv50_fb *fb = nv50_fb(base);
-	struct nvkm_device *device = fb->base.subdev.device;
-
-	if (fb->r100c08_page) {
-#ifdef __NetBSD__
-		const bus_dma_tag_t dmat = device->func->dma_tag(device);
-
-		bus_dmamap_unload(dmat, fb->r100c08_page);
-		bus_dmamem_unmap(dmat, fb->r100c08_kva, PAGE_SIZE);
-		bus_dmamap_destroy(dmat, fb->r100c08_page);
-		bus_dmamem_free(dmat, &fb->r100c08_seg, 1);
-		fb->r100c08_page = NULL;
-#else
-		dma_unmap_page(device->dev, fb->r100c08, PAGE_SIZE,
-			       DMA_BIDIRECTIONAL);
-		__free_page(fb->r100c08_page);
-#endif
-	}
-
-	return fb;
-}
-
-static const struct nvkm_fb_func
-nv50_fb_ = {
-	.dtor = nv50_fb_dtor,
-	.init = nv50_fb_init,
-	.intr = nv50_fb_intr,
-	.ram_new = nv50_fb_ram_new,
-	.memtype_valid = nv50_fb_memtype_valid,
-};
-
-int
-nv50_fb_new_(const struct nv50_fb_func *func, struct nvkm_device *device,
-	     int index, struct nvkm_fb **pfb)
-{
-	struct nv50_fb *fb;
-
-	if (!(fb = kzalloc(sizeof(*fb), GFP_KERNEL)))
-		return -ENOMEM;
-	nvkm_fb_ctor(&nv50_fb_, device, index, &fb->base);
-	fb->func = func;
-	*pfb = &fb->base;
 
 #ifdef __NetBSD__
     {
@@ -328,10 +253,84 @@ fail3: __unused	bus_dmamem_unmap(dmat, fb->r100c08_kva, PAGE_SIZE);
 					   PAGE_SIZE, DMA_BIDIRECTIONAL);
 		if (dma_mapping_error(device->dev, fb->r100c08))
 			return -EFAULT;
-	} else {
-		nvkm_warn(&fb->base.subdev, "failed 100c08 page alloc\n");
 	}
 #endif
+
+	return 0;
+}
+
+static void
+nv50_fb_init(struct nvkm_fb *base)
+{
+	struct nv50_fb *fb = nv50_fb(base);
+	struct nvkm_device *device = fb->base.subdev.device;
+
+	/* Not a clue what this is exactly.  Without pointing it at a
+	 * scratch page, VRAM->GART blits with M2MF (as in DDX DFS)
+	 * cause IOMMU "read from address 0" errors (rh#561267)
+	 */
+	nvkm_wr32(device, 0x100c08, fb->r100c08 >> 8);
+
+	/* This is needed to get meaningful information from 100c90
+	 * on traps. No idea what these values mean exactly. */
+	nvkm_wr32(device, 0x100c90, fb->func->trap);
+}
+
+static u32
+nv50_fb_tags(struct nvkm_fb *base)
+{
+	struct nv50_fb *fb = nv50_fb(base);
+	if (fb->func->tags)
+		return fb->func->tags(&fb->base);
+	return 0;
+}
+
+static void *
+nv50_fb_dtor(struct nvkm_fb *base)
+{
+	struct nv50_fb *fb = nv50_fb(base);
+	struct nvkm_device *device = fb->base.subdev.device;
+
+	if (fb->r100c08_page) {
+#ifdef __NetBSD__
+		const bus_dma_tag_t dmat = device->func->dma_tag(device);
+
+		bus_dmamap_unload(dmat, fb->r100c08_page);
+		bus_dmamem_unmap(dmat, fb->r100c08_kva, PAGE_SIZE);
+		bus_dmamap_destroy(dmat, fb->r100c08_page);
+		bus_dmamem_free(dmat, &fb->r100c08_seg, 1);
+		fb->r100c08_page = NULL;
+#else
+		dma_unmap_page(device->dev, fb->r100c08, PAGE_SIZE,
+			       DMA_BIDIRECTIONAL);
+		__free_page(fb->r100c08_page);
+#endif
+	}
+
+	return fb;
+}
+
+static const struct nvkm_fb_func
+nv50_fb_ = {
+	.dtor = nv50_fb_dtor,
+	.tags = nv50_fb_tags,
+	.oneinit = nv50_fb_oneinit,
+	.init = nv50_fb_init,
+	.intr = nv50_fb_intr,
+	.ram_new = nv50_fb_ram_new,
+};
+
+int
+nv50_fb_new_(const struct nv50_fb_func *func, struct nvkm_device *device,
+	     int index, struct nvkm_fb **pfb)
+{
+	struct nv50_fb *fb;
+
+	if (!(fb = kzalloc(sizeof(*fb), GFP_KERNEL)))
+		return -ENOMEM;
+	nvkm_fb_ctor(&nv50_fb_, device, index, &fb->base);
+	fb->func = func;
+	*pfb = &fb->base;
 
 	return 0;
 }
@@ -339,6 +338,7 @@ fail3: __unused	bus_dmamem_unmap(dmat, fb->r100c08_kva, PAGE_SIZE);
 static const struct nv50_fb_func
 nv50_fb = {
 	.ram_new = nv50_ram_new,
+	.tags = nv20_fb_tags,
 	.trap = 0x000707ff,
 };
 

@@ -41,20 +41,29 @@ nvkm_oproxy_ntfy(struct nvkm_object *object, u32 mthd,
 	return nvkm_object_ntfy(nvkm_oproxy(object)->object, mthd, pevent);
 }
 
+static int
 #ifdef __NetBSD__
-static int
-nvkm_oproxy_map(struct nvkm_object *object, bus_space_tag_t *tagp, u64 *addr,
-    u32 *size)
-{
-	return nvkm_object_map(nvkm_oproxy(object)->object, tagp, addr, size);
-}
+nvkm_oproxy_map(struct nvkm_object *object, void *argv, u32 argc,
+    enum nvkm_object_map *type, bus_space_tag_t *tag, u64 *addr, u64 *size)
 #else
-static int
-nvkm_oproxy_map(struct nvkm_object *object, u64 *addr, u32 *size)
-{
-	return nvkm_object_map(nvkm_oproxy(object)->object, addr, size);
-}
+nvkm_oproxy_map(struct nvkm_object *object, void *argv, u32 argc,
+		enum nvkm_object_map *type, u64 *addr, u64 *size)
 #endif
+{
+	struct nvkm_oproxy *oproxy = nvkm_oproxy(object);
+#ifdef __NetBSD__
+	return nvkm_object_map(oproxy->object, argv, argc, type, tag, addr,
+	    size);
+#else
+	return nvkm_object_map(oproxy->object, argv, argc, type, addr, size);
+#endif
+}
+
+static int
+nvkm_oproxy_unmap(struct nvkm_object *object)
+{
+	return nvkm_object_unmap(nvkm_oproxy(object)->object);
+}
 
 static int
 nvkm_oproxy_rd08(struct nvkm_object *object, u64 addr, u8 *data)
@@ -185,6 +194,7 @@ nvkm_oproxy_func = {
 	.mthd = nvkm_oproxy_mthd,
 	.ntfy = nvkm_oproxy_ntfy,
 	.map = nvkm_oproxy_map,
+	.unmap = nvkm_oproxy_unmap,
 	.rd08 = nvkm_oproxy_rd08,
 	.rd16 = nvkm_oproxy_rd16,
 	.rd32 = nvkm_oproxy_rd32,

@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+// SPDX-License-Identifier: GPL-2.0
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
@@ -64,7 +65,7 @@ void *
 nv20_gr_chan_dtor(struct nvkm_object *object)
 {
 	struct nv20_gr_chan *chan = nv20_gr_chan(object);
-	nvkm_memory_del(&chan->inst);
+	nvkm_memory_unref(&chan->inst);
 	return chan;
 }
 
@@ -328,7 +329,7 @@ void *
 nv20_gr_dtor(struct nvkm_gr *base)
 {
 	struct nv20_gr *gr = nv20_gr(base);
-	nvkm_memory_del(&gr->ctxtab);
+	nvkm_memory_unref(&gr->ctxtab);
 	return gr;
 }
 
@@ -342,7 +343,7 @@ nv20_gr_new_(const struct nvkm_gr_func *func, struct nvkm_device *device,
 		return -ENOMEM;
 	*pgr = &gr->base;
 
-	return nvkm_gr_ctor(func, device, index, 0x00001000, true, &gr->base);
+	return nvkm_gr_ctor(func, device, index, true, &gr->base);
 }
 
 static const struct nvkm_gr_func

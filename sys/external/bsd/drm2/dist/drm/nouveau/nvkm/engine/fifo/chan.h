@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_FIFO_CHAN_H__
 #define __NVKM_FIFO_CHAN_H__
 #define nvkm_fifo_chan(p) container_of((p), struct nvkm_fifo_chan, object)
@@ -31,5 +32,5 @@ struct nvkm_fifo_chan_oclass {
 	struct nvkm_sclass base;
 };
 
-int g84_fifo_chan_ntfy(struct nvkm_fifo_chan *, u32, struct nvkm_event **);
+int gf100_fifo_chan_ntfy(struct nvkm_fifo_chan *, u32, struct nvkm_event **);
 #endif

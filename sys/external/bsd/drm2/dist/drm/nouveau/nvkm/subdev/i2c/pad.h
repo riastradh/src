@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_I2C_PAD_H__
 #define __NVKM_I2C_PAD_H__
 #include <subdev/i2c.h>
@@ -51,11 +52,11 @@ int nv4e_i2c_pad_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
 int nv50_i2c_pad_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
 int g94_i2c_pad_x_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
 int gf119_i2c_pad_x_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
-int gm204_i2c_pad_x_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
+int gm200_i2c_pad_x_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
 
 int g94_i2c_pad_s_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
 int gf119_i2c_pad_s_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
-int gm204_i2c_pad_s_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
+int gm200_i2c_pad_s_new(struct nvkm_i2c *, int, struct nvkm_i2c_pad **);
 
 int anx9805_pad_new(struct nvkm_i2c_bus *, int, u8, struct nvkm_i2c_pad **);
 

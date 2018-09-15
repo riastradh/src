@@ -1,4 +1,4 @@
-/*	$NetBSD$	*/
+/*	$NetBSD: amdgpu_kv_smc.c,v 1.1 2018/08/27 14:22:31 riastradh Exp $	*/
 
 /*
  * Copyright 2013 Advanced Micro Devices, Inc.
@@ -25,9 +25,9 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD$");
+__KERNEL_RCSID(0, "$NetBSD: amdgpu_kv_smc.c,v 1.1 2018/08/27 14:22:31 riastradh Exp $");
 
-#include "drmP.h"
+#include <drm/drmP.h>
 #include "amdgpu.h"
 #include "cikd.h"
 #include "kv_dpm.h"

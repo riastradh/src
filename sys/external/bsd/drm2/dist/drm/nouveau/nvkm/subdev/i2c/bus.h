@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_I2C_BUS_H__
 #define __NVKM_I2C_BUS_H__
 #include "pad.h"

@@ -28,7 +28,7 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
-#include "drmP.h"
+#include <drm/drmP.h>
 #include "radeon.h"
 #include "rv770d.h"
 #include "rv770_dpm.h"

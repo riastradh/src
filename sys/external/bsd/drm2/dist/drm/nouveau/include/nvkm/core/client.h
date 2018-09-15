@@ -1,7 +1,9 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef __NVKM_CLIENT_H__
 #define __NVKM_CLIENT_H__
+#define nvkm_client(p) container_of((p), struct nvkm_client, object)
 #include <core/object.h>
 
 struct nvkm_client {
@@ -10,20 +12,19 @@ struct nvkm_client {
 	u64 device;
 	u32 debug;
 
-	struct nvkm_client_notify *notify[16];
+	struct nvkm_client_notify *notify[32];
 #ifdef __NetBSD__
 	struct rb_tree objtree;
-	struct rb_tree dmatree;
 #else
 	struct rb_root objroot;
-	struct rb_root dmaroot;
 #endif
 
 	bool super;
 	void *data;
 	int (*ntfy)(const void *, u32, const void *, u32);
 
-	struct nvkm_vm *vm;
+	struct list_head umem;
+	spinlock_t lock;
 
 #ifdef __NetBSD__
 	bus_space_tag_t mmiot;
@@ -33,17 +34,11 @@ struct nvkm_client {
 #endif
 };
 
-extern const rb_tree_ops_t nvkm_client_dmatree_ops;
-
-bool nvkm_client_insert(struct nvkm_client *, struct nvkm_object *);
-void nvkm_client_remove(struct nvkm_client *, struct nvkm_object *);
-struct nvkm_object *nvkm_client_search(struct nvkm_client *, u64 object);
-
 int  nvkm_client_new(const char *name, u64 device, const char *cfg,
-		     const char *dbg, struct nvkm_client **);
-void nvkm_client_del(struct nvkm_client **);
-int  nvkm_client_init(struct nvkm_client *);
-int  nvkm_client_fini(struct nvkm_client *, bool suspend);
+		     const char *dbg,
+		     int (*)(const void *, u32, const void *, u32),
+		     struct nvkm_client **);
+struct nvkm_client *nvkm_client_search(struct nvkm_client *, u64 handle);
 
 int nvkm_client_notify_new(struct nvkm_object *, struct nvkm_event *,
 			   void *data, u32 size);
@@ -53,8 +48,8 @@ int nvkm_client_notify_put(struct nvkm_client *, int index);
 
 /* logging for client-facing objects */
 #define nvif_printk(o,l,p,f,a...) do {                                         \
-	struct nvkm_object *_object = (o);                                     \
-	struct nvkm_client *_client = _object->client;                         \
+	const struct nvkm_object *_object = (o);                               \
+	const struct nvkm_client *_client = _object->client;                   \
 	if (_client->debug == NV_DBG_##l || _client->debug > NV_DBG_##l)       \
 		printk(KERN_##p "nouveau: %s:%08x:%08x: "f, _client->name,     \
 		       _object->handle, _object->oclass, ##a);                 \

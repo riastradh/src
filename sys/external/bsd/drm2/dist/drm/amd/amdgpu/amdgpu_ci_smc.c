@@ -28,8 +28,7 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
-#include <asm/byteorder.h>
-#include "drmP.h"
+#include <drm/drmP.h>
 #include "amdgpu.h"
 #include "cikd.h"
 #include "ppsmc.h"

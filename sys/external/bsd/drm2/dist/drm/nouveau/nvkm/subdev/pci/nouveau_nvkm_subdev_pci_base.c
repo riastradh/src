@@ -74,15 +74,17 @@ static irqreturn_t
 nvkm_pci_intr(DRM_IRQ_ARGS)
 {
 	struct nvkm_pci *pci = arg;
-	struct nvkm_mc *mc = pci->subdev.device->mc;
+	struct nvkm_device *device = pci->subdev.device;
 	bool handled = false;
-	if (likely(mc)) {
-		nvkm_mc_intr_unarm(mc);
-		if (pci->msi)
-			pci->func->msi_rearm(pci);
-		nvkm_mc_intr(mc, &handled);
-		nvkm_mc_intr_rearm(mc);
-	}
+
+	if (pci->irq < 0)
+		return IRQ_HANDLED;
+
+	nvkm_mc_intr_unarm(device);
+	if (pci->msi)
+		pci->func->msi_rearm(pci);
+	nvkm_mc_intr(device, &handled);
+	nvkm_mc_intr_rearm(device);
 	return handled ? IRQ_HANDLED : IRQ_NONE;
 }
 
@@ -90,23 +92,6 @@ static int
 nvkm_pci_fini(struct nvkm_subdev *subdev, bool suspend)
 {
 	struct nvkm_pci *pci = nvkm_pci(subdev);
-
-#ifdef __NetBSD__
-	const struct pci_attach_args *pa = &pci->pdev->pd_pa;
-	if (pci->pci_intrcookie != NULL) {
-		pci_intr_disestablish(pa->pa_pc, pci->pci_intrcookie);
-		pci->pci_intrcookie = NULL;
-	}
-	if (pci->pci_ihp != NULL) {
-		pci_intr_release(pa->pa_pc, pci->pci_ihp, 1);
-		pci->pci_ihp = NULL;
-	}
-#else
-	if (pci->irq >= 0) {
-		free_irq(pci->irq, pci);
-		pci->irq = -1;
-	};
-#endif
 
 	if (pci->agp.bridge)
 		nvkm_agp_fini(pci);
@@ -124,20 +109,17 @@ nvkm_pci_preinit(struct nvkm_subdev *subdev)
 }
 
 static int
-nvkm_pci_init(struct nvkm_subdev *subdev)
+nvkm_pci_oneinit(struct nvkm_subdev *subdev)
 {
 	struct nvkm_pci *pci = nvkm_pci(subdev);
 	struct pci_dev *pdev = pci->pdev;
 	int ret;
 
-	if (pci->agp.bridge) {
-		ret = nvkm_agp_init(pci);
+	if (pci_is_pcie(pci->pdev)) {
+		ret = nvkm_pcie_oneinit(pci);
 		if (ret)
 			return ret;
 	}
-
-	if (pci->func->init)
-		pci->func->init(pci);
 
 #ifdef __NetBSD__
     {
@@ -160,6 +142,25 @@ nvkm_pci_init(struct nvkm_subdev *subdev)
 
 	pci->irq = pdev->irq;
 #endif
+	return 0;
+}
+
+static int
+nvkm_pci_init(struct nvkm_subdev *subdev)
+{
+	struct nvkm_pci *pci = nvkm_pci(subdev);
+	int ret;
+
+	if (pci->agp.bridge) {
+		ret = nvkm_agp_init(pci);
+		if (ret)
+			return ret;
+	} else if (pci_is_pcie(pci->pdev)) {
+		nvkm_pcie_init(pci);
+	}
+
+	if (pci->func->init)
+		pci->func->init(pci);
 
 	/* Ensure MSI interrupts are armed, for the case where there are
 	 * already interrupts pending (for whatever reason) at load time.
@@ -167,22 +168,47 @@ nvkm_pci_init(struct nvkm_subdev *subdev)
 	if (pci->msi)
 		pci->func->msi_rearm(pci);
 
-	return ret;
+	return 0;
 }
 
 static void *
 nvkm_pci_dtor(struct nvkm_subdev *subdev)
 {
 	struct nvkm_pci *pci = nvkm_pci(subdev);
+
 	nvkm_agp_dtor(pci);
+
+#ifdef __NetBSD__
+	const struct pci_attach_args *pa = &pci->pdev->pd_pa;
+	if (pci->pci_intrcookie != NULL) {
+		pci_intr_disestablish(pa->pa_pc, pci->pci_intrcookie);
+		pci->pci_intrcookie = NULL;
+	}
+	if (pci->pci_ihp != NULL) {
+		pci_intr_release(pa->pa_pc, pci->pci_ihp, 1);
+		pci->pci_ihp = NULL;
+	}
+#else
+	if (pci->irq >= 0) {
+		/* freq_irq() will call the handler, we use pci->irq == -1
+		 * to signal that it's been torn down and should be a noop.
+		 */
+		int irq = pci->irq;
+		pci->irq = -1;
+		free_irq(irq, pci);
+	}
+#endif
+
 	if (pci->msi)
 		pci_disable_msi(pci->pdev);
+
 	return nvkm_pci(subdev);
 }
 
 static const struct nvkm_subdev_func
 nvkm_pci_func = {
 	.dtor = nvkm_pci_dtor,
+	.oneinit = nvkm_pci_oneinit,
 	.preinit = nvkm_pci_preinit,
 	.init = nvkm_pci_init,
 	.fini = nvkm_pci_fini,
@@ -196,12 +222,14 @@ nvkm_pci_new_(const struct nvkm_pci_func *func, struct nvkm_device *device,
 
 	if (!(pci = *ppci = kzalloc(sizeof(**ppci), GFP_KERNEL)))
 		return -ENOMEM;
-	nvkm_subdev_ctor(&nvkm_pci_func, device, index, 0, &pci->subdev);
+	nvkm_subdev_ctor(&nvkm_pci_func, device, index, &pci->subdev);
 	pci->func = func;
 	pci->pdev = device->func->pci(device)->pdev;
 #ifndef __NetBSD__
 	pci->irq = -1;
 #endif
+	pci->pcie.speed = -1;
+	pci->pcie.width = -1;
 
 	if (device->type == NVKM_DEVICE_AGP)
 		nvkm_agp_ctor(pci);
