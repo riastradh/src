@@ -28,6 +28,7 @@ file	external/bsd/drm2/i915drm/intel_gtt.c		i915drmkms
 
 file	external/bsd/drm2/i915drm/intelfb.c		intelfb
 
+# Generated from i915drmkms2netbsd.
 file	external/bsd/drm2/dist/drm/i915/dvo_ch7017.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/dvo_ch7xxx.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/dvo_ivch.c	i915drmkms
