@@ -120,7 +120,7 @@ file	external/bsd/drm2/dist/drm/drm_property.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_rect.c	drmkms
 file	external/bsd/drm2/drm/drm_scatter.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_scdc_helper.c	drmkms
-file	external/bsd/drm2/dist/drm/drm_simple_kms_helper.c	drmkms
+#file	external/bsd/drm2/dist/drm/drm_simple_kms_helper.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_syncobj.c	drmkms
 file	external/bsd/drm2/drm/drm_sysfs.c	drmkms
 #file	external/bsd/drm2/dist/drm/drm_trace_points.c	drmkms
