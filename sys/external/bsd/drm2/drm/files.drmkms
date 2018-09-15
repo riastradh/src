@@ -94,7 +94,7 @@ file	external/bsd/drm2/dist/drm/drm_flip_work.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_fourcc.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_framebuffer.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_gem.c	drmkms
-file	external/bsd/drm2/dist/drm/drm_gem_framebuffer_helper.c	drmkms
+file	external/bsd/drm2/drm/drm_gem_framebuffer_helper.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_global.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_hashtab.c	drmkms
 #file	external/bsd/drm2/dist/drm/drm_info.c	drmkms
