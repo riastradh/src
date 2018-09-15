@@ -58,6 +58,11 @@ makeoptions 	drmkms 	"CWARNFLAGS.drm_crtc.c"+="-Wno-shadow"
 makeoptions 	drmkms 	"CWARNFLAGS.drm_edid.c"+="-Wno-shadow"
 makeoptions 	drmkms 	"CWARNFLAGS.drm_ioctl.c"+="-Wno-shadow"
 
+define	drmkms_sched: drmkms
+
+file	external/bsd/drm2/dist/drm/scheduler/gpu_scheduler.o	drmkms_sched
+file	external/bsd/drm2/dist/drm/scheduler/sched_fence.o	drmkms_sched
+
 # Generated from drm2netbsd.
 #file	external/bsd/drm2/dist/drm/ati_pcigart.c	drmkms  # drmkms_pci
 #file	external/bsd/drm2/dist/drm/drm_agpsupport.c	drmkms  # drmkms_pci
