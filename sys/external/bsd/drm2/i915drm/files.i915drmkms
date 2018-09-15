@@ -81,7 +81,7 @@ file	external/bsd/drm2/dist/drm/i915/i915_sw_fence.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_syncmap.c	i915drmkms
 file	external/bsd/drm2/i915drm/i915_sysfs.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_timeline.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/i915_trace_points.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/i915_trace_points.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_vgpu.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_vma.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/icl_dsi.c	i915drmkms

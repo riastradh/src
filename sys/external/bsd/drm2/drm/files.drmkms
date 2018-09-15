@@ -123,7 +123,7 @@ file	external/bsd/drm2/dist/drm/drm_scdc_helper.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_simple_kms_helper.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_syncobj.c	drmkms
 file	external/bsd/drm2/drm/drm_sysfs.c	drmkms
-file	external/bsd/drm2/dist/drm/drm_trace_points.c	drmkms
+#file	external/bsd/drm2/dist/drm/drm_trace_points.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_vblank.c	drmkms
 file	external/bsd/drm2/drm/drm_vm.c	drmkms
 file	external/bsd/drm2/drm/drm_vma_manager.c	drmkms
