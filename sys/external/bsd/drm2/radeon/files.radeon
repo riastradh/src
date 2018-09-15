@@ -74,7 +74,6 @@ file	external/bsd/drm2/dist/drm/radeon/radeon_gem.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_i2c.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_ib.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_irq_kms.c	radeon
-file	external/bsd/drm2/dist/drm/radeon/radeon_kfd.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_kms.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_kv_dpm.c	radeon
 file	external/bsd/drm2/dist/drm/radeon/radeon_kv_smc.c	radeon
