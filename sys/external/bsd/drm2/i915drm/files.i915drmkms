@@ -77,7 +77,7 @@ file	external/bsd/drm2/dist/drm/i915/i915_perf.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_query.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_request.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_suspend.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/i915_sw_fence.c	i915drmkms
+file	external/bsd/drm2/i915drm/i915_sw_fence.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_syncmap.c	i915drmkms
 file	external/bsd/drm2/i915drm/i915_sysfs.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_timeline.c	i915drmkms
