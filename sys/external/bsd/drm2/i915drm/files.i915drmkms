@@ -151,5 +151,5 @@ file	external/bsd/drm2/dist/drm/i915/intel_uc_fw.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_uncore.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_wopcm.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_workarounds.c	i915drmkms
-file	external/bsd/drm2/drm/i915drm/vlv_dsi.c	i915drmkms
+file	external/bsd/drm2/i915drm/vlv_dsi.c	i915drmkms
 #file	external/bsd/drm2/dist/drm/i915/vlv_dsi_pll.c	i915drmkms
