@@ -28,8 +28,6 @@ __KERNEL_RCSID(0, "$NetBSD: amdgpu_cik_sdma.c,v 1.2 2018/08/27 14:24:03 riastrad
 
 #include <linux/firmware.h>
 #include <linux/module.h>
-#include <linux/log2.h>
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include "amdgpu.h"
 #include "amdgpu_ucode.h"

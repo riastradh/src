@@ -31,7 +31,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <asm/unaligned.h>
-#include <asm/byteorder.h>
 
 #define ATOM_DEBUG
 

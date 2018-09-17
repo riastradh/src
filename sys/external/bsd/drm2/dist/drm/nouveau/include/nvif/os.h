@@ -47,7 +47,6 @@
 #include <linux/io.h>
 
 #include <asm/barrier.h>
-#include <asm/byteorder.h>
 #include <asm/io.h>
 #include <asm/unaligned.h>
 

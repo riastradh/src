@@ -32,7 +32,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <drm/drm_crtc_helper.h>
 #include <drm/amdgpu_drm.h>
 #include <drm/drm_fixed.h>
-#include <asm/byteorder.h>
 #include "amdgpu.h"
 #include "atom.h"
 #include "atom-bits.h"

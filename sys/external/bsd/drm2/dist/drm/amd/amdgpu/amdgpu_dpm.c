@@ -27,7 +27,6 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include "amdgpu.h"
 #include "amdgpu_atombios.h"

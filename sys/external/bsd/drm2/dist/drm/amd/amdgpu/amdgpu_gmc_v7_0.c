@@ -27,7 +27,6 @@ __KERNEL_RCSID(0, "$NetBSD: amdgpu_gmc_v7_0.c,v 1.1 2018/08/27 14:10:14 riastrad
 
 #include <linux/firmware.h>
 #include <linux/module.h>
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include <drm/drm_cache.h>
 #include "amdgpu.h"

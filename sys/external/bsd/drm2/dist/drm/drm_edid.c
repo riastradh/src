@@ -44,7 +44,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/string.h>
 #include <linux/errno.h>
 #include <linux/vga_switcheroo.h>
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include <drm/drm_edid.h>
 #include <drm/drm_encoder.h>

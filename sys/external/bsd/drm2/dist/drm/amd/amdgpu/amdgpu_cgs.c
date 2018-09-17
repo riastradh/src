@@ -26,7 +26,6 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <asm/byteorder.h>
 #include <linux/list.h>
 #include <linux/slab.h>
 #include <drm/drmP.h>

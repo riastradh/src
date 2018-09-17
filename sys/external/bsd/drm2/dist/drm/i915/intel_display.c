@@ -58,7 +58,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <asm/bug.h>
 #include <linux/math64.h>
 #include <linux/bitops.h>
-#include <linux/log2.h>
 #include <linux/reservation.h>
 
 /* Primary plane formats for gen <= 3 */

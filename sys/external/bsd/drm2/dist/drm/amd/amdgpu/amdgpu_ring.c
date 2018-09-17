@@ -31,8 +31,6 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <asm/byteorder.h>
-#include <linux/log2.h>
 #include <linux/seq_file.h>
 #include <linux/slab.h>
 #include <linux/debugfs.h>

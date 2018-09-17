@@ -28,8 +28,6 @@ __KERNEL_RCSID(0, "$NetBSD: amdgpu_gfx_v8_0.c,v 1.1 2018/08/27 14:10:14 riastrad
 #include <linux/kernel.h>
 #include <linux/firmware.h>
 #include <linux/module.h>
-#include <linux/log2.h>
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include "amdgpu.h"
 #include "amdgpu_gfx.h"

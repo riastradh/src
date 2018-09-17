@@ -31,7 +31,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/amdgpu_drm.h>
-#include <asm/byteorder.h>
 #include "amdgpu.h"
 
 #include "atom.h"

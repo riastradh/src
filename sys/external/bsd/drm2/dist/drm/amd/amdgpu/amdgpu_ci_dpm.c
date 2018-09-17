@@ -28,7 +28,6 @@ __KERNEL_RCSID(0, "$NetBSD: amdgpu_ci_dpm.c,v 1.2 2018/08/27 14:24:03 riastradh 
 
 #include <linux/firmware.h>
 #include <linux/module.h>
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include "amdgpu.h"
 #include "amdgpu_pm.h"

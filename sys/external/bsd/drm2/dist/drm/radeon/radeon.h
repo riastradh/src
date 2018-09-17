@@ -62,7 +62,6 @@
  *                          are considered as fatal)
  */
 
-#include <asm/byteorder.h>
 #include <linux/atomic.h>
 #include <linux/wait.h>
 #include <linux/list.h>
@@ -71,7 +70,6 @@
 #include <linux/hashtable.h>
 #include <linux/dma-fence.h>
 #include <linux/device.h>
-#include <linux/log2.h>
 #include <linux/notifier.h>
 #include <linux/printk.h>
 #include <linux/rwsem.h>

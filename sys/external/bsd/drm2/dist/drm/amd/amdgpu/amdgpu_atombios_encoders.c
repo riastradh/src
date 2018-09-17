@@ -37,7 +37,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "atombios_encoders.h"
 #include "atombios_dp.h"
 #include <linux/backlight.h>
-#include <asm/byteorder.h>
 #include "bif/bif_4_1_d.h"
 
 u8

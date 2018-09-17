@@ -35,7 +35,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/reservation.h>
 #include <linux/sync_file.h>
 #include <linux/uaccess.h>
-#include <linux/log2.h>
 #include <linux/pagemap.h>
 #include <linux/err.h>
 #include <asm/cpufeature.h>

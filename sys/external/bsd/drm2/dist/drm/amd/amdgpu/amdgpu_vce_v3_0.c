@@ -31,7 +31,6 @@
 __KERNEL_RCSID(0, "$NetBSD: amdgpu_vce_v3_0.c,v 1.1 2018/08/27 14:10:14 riastradh Exp $");
 
 #include <linux/firmware.h>
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include "amdgpu.h"
 #include "amdgpu_vce.h"

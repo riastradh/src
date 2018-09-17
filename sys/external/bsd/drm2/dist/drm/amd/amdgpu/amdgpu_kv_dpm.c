@@ -26,7 +26,6 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: amdgpu_kv_dpm.c,v 1.2 2018/08/27 14:24:03 riastradh Exp $");
 
-#include <asm/byteorder.h>
 #include <drm/drmP.h>
 #include "amdgpu.h"
 #include "amdgpu_pm.h"
