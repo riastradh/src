@@ -38,9 +38,14 @@
 #include <sys/systm.h>
 
 #include <lib/libkern/libkern.h>
+
 #include <linux/bitops.h>
+#include <linux/compiler.h>
+#include <linux/log2.h>
 #include <linux/printk.h>
 #include <linux/slab.h>
+
+#include <asm/byteorder.h>
 
 #define U16_MAX UINT16_MAX
 #define U32_MAX UINT32_MAX
