@@ -35,7 +35,6 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/err.h>
-#include <linux/spinlock.h>
 #include <linux/ctype.h>
 #include <linux/list.h>
 #include <linux/slab.h>
