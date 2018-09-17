@@ -41,7 +41,6 @@ __KERNEL_RCSID(0, "$NetBSD: linux_dma_buf.c,v 1.4 2018/08/27 15:25:13 riastradh 
 
 #include <linux/dma-buf.h>
 #include <linux/err.h>
-#include <linux/fence.h>
 #include <linux/reservation.h>
 
 struct dma_buf_file {
