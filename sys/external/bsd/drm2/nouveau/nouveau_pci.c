@@ -43,7 +43,7 @@ __KERNEL_RCSID(0, "$NetBSD: nouveau_pci.c,v 1.21 2018/08/28 03:34:07 riastradh E
 #include <core/device.h>
 #include <core/pci.h>
 
-#include "nouveau_drm.h"
+#include "nouveau_drv.h"
 #include "nouveau_pci.h"
 
 MODULE(MODULE_CLASS_DRIVER, nouveau_pci, "nouveau,drmkms_pci");
