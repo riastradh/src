@@ -49,13 +49,7 @@ typedef unsigned int drm_handle_t;
 
 #include <linux/types.h>
 #include <asm/ioctl.h>
-
-/* XXX Why was this historically different between Linux and BSD?  */
-#  ifdef __NetBSD__
-typedef unsigned long drm_handle_t;
-#  else
 typedef unsigned int drm_handle_t;
-#  endif
 
 #endif
 #endif
