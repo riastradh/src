@@ -1006,10 +1006,8 @@ void drm_fb_helper_fini(struct drm_fb_helper *fb_helper)
 	mutex_lock(&kernel_fb_helper_lock);
 	if (!list_empty(&fb_helper->kernel_fb_list)) {
 		list_del(&fb_helper->kernel_fb_list);
-#ifndef __NetBSD__		/* XXX drm sysrq */
 		if (list_empty(&kernel_fb_helper_list))
 			unregister_sysrq_key('v', &sysrq_drm_fb_helper_restore_op);
-#endif
 	}
 	mutex_unlock(&kernel_fb_helper_lock);
 
@@ -1019,7 +1017,6 @@ void drm_fb_helper_fini(struct drm_fb_helper *fb_helper)
 }
 EXPORT_SYMBOL(drm_fb_helper_fini);
 
-#ifndef __NetBSD__		/* XXX fb info */
 /**
  * drm_fb_helper_unlink_fbi - wrapper around unlink_framebuffer
  * @fb_helper: driver-allocated fbdev helper, can be NULL
