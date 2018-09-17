@@ -2181,6 +2181,7 @@ out:
 	return ret;
 }
 
+#ifndef __NetBSD__		/* XXX runtime pm */
 static int i915_pm_prepare(struct device *kdev)
 {
 	struct pci_dev *pdev = to_pci_dev(kdev);
@@ -2196,9 +2197,7 @@ static int i915_pm_prepare(struct device *kdev)
 
 	return i915_drm_prepare(dev);
 }
-#endif
 
-#ifndef __NetBSD__		/* XXX runtime pm */
 static int i915_pm_suspend(struct device *kdev)
 {
 	struct pci_dev *pdev = to_pci_dev(kdev);

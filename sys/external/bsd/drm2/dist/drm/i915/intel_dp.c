@@ -1422,7 +1422,6 @@ static i915_reg_t g4x_aux_ctl_reg(struct intel_dp *intel_dp)
 		MISSING_CASE(aux_ch);
 		return DP_AUX_CH_CTL(AUX_CH_B);
 	}
-#endif
 }
 
 static i915_reg_t g4x_aux_data_reg(struct intel_dp *intel_dp, int index)

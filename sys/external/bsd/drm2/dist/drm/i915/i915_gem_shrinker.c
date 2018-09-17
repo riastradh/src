@@ -121,7 +121,6 @@ static bool unsafe_drop_pages(struct drm_i915_gem_object *obj)
 		__i915_gem_object_put_pages(obj, I915_MM_SHRINKER);
 	return !i915_gem_object_has_pages(obj);
 }
-#endif
 
 /**
  * i915_gem_shrink - Shrink buffer object caches
