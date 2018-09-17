@@ -181,7 +181,7 @@ fail2:	mutex_lock(&drm_global_mutex);
 	lastclose = (dev->open_count == 0);
 	mutex_unlock(&drm_global_mutex);
 	if (lastclose)
-		(void)drm_lastclose(dev);
+		drm_lastclose(dev);
 fail1:	drm_minor_release(dminor);
 fail0:	KASSERT(error);
 	return error;
@@ -205,7 +205,7 @@ drm_close(struct file *fp)
 	mutex_unlock(&drm_global_mutex);
 
 	if (lastclose)
-		(void)drm_lastclose(dev);
+		drm_lastclose(dev);
 
 	drm_minor_release(dminor);
 
@@ -240,7 +240,7 @@ fail0:	KASSERT(ret);
 	return ret;
 }
 
-int
+void
 drm_lastclose(struct drm_device *dev)
 {
 
@@ -264,8 +264,6 @@ drm_lastclose(struct drm_device *dev)
 		dev->last_context = 0;
 		dev->if_version = 0;
 	}
-
-	return 0;
 }
 
 static int
