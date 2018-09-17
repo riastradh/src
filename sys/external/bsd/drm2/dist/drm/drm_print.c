@@ -30,7 +30,11 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #define DEBUG /* for pr_debug() */
 
+#ifdef __NetBSD__
+#include <sys/stdarg.h>
+#else
 #include <stdarg.h>
+#endif
 #include <linux/seq_file.h>
 #include <drm/drmP.h>
 #include <drm/drm_print.h>
