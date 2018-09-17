@@ -139,12 +139,6 @@
 	}								\
 } while (0)
 
-#define	ACCESS_ONCE(X) ({						      \
-	typeof(X) __access_once_tmp = (X);				      \
-	__insn_barrier();						      \
-	__access_once_tmp;						      \
-})
-
 static inline int64_t
 abs64(int64_t x)
 {
