@@ -41,6 +41,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_cache.c,v 1.12 2018/08/27 15:29:19 riastradh Exp
 #include <linux/mm_types.h>
 
 #include <drm/drmP.h>
+#include <drm/drm_cache.h>
 
 #if !defined(__arm__)
 #define DRM_CLFLUSH	1
