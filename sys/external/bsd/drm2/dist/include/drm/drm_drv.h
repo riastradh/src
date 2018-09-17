@@ -31,6 +31,7 @@
 
 #include <linux/list.h>
 #include <linux/irqreturn.h>
+#include <linux/ktime.h>
 
 #include <drm/drm_device.h>
 
@@ -42,6 +43,7 @@ struct dma_buf_attachment;
 struct drm_display_mode;
 struct drm_mode_create_dumb;
 struct drm_printer;
+struct drm_unique;
 
 /* driver capabilities and requirements mask */
 #define DRIVER_USE_AGP			0x1
