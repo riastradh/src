@@ -89,8 +89,10 @@ int drm_client_new(struct drm_device *dev, struct drm_client_dev *client,
 	    !dev->driver->dumb_create || !dev->driver->gem_prime_vmap)
 		return -ENOTSUPP;
 
+#ifndef __NetBSD__		/* XXX module refs */
 	if (funcs && !try_module_get(funcs->owner))
 		return -ENODEV;
+#endif
 
 	client->dev = dev;
 	client->name = name;
@@ -109,8 +111,10 @@ int drm_client_new(struct drm_device *dev, struct drm_client_dev *client,
 	return 0;
 
 err_put_module:
+#ifndef __NetBSD__		/* XXX module refs */
 	if (funcs)
 		module_put(funcs->owner);
+#endif
 
 	return ret;
 }
@@ -138,8 +142,10 @@ void drm_client_release(struct drm_client_dev *client)
 
 	drm_client_close(client);
 	drm_dev_put(dev);
+#ifndef __NetBSD__		/* XXX module refs */
 	if (client->funcs)
 		module_put(client->funcs->owner);
+#endif
 }
 EXPORT_SYMBOL(drm_client_release);
 
