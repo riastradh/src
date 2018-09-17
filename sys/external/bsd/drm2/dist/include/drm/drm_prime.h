@@ -98,7 +98,14 @@ void drm_gem_dmabuf_vunmap(struct dma_buf *dma_buf, void *vaddr);
 void *drm_gem_dmabuf_kmap(struct dma_buf *dma_buf, unsigned long page_num);
 void drm_gem_dmabuf_kunmap(struct dma_buf *dma_buf, unsigned long page_num,
 			   void *addr);
+#ifdef __NetBSD__
+int
+drm_gem_dmabuf_mmap(struct dma_buf *dma_buf, off_t *offp, size_t size,
+    int prot, int *flagsp, int *advicep, struct uvm_object **uobjp,
+    int *maxprotp);
+#else
 int drm_gem_dmabuf_mmap(struct dma_buf *dma_buf, struct vm_area_struct *vma);
+#endif
 
 #ifdef __NetBSD__
 struct sg_table *drm_prime_bus_dmamem_to_sg(bus_dma_tag_t,
