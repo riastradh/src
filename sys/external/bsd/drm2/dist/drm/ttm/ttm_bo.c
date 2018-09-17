@@ -56,7 +56,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/reservation.h>
 #include <linux/printk.h>
 #include <linux/export.h>
-#include <linux/fence.h>
+#include <linux/dma-fence.h>
 
 #ifndef __NetBSD__
 static void ttm_bo_global_kobj_release(struct kobject *kobj);
