@@ -38,6 +38,8 @@ __KERNEL_RCSID(0, "$NetBSD: drm_fops.c,v 1.14 2018/08/27 15:22:54 riastradh Exp 
 #include <drm/drmP.h>
 #include <drm/drm_internal.h>
 #include <drm/drm_legacy.h>
+
+#include "../dist/drm/drm_internal.h"
 #include "../dist/drm/drm_legacy.h"
 
 static int	drm_open_file_master(struct drm_file *);

@@ -58,7 +58,8 @@ __KERNEL_RCSID(0, "$NetBSD: drm_cdevsw.c,v 1.12 2018/08/28 03:41:39 riastradh Ex
 #include <linux/pm.h>
 
 #include <drm/drmP.h>
-#include <drm/drm_internal.h>
+
+#include "../dist/drm/drm_internal.h"
 #include "../dist/drm/drm_legacy.h"
 
 static dev_type_open(drm_open);
