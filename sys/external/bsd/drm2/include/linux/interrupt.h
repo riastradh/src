@@ -34,6 +34,8 @@
 
 #include <sys/cpu.h>
 
+#include <linux/kernel.h>
+
 #define	in_interrupt()	(cpu_intr_p() || cpu_softintr_p())
 
 #endif  /* _LINUX_INTERRUPT_H_ */
