@@ -3048,7 +3048,6 @@ __i915_gem_object_pin_pages(struct drm_i915_gem_object *obj)
 
 	atomic_inc(&obj->mm.pages_pin_count);
 }
-#endif
 
 static inline bool
 i915_gem_object_has_pinned_pages(struct drm_i915_gem_object *obj)
