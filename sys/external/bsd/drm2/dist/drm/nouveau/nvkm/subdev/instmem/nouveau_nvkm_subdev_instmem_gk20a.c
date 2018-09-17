@@ -603,7 +603,6 @@ free_pages:
 	return ret;
 }
 
-#endif	/* __NetBSD__ */
 
 static int
 gk20a_instobj_new(struct nvkm_instmem *base, u32 size, u32 align, bool zero,
