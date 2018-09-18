@@ -175,8 +175,6 @@ struct drm_ioctl_desc {
 int drm_ioctl_permit(u32 flags, struct drm_file *file_priv);
 #ifdef __NetBSD__
 int drm_ioctl(struct file *, unsigned long, void *);
-extern struct spinlock drm_minor_lock;
-extern struct idr drm_minors_idr;
 #else
 long drm_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
 long drm_ioctl_kernel(struct file *, drm_ioctl_t, void *, u32);
