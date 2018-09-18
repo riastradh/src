@@ -85,9 +85,8 @@ file	external/bsd/drm2/dist/drm/drm_drv.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_dumb_buffers.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_edid.c	drmkms
 file	external/bsd/drm2/i2c/drm_encoder_slave.c	drmkms
-file	external/bsd/drm2/dist/drm/drm_encoder_slave.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_fb_helper.c	drmkms
-file	external/bsd/drm2/dist/drm/drm_file.c	drmkms
+file	external/bsd/drm2/drm/drm_file.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_flip_work.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_fourcc.c	drmkms
 file	external/bsd/drm2/dist/drm/drm_framebuffer.c	drmkms
