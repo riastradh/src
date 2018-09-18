@@ -29,6 +29,7 @@
 #include <linux/i2c.h>
 #include <linux/delay.h>
 #include <linux/mutex.h>
+#include <linux/workqueue.h>
 
 /*
  * Unless otherwise noted, all values are from the DP 1.1a spec.  Note that

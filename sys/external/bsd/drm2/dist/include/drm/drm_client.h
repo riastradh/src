@@ -6,6 +6,7 @@
 #define _DRM_CLIENT_H_
 
 #include <linux/types.h>
+#include <linux/list.h>
 
 struct drm_client_dev;
 struct drm_device;
