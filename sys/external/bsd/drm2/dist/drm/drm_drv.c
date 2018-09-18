@@ -93,7 +93,11 @@ static bool drm_core_init_complete = false;
 static struct dentry *drm_debugfs_root;
 #endif
 
+#ifdef __NetBSD__
+struct srcu drm_unplug_srcu;
+#else
 DEFINE_STATIC_SRCU(drm_unplug_srcu);
+#endif
 
 /*
  * DRM Minors
