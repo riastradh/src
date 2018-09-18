@@ -255,9 +255,9 @@ static int drm_addmap_core(struct drm_device *dev, resource_size_t offset,
 			/* Prevent a 2nd X Server from creating a 2nd lock */
 			spin_lock(&dev->master->lock.spinlock);
 			if (dev->master->lock.hw_lock != NULL) {
+				spin_unlock(&dev->master->lock.spinlock);
 				vfree(map->handle);
 				kfree(map);
-				spin_unlock(&dev->master->lock.spinlock);
 				return -EBUSY;
 			}
 			dev->sigdata.lock = dev->master->lock.hw_lock = map->handle;	/* Pointer to lock */
