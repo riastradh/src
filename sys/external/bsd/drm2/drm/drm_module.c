@@ -48,6 +48,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_module.c,v 1.15 2018/08/28 03:41:39 riastradh Ex
 #include <drm/drm_encoder_slave.h>
 #include <drm/drm_sysctl.h>
 
+#include "../dist/drm/drm_crtc_internal.h"
 #include "../dist/drm/drm_internal.h"
 
 /*
