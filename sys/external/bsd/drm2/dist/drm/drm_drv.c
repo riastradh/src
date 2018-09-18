@@ -821,9 +821,13 @@ static int create_compat_control_link(struct drm_device *dev)
 	if (!name)
 		return -ENOMEM;
 
+#ifdef __NetBSD__		/* XXX sysfs */
+	ret = 0;
+#else
 	ret = sysfs_create_link(minor->kdev->kobj.parent,
 				&minor->kdev->kobj,
 				name);
+#endif
 
 	kfree(name);
 
@@ -846,7 +850,9 @@ static void remove_compat_control_link(struct drm_device *dev)
 	if (!name)
 		return;
 
+#ifndef __NetBSD__		/* XXX sysfs */
 	sysfs_remove_link(minor->kdev->kobj.parent, name);
+#endif
 
 	kfree(name);
 }
