@@ -904,7 +904,7 @@ static int drm_atomic_plane_set_property(struct drm_plane *plane,
 		state->alpha = val;
 	} else if (property == plane->rotation_property) {
 		if (!is_power_of_2(val & DRM_MODE_ROTATE_MASK)) {
-			DRM_DEBUG_ATOMIC("[PLANE:%d:%s] bad rotation bitmask: 0x%llx\n",
+			DRM_DEBUG_ATOMIC("[PLANE:%d:%s] bad rotation bitmask: 0x%"PRIx64"\n",
 					 plane->base.id, plane->name, val);
 			return -EINVAL;
 		}
@@ -1055,7 +1055,7 @@ static int drm_atomic_plane_check(struct drm_plane *plane,
 					   state->fb->modifier);
 	if (ret) {
 		struct drm_format_name_buf format_name;
-		DRM_DEBUG_ATOMIC("[PLANE:%d:%s] invalid pixel format %s, modifier 0x%llx\n",
+		DRM_DEBUG_ATOMIC("[PLANE:%d:%s] invalid pixel format %s, modifier 0x%"PRIx64"\n",
 				 plane->base.id, plane->name,
 				 drm_get_format_name(state->fb->format->format,
 						     &format_name),
