@@ -38,6 +38,7 @@
 
 #include <asm/page.h>
 #include <linux/shrinker.h>
+#include <linux/slab.h>
 
 struct file;
 
@@ -77,6 +78,16 @@ static inline unsigned long
 get_num_physpages(void)
 {
 	return uvmexp.npages;
+}
+
+static inline void *
+kvmalloc_array(size_t nelem, size_t elemsize, gfp_t gfp)
+{
+
+	KASSERT(elemsize != 0);
+	if (nelem > SIZE_MAX/elemsize)
+		return NULL;
+	return kmalloc(nelem * elemsize, gfp);
 }
 
 /*
