@@ -33,6 +33,7 @@
 struct drm_framebuffer;
 struct drm_file;
 struct drm_device;
+struct drm_clip_rect;
 
 /**
  * struct drm_framebuffer_funcs - framebuffer hooks
