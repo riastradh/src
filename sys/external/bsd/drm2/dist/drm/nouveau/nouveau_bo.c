@@ -592,21 +592,9 @@ nouveau_bo_validate(struct nouveau_bo *nvbo, bool interruptible,
 
 #  define	__iomem			volatile
 #  define	__force
-#  define	ioread16_native		fake_ioread16_native
 #  define	ioread32_native		fake_ioread32_native
 #  define	iowrite16_native	fake_iowrite16_native
 #  define	iowrite32_native	fake_iowrite32_native
-
-static inline uint16_t
-ioread16_native(const void __iomem *ptr)
-{
-	uint16_t v;
-
-	v = *(const uint16_t __iomem *)ptr;
-	membar_consumer();
-
-	return v;
-}
 
 static inline uint32_t
 ioread32_native(const void __iomem *ptr)
@@ -681,7 +669,6 @@ nouveau_bo_wr32(struct nouveau_bo *nvbo, unsigned index, u32 val)
 #ifdef __NetBSD__
 #  undef	__iomem
 #  undef	__force
-#  undef	ioread16_native
 #  undef	ioread32_native
 #  undef	iowrite16_native
 #  undef	iowrite32_native
