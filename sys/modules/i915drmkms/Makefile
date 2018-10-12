@@ -26,6 +26,8 @@ CPPFLAGS+=	-DNVGA=1
 
 CWARNFLAGS+=	-Wno-shadow
 CWARNFLAGS+=	-Wno-pointer-arith
+CWARNFLAGS.clang+=	-Wno-error=enum-conversion
+CWARNFLAGS.clang+=	-Wno-error=unused-function
 
 COPTS.i915_drv.c+=	${${ACTIVE_CC} == "gcc":? -Wno-override-init :}
 COPTS.i915_drv.c+=	${${ACTIVE_CC} == "clang":? -Wno-initializer-overrides :}
