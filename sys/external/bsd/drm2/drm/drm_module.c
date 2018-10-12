@@ -123,6 +123,7 @@ drm_init(void)
 	idr_init(&drm_minors_idr);
 	srcu_init(&drm_unplug_srcu, "drmunplg");
 	linux_mutex_init(&drm_global_mutex);
+	linux_mutex_init(&drm_kernel_fb_helper_lock);
 	drm_connector_ida_init();
 	drm_global_init();
 	drm_sysctl_init(&drm_def);
@@ -151,6 +152,7 @@ drm_fini(void)
 	drm_sysctl_fini(&drm_def);
 	drm_global_release();
 	drm_connector_ida_destroy();
+	linux_mutex_destroy(&drm_kernel_fb_helper_lock);
 	linux_mutex_destroy(&drm_global_mutex);
 	srcu_fini(&drm_unplug_srcu);
 	idr_destroy(&drm_minors_idr);
