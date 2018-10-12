@@ -26,6 +26,7 @@ makeoptions	nouveau	CPPFLAGS+="-DCONFIG_NOUVEAU_DEBUG_DEFAULT=3"
 
 makeoptions	nouveau	"CWARNFLAGS.nouveau"+="-Wno-missing-field-initializers"
 makeoptions	nouveau	"CWARNFLAGS.nouveau"+="-Wno-shadow"
+makeoptions	nouveau	"CWARNFLAGS.nouveau"+="${${ACTIVE_CC} == clang:? -Wno-error=gnu-variable-sized-type-not-at-end :}"
 
 file	external/bsd/drm2/nouveau/nouveau_module.c	nouveau
 
