@@ -647,6 +647,7 @@ static struct sysrq_key_op sysrq_drm_fb_helper_restore_op = {
 static struct sysrq_key_op sysrq_drm_fb_helper_restore_op;
 #endif
 
+#ifndef __NetBSD__		/* XXX fb info */
 static void dpms_legacy(struct drm_fb_helper *fb_helper, int dpms_mode)
 {
 	struct drm_device *dev = fb_helper->dev;
@@ -672,7 +673,6 @@ static void dpms_legacy(struct drm_fb_helper *fb_helper, int dpms_mode)
 	drm_modeset_unlock_all(dev);
 }
 
-#ifndef __NetBSD__		/* XXX fb info */
 static void drm_fb_helper_dpms(struct fb_info *info, int dpms_mode)
 {
 	struct drm_fb_helper *fb_helper = info->par;
@@ -769,29 +769,32 @@ static void drm_fb_helper_crtc_free(struct drm_fb_helper *helper)
 
 static void drm_fb_helper_resume_worker(struct work_struct *work)
 {
+#ifndef __NetBSD__		/* XXX fb suspend */
 	struct drm_fb_helper *helper = container_of(work, struct drm_fb_helper,
 						    resume_work);
 
 	console_lock();
 	fb_set_suspend(helper->fbdev, 0);
 	console_unlock();
+#endif
 }
 
+#ifndef __NetBSD__		/* XXX fb dirty */
 static void drm_fb_helper_dirty_blit_real(struct drm_fb_helper *fb_helper,
 					  struct drm_clip_rect *clip)
 {
 	struct drm_framebuffer *fb = fb_helper->fb;
 	unsigned int cpp = drm_format_plane_cpp(fb->format->format, 0);
 	size_t offset = clip->y1 * fb->pitches[0] + clip->x1 * cpp;
-	void *src = fb_helper->fbdev->screen_buffer + offset;
-	void *dst = fb_helper->buffer->vaddr + offset;
+	void *src = (char *)fb_helper->fbdev->screen_buffer + offset;
+	void *dst = (char *)fb_helper->buffer->vaddr + offset;
 	size_t len = (clip->x2 - clip->x1) * cpp;
 	unsigned int y;
 
 	for (y = clip->y1; y < clip->y2; y++) {
 		memcpy(dst, src, len);
-		src += fb->pitches[0];
-		dst += fb->pitches[0];
+		src = (char *)src + fb->pitches[0];
+		dst = (char *)dst + fb->pitches[0];
 	}
 }
 
@@ -817,6 +820,7 @@ static void drm_fb_helper_dirty_work(struct work_struct *work)
 		helper->fb->funcs->dirty(helper->fb, NULL, 0, 0, &clip_copy, 1);
 	}
 }
+#endif	/* __NetBSD__ */
 
 /**
  * drm_fb_helper_prepare - setup a drm_fb_helper structure
@@ -831,11 +835,19 @@ void drm_fb_helper_prepare(struct drm_device *dev, struct drm_fb_helper *helper,
 			   const struct drm_fb_helper_funcs *funcs)
 {
 	INIT_LIST_HEAD(&helper->kernel_fb_list);
+#ifndef __NetBSD__		/* XXX fb dirty */
 	spin_lock_init(&helper->dirty_lock);
+#endif
 	INIT_WORK(&helper->resume_work, drm_fb_helper_resume_worker);
+#ifndef __NetBSD__		/* XXX fb dirty */
 	INIT_WORK(&helper->dirty_work, drm_fb_helper_dirty_work);
 	helper->dirty_clip.x1 = helper->dirty_clip.y1 = ~0;
+#endif
+#ifdef __NetBSD__
+	linux_mutex_init(&helper->lock);
+#else
 	mutex_init(&helper->lock);
+#endif
 	helper->funcs = funcs;
 	helper->dev = dev;
 }
@@ -1052,6 +1064,8 @@ static void drm_fb_helper_dirty(struct fb_info *info, u32 x, u32 y,
 	schedule_work(&helper->dirty_work);
 }
 
+#ifndef __NetBSD__		/* XXX fb deferred */
+
 /**
  * drm_fb_helper_deferred_io() - fbdev deferred_io callback function
  * @info: fb_info struct pointer
@@ -1127,6 +1141,8 @@ int drm_fb_helper_defio_init(struct drm_fb_helper *fb_helper)
 	return 0;
 }
 EXPORT_SYMBOL(drm_fb_helper_defio_init);
+
+#endif	/* __NetBSD__ */
 
 /**
  * drm_fb_helper_sys_read - wrapper around fb_sys_read
@@ -1716,9 +1732,7 @@ int drm_fb_helper_check_var(struct fb_var_screeninfo *var,
 	return 0;
 }
 EXPORT_SYMBOL(drm_fb_helper_check_var);
-#endif
 
-#ifndef __NetBSD__		/* XXX fb info */
 /**
  * drm_fb_helper_set_par - implementation for &fb_ops.fb_set_par
  * @info: fbdev registered by the helper
@@ -2412,7 +2426,6 @@ static int drm_pick_crtcs(struct drm_fb_helper *fb_helper,
 {
 	int c, o;
 	struct drm_connector *connector;
-	const struct drm_connector_helper_funcs *connector_funcs;
 	int my_score, best_score, score;
 	struct drm_fb_helper_crtc **crtcs, *crtc;
 	struct drm_fb_helper_connector *fb_helper_conn;
@@ -2440,8 +2453,6 @@ static int drm_pick_crtcs(struct drm_fb_helper *fb_helper,
 		my_score++;
 	if (drm_has_preferred_mode(fb_helper_conn, width, height))
 		my_score++;
-
-	connector_funcs = connector->helper_private;
 
 	/*
 	 * select a crtc for this connector and then attempt to configure
@@ -2640,13 +2651,16 @@ out:
  */
 static void drm_setup_crtcs_fb(struct drm_fb_helper *fb_helper)
 {
+#ifndef __NetBSD__		/* XXX fb info */
 	struct fb_info *info = fb_helper->fbdev;
+#endif
 	int i;
 
 	for (i = 0; i < fb_helper->crtc_count; i++)
 		if (fb_helper->crtc_info[i].mode_set.num_connectors)
 			fb_helper->crtc_info[i].mode_set.fb = fb_helper->fb;
 
+#ifndef __NetBSD__		/* XXX fb info */
 	mutex_lock(&fb_helper->dev->mode_config.mutex);
 	drm_fb_helper_for_each_connector(fb_helper, i) {
 		struct drm_connector *connector =
@@ -2682,6 +2696,7 @@ static void drm_setup_crtcs_fb(struct drm_fb_helper *fb_helper)
 		 */
 		info->fbcon_rotate_hint = FB_ROTATE_UR;
 	}
+#endif
 }
 
 /* Note: Drops fb_helper->lock before returning. */
@@ -2690,7 +2705,9 @@ __drm_fb_helper_initial_config_and_unlock(struct drm_fb_helper *fb_helper,
 					  int bpp_sel)
 {
 	struct drm_device *dev = fb_helper->dev;
+#ifndef __NetBSD__		/* XXX fb info */
 	struct fb_info *info;
+#endif
 	unsigned int width, height;
 	int ret;
 
@@ -2727,10 +2744,10 @@ __drm_fb_helper_initial_config_and_unlock(struct drm_fb_helper *fb_helper,
 	ret = register_framebuffer(info);
 	if (ret < 0)
 		return ret;
-#endif
 
 	dev_info(dev->dev, "fb%d: %s frame buffer device\n",
 		 info->node, info->fix.id);
+#endif
 
 	mutex_lock(&kernel_fb_helper_lock);
 	if (list_empty(&kernel_fb_helper_list))
@@ -2951,6 +2968,7 @@ void drm_fb_helper_fbdev_teardown(struct drm_device *dev)
 	if (!fb_helper)
 		return;
 
+#ifndef __NetBSD__	/* XXX fb info */
 	/* Unregister if it hasn't been done already */
 	if (fb_helper->fbdev && fb_helper->fbdev->dev)
 		drm_fb_helper_unregister_fbi(fb_helper);
@@ -2960,6 +2978,7 @@ void drm_fb_helper_fbdev_teardown(struct drm_device *dev)
 		kfree(fb_helper->fbdev->fbdefio);
 		fbops = fb_helper->fbdev->fbops;
 	}
+#endif
 
 	drm_fb_helper_fini(fb_helper);
 	kfree(fbops);
@@ -2996,6 +3015,8 @@ void drm_fb_helper_output_poll_changed(struct drm_device *dev)
 	drm_fb_helper_hotplug_event(dev->fb_helper);
 }
 EXPORT_SYMBOL(drm_fb_helper_output_poll_changed);
+
+#ifndef __NetBSD__		/* XXX fb info */
 
 /* @user: 1=userspace, 0=fbcon */
 static int drm_fbdev_fb_open(struct fb_info *info, int user)
@@ -3082,6 +3103,8 @@ static struct fb_deferred_io drm_fbdev_defio = {
 	.deferred_io	= drm_fb_helper_deferred_io,
 };
 
+#endif	/* __NetBSD__ */
+
 /**
  * drm_fb_helper_generic_probe - Generic fbdev emulation probe helper
  * @fb_helper: fbdev helper structure
@@ -3101,9 +3124,13 @@ int drm_fb_helper_generic_probe(struct drm_fb_helper *fb_helper,
 	struct drm_client_dev *client = &fb_helper->client;
 	struct drm_client_buffer *buffer;
 	struct drm_framebuffer *fb;
+#ifndef __NetBSD__		/* XXX fb info */
 	struct fb_info *fbi;
+#endif
 	u32 format;
+#ifndef __NetBSD__
 	int ret;
+#endif
 
 	DRM_DEBUG_KMS("surface width(%d), height(%d) and bpp(%d)\n",
 		      sizes->surface_width, sizes->surface_height,
@@ -3119,6 +3146,9 @@ int drm_fb_helper_generic_probe(struct drm_fb_helper *fb_helper,
 	fb_helper->fb = buffer->fb;
 	fb = buffer->fb;
 
+#ifdef __NetBSD__		/* XXX fb info */
+	__USE(fb);
+#else
 	fbi = drm_fb_helper_alloc_fbi(fb_helper);
 	if (IS_ERR(fbi)) {
 		ret = PTR_ERR(fbi);
@@ -3159,15 +3189,18 @@ int drm_fb_helper_generic_probe(struct drm_fb_helper *fb_helper,
 
 		fb_deferred_io_init(fbi);
 	}
+#endif	/* __NetBSD__ */
 
 	return 0;
 
+#ifndef __NetBSD__		/* XXX fb info */
 err_fb_info_destroy:
 	drm_fb_helper_fini(fb_helper);
 err_free_buffer:
 	drm_client_framebuffer_delete(buffer);
 
 	return ret;
+#endif
 }
 EXPORT_SYMBOL(drm_fb_helper_generic_probe);
 
@@ -3180,7 +3213,9 @@ static void drm_fbdev_client_unregister(struct drm_client_dev *client)
 	struct drm_fb_helper *fb_helper = drm_fb_helper_from_client(client);
 
 	if (fb_helper->fbdev) {
+#ifndef __NetBSD__		/* XXX fb info */
 		drm_fb_helper_unregister_fbi(fb_helper);
+#endif
 		/* drm_fbdev_fb_destroy() takes care of cleanup */
 		return;
 	}
