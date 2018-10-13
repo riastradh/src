@@ -468,7 +468,7 @@ int drm_mode_getplane_res(struct drm_device *dev, void *data,
 			  struct drm_file *file_priv)
 {
 	struct drm_mode_get_plane_res *plane_resp = data;
-	struct drm_mode_config *config;
+	struct drm_mode_config *config __unused;
 	struct drm_plane *plane;
 	uint32_t __user *plane_ptr;
 	int count = 0;
