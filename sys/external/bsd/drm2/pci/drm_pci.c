@@ -41,6 +41,8 @@ __KERNEL_RCSID(0, "$NetBSD: drm_pci.c,v 1.31 2018/08/28 03:41:39 riastradh Exp $
 #include <drm/drmP.h>
 #include <drm/drm_legacy.h>
 
+#include "../dist/drm/drm_internal.h"
+
 struct drm_bus_irq_cookie {
 	pci_intr_handle_t *intr_handles;
 	void *ih_cookie;
