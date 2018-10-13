@@ -224,6 +224,7 @@ struct i915_page_dma {
 		uint32_t ggtt_offset;
 	};
 	bus_dmamap_t map;
+	int order;
 #else
 	struct page *page;
 	int order;
@@ -286,8 +287,10 @@ struct i915_vma_ops {
 };
 
 struct pagestash {
+#ifndef __NetBSD__
 	spinlock_t lock;
 	struct pagevec pvec;
+#endif
 };
 
 struct i915_address_space {
