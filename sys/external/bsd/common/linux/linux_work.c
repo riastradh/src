@@ -1402,17 +1402,21 @@ flush_workqueue(struct workqueue_struct *wq)
  *
  *	If work is queued or currently executing, wait for it to
  *	complete.
+ *
+ *	Return true if we waited to flush it, false if it was already
+ *	idle.
  */
-void
+bool
 flush_work(struct work_struct *work)
 {
 	struct workqueue_struct *wq;
 
 	/* If there's no workqueue, nothing to flush.  */
 	if ((wq = work_queue(work)) == NULL)
-		return;
+		return false;
 
 	flush_workqueue(wq);
+	return true;
 }
 
 /*
@@ -1422,14 +1426,15 @@ flush_work(struct work_struct *work)
  *	instead.  Then, if dw is queued or currently executing, wait
  *	for it to complete.
  */
-void
+bool
 flush_delayed_work(struct delayed_work *dw)
 {
 	struct workqueue_struct *wq;
+	bool waited = false;
 
 	/* If there's no workqueue, nothing to flush.  */
 	if ((wq = work_queue(&dw->work)) == NULL)
-		return;
+		return false;
 
 	mutex_enter(&wq->wq_lock);
 	if (__predict_false(work_queue(&dw->work) != wq)) {
@@ -1438,6 +1443,7 @@ flush_delayed_work(struct delayed_work *dw)
 		 * queue, though that would be ill-advised), so it must
 		 * have completed, and we have nothing more to do.
 		 */
+		waited = false;
 	} else {
 		switch (dw->dw_state) {
 		case DELAYED_WORK_IDLE:
@@ -1486,6 +1492,9 @@ flush_delayed_work(struct delayed_work *dw)
 		 * but doesn't hurt.
 		 */
 		flush_workqueue_locked(wq);
+		waited = true;
 	}
 	mutex_exit(&wq->wq_lock);
+
+	return waited;
 }
