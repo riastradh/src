@@ -33,6 +33,11 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#ifdef __NetBSD__
+#include <sys/types.h>
+#include <sys/file.h>
+#endif
+
 #include <drm/drm_ioctl.h>
 #include <drm/drmP.h>
 #include <drm/drm_auth.h>
@@ -748,7 +753,11 @@ static const struct drm_ioctl_desc drm_ioctls[] = {
 long drm_ioctl_kernel(struct file *file, drm_ioctl_t *func, void *kdata,
 		      u32 flags)
 {
+#ifdef __NetBSD__
+	struct drm_file *file_priv = file->f_data;
+#else
 	struct drm_file *file_priv = file->private_data;
+#endif
 	struct drm_device *dev = file_priv->minor->dev;
 	int retcode;
 
@@ -792,7 +801,7 @@ drm_ioctl(struct file *fp, unsigned long cmd, void *data)
 {
 	char stackbuf[128];
 	char *buf = stackbuf;
-	void *data0;
+	void *data0 = data;
 	struct drm_file *const file = fp->f_data;
 	const unsigned int nr = DRM_IOCTL_NR(cmd);
 	int error;
@@ -850,7 +859,7 @@ drm_ioctl(struct file *fp, unsigned long cmd, void *data)
 	}
 
 	/* XXX errno Linux->NetBSD */
-	error = -drm_ioctl_kernel(file, func, data0, ioctl->flags);
+	error = -drm_ioctl_kernel(fp, ioctl->func, data0, ioctl->flags);
 
 	/* If we used a temporary buffer, copy it back out.  */
 	if (data != data0)
