@@ -82,6 +82,7 @@ ktime_to_timespec(ktime_t kt)
 {
 	return ns_to_timespec(ktime_to_ns(kt));
 }
+#define	ktime_to_timespec64	ktime_to_timespec
 
 static inline struct timeval
 ktime_to_timeval(ktime_t kt)
@@ -95,6 +96,7 @@ timespec_to_ktime(struct timespec ts)
 	/* XXX Silently truncate?  */
 	return ns_to_ktime(1000000000*(int64_t)ts.tv_sec + ts.tv_nsec);
 }
+#define	timespec64_to_ktime	timespec_to_ktime
 
 static inline ktime_t
 ktime_get(void)
