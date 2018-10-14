@@ -627,7 +627,7 @@ fail2: __unused
 		goto fail1;
 	}
 
-	p->page = container_of(PHYS_TO_VM_PAGE(P->seg.ds_addr), struct page,
+	p->page = container_of(PHYS_TO_VM_PAGE(p->seg.ds_addr), struct page,
 	    p_vmp);
 
 	if (flags & __GFP_ZERO) {

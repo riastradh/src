@@ -50,6 +50,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_atomic_helper.h>
 #include <drm/i915_drm.h>
+#include "../drm_internal.h"	/* drm_pci_set_busid */
 
 #include "i915_drv.h"
 #include "i915_trace.h"
@@ -91,14 +92,35 @@ bool i915_error_injected(void)
 
 #endif
 
+#ifdef __NetBSD__
+#define	NBSD_BUG_URL "https://gnats.NetBSD.org/"
+#define	NBSD_BUG_MSG							      \
+	"Please file a bug at " NBSD_BUG_URL " in category kern"	      \
+	" providing the dmesg log by booting with debug/verbose"	      \
+	" as in `boot -vx'."
+#else
 #define FDO_BUG_URL "https://bugs.freedesktop.org/enter_bug.cgi?product=DRI"
 #define FDO_BUG_MSG "Please file a bug at " FDO_BUG_URL " against DRM/Intel " \
 		    "providing the dmesg log by booting with drm.debug=0xf"
+#endif
 
 void
 __i915_printk(struct drm_i915_private *dev_priv, const char *level,
 	      const char *fmt, ...)
 {
+#ifdef __NetBSD__
+	static volatile unsigned done = 0;
+	va_list va;
+
+	va_start(va, fmt);
+	printf("%s: %s ", device_xname(dev_priv->drm.dev), level);
+	vprintf(fmt, va);
+	va_end(va);
+
+	if (strncmp(level, KERN_ERR, strlen(KERN_ERR)) == 0 &&
+	    atomic_swap_uint(&done, 1) == 0)
+		printf("%s\n", NBSD_BUG_MSG);
+#else
 	static bool shown_bug_once;
 	struct device *kdev = dev_priv->drm.dev;
 	bool is_error = level[1] <= KERN_ERR[1];
@@ -132,6 +154,7 @@ __i915_printk(struct drm_i915_private *dev_priv, const char *level,
 			dev_notice(kdev, "%s", FDO_BUG_MSG);
 		shown_bug_once = true;
 	}
+#endif
 }
 
 /* Map PCH device id to PCH type, or PCH_NONE if unknown. */
@@ -665,7 +688,9 @@ static int i915_load_modeset_init(struct drm_device *dev)
 
 	intel_bios_init(dev_priv);
 
-#ifndef __NetBSD__		/* XXX vga */
+#ifdef __NetBSD__		/* XXX vga */
+	__USE(pdev);
+#else
 	/* If we have > 1 VGA cards, then we need to arbitrate access
 	 * to the common VGA resources.
 	 *
@@ -749,6 +774,7 @@ out:
 	return ret;
 }
 
+#if IS_ENABLED(CONFIG_FB)
 static int i915_kick_out_firmware_fb(struct drm_i915_private *dev_priv)
 {
 	struct apertures_struct *ap;
@@ -773,6 +799,12 @@ static int i915_kick_out_firmware_fb(struct drm_i915_private *dev_priv)
 
 	return ret;
 }
+#else
+static int i915_kick_out_firmware_fb(struct drm_i915_private *dev_priv)
+{
+	return 0;
+}
+#endif
 
 #if !defined(CONFIG_VGA_CONSOLE)
 static int i915_kick_out_vgacon(struct drm_i915_private *dev_priv)
@@ -1057,7 +1089,8 @@ static int i915_mmio_setup(struct drm_i915_private *dev_priv)
 	dev_priv->regs = pci_iomap(pdev, mmio_bar, mmio_size);
 #ifdef __NetBSD__
 	if (!dev_priv->regs)
-		dev_priv->regs = drm_agp_borrow(dev, mmio_bar, mmio_size);
+		dev_priv->regs = drm_agp_borrow(&dev_priv->drm, mmio_bar,
+		    mmio_size);
 #endif
 	if (dev_priv->regs == NULL) {
 		DRM_ERROR("failed to map registers\n");
@@ -1066,8 +1099,8 @@ static int i915_mmio_setup(struct drm_i915_private *dev_priv)
 	}
 
 #ifdef __NetBSD__
-	dev_priv->regs_bst = dev_priv->dev->pdev->pd_resources[mmio_bar].bst;
-	dev_priv->regs_bsh = dev_priv->dev->pdev->pd_resources[mmio_bar].bsh;
+	dev_priv->regs_bst = dev_priv->drm.pdev->pd_resources[mmio_bar].bst;
+	dev_priv->regs_bsh = dev_priv->drm.pdev->pd_resources[mmio_bar].bsh;
 #endif
 
 	/* Try to make sure MCHBAR is enabled before poking at it */
@@ -1436,18 +1469,20 @@ int i915_driver_load(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ret = -ENOMEM;
 	dev_priv = kzalloc(sizeof(*dev_priv), GFP_KERNEL);
 	if (dev_priv)
-		ret = drm_dev_init(&dev_priv->drm, &driver, &pdev->dev);
+		ret = drm_dev_init(&dev_priv->drm, &driver, pci_dev_dev(pdev));
 	if (ret) {
-		DRM_DEV_ERROR(&pdev->dev, "allocation failed\n");
+		DRM_DEV_ERROR(pdev->pd_dev, "allocation failed\n");
 		goto out_free;
 	}
 
 	dev_priv->drm.pdev = pdev;
 	dev_priv->drm.dev_private = dev_priv;
 
+#ifndef __NetBSD__		/* XXX done for us */
 	ret = pci_enable_device(pdev);
 	if (ret)
 		goto out_fini;
+#endif
 
 	pci_set_drvdata(pdev, &dev_priv->drm);
 	/*
@@ -1458,7 +1493,7 @@ int i915_driver_load(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * becaue the HDA driver may require us to enable the audio power
 	 * domain during system suspend.
 	 */
-	dev_pm_set_driver_flags(&pdev->dev, DPM_FLAG_NEVER_SKIP);
+	dev_pm_set_driver_flags(dev_priv->drm.dev, DPM_FLAG_NEVER_SKIP);
 
 	ret = i915_driver_init_early(dev_priv, ent);
 	if (ret < 0)
@@ -1510,8 +1545,10 @@ out_runtime_pm_put:
 	intel_runtime_pm_put(dev_priv);
 	i915_driver_cleanup_early(dev_priv);
 out_pci_disable:
+#ifndef __NetBSD__
 	pci_disable_device(pdev);
 out_fini:
+#endif
 	i915_load_error(dev_priv, "Device initialization failed (%d)\n", ret);
 	drm_dev_fini(&dev_priv->drm);
 out_free:
@@ -1540,8 +1577,12 @@ void i915_driver_unload(struct drm_device *dev)
 
 	intel_bios_cleanup(dev_priv);
 
+#ifdef __NetBSD__		/* XXX vga */
+	__USE(pdev);
+#else
 	vga_switcheroo_unregister_client(pdev);
 	vga_client_register(pdev, NULL, NULL, NULL);
+#endif
 
 	intel_csr_ucode_fini(dev_priv);
 
@@ -1627,9 +1668,11 @@ static void intel_suspend_encoders(struct drm_i915_private *dev_priv)
 	drm_modeset_unlock_all(dev);
 }
 
+#ifndef __NetBSD__		/* XXX vlv suspend/resume */
 static int vlv_resume_prepare(struct drm_i915_private *dev_priv,
 			      bool rpm_resume);
 static int vlv_suspend_complete(struct drm_i915_private *dev_priv);
+#endif
 
 static bool suspend_to_idle(struct drm_i915_private *dev_priv)
 {
@@ -1640,6 +1683,7 @@ static bool suspend_to_idle(struct drm_i915_private *dev_priv)
 	return false;
 }
 
+#ifndef __NetBSD__		/* XXX runtime pm */
 static int i915_drm_prepare(struct drm_device *dev)
 {
 	struct drm_i915_private *i915 = to_i915(dev);
@@ -1653,11 +1697,12 @@ static int i915_drm_prepare(struct drm_device *dev)
 	 */
 	err = i915_gem_suspend(i915);
 	if (err)
-		dev_err(&i915->drm.pdev->dev,
+		dev_err(i915->drm.dev,
 			"GEM idle failed, suspend/resume might fail\n");
 
 	return err;
 }
+#endif
 
 int i915_drm_suspend(struct drm_device *dev)
 {
@@ -1673,7 +1718,9 @@ int i915_drm_suspend(struct drm_device *dev)
 
 	drm_kms_helper_poll_disable(dev);
 
-#ifndef __NetBSD__		/* pmf handles this for us.  */
+#ifdef __NetBSD__		/* pmf handles this for us.  */
+	__USE(pdev);
+#else
 	pci_save_state(pdev);
 #endif
 
@@ -1742,7 +1789,11 @@ int i915_drm_suspend_late(struct drm_device *dev, bool hibernation)
 	else if (IS_HASWELL(dev_priv) || IS_BROADWELL(dev_priv))
 		hsw_enable_pc8(dev_priv);
 	else if (IS_VALLEYVIEW(dev_priv) || IS_CHERRYVIEW(dev_priv))
+#ifdef __NetBSD__
+		ret = 0;
+#else
 		ret = vlv_suspend_complete(dev_priv);
+#endif
 
 	if (ret) {
 		DRM_ERROR("Suspend complete failed: %d\n", ret);
@@ -1754,7 +1805,9 @@ int i915_drm_suspend_late(struct drm_device *dev, bool hibernation)
 		goto out;
 	}
 
-#ifndef __NetBSD__		/* pmf handles this for us.  */
+#ifdef __NetBSD__		/* pmf handles this for us.  */
+	__USE(pdev);
+#else
 	pci_disable_device(pdev);
 	/*
 	 * During hibernation on some platforms the BIOS may try to access
@@ -1778,6 +1831,7 @@ out:
 	return ret;
 }
 
+#ifndef __NetBSD__		/* XXX vga switcheroo */
 static int i915_suspend_switcheroo(struct drm_device *dev, pm_message_t state)
 {
 	int error;
@@ -1801,6 +1855,7 @@ static int i915_suspend_switcheroo(struct drm_device *dev, pm_message_t state)
 
 	return i915_drm_suspend_late(dev, false);
 }
+#endif
 
 int i915_drm_resume(struct drm_device *dev)
 {
@@ -1901,7 +1956,10 @@ int i915_drm_resume_early(struct drm_device *dev)
 	 * the device powered we can also remove the following set power state
 	 * call.
 	 */
-#ifndef __NetBSD__		/* pmf handles this for us.  */
+#ifdef __NetBSD__		/* pmf handles this for us.  */
+	if (0)
+		goto out;
+#else
 	ret = pci_set_power_state(pdev, PCI_D0);
 	if (ret) {
 		DRM_ERROR("failed to set PCI D0 power state (%d)\n", ret);
@@ -1932,7 +1990,11 @@ int i915_drm_resume_early(struct drm_device *dev)
 	disable_rpm_wakeref_asserts(dev_priv);
 
 	if (IS_VALLEYVIEW(dev_priv) || IS_CHERRYVIEW(dev_priv))
+#ifdef __NetBSD__		/* XXX vlv suspend/resume */
+		ret = 0;
+#else
 		ret = vlv_resume_prepare(dev_priv, false);
+#endif
 	if (ret)
 		DRM_ERROR("Resume prepare failed: %d, continuing anyway\n",
 			  ret);
@@ -1963,6 +2025,7 @@ out:
 	return ret;
 }
 
+#ifndef __NetBSD__		/* XXX vga switcheroo */
 static int i915_resume_switcheroo(struct drm_device *dev)
 {
 	int ret;
@@ -1976,6 +2039,7 @@ static int i915_resume_switcheroo(struct drm_device *dev)
 
 	return i915_drm_resume(dev);
 }
+#endif
 
 /**
  * i915_reset - reset chip after a hang
@@ -2721,7 +2785,9 @@ static int intel_runtime_suspend(struct device *kdev)
 	} else if (IS_HASWELL(dev_priv) || IS_BROADWELL(dev_priv)) {
 		hsw_enable_pc8(dev_priv);
 	} else if (IS_VALLEYVIEW(dev_priv) || IS_CHERRYVIEW(dev_priv)) {
+#ifndef __NetBSD__		/* XXX vlv suspend/resume */
 		ret = vlv_suspend_complete(dev_priv);
+#endif
 	}
 
 	if (ret) {

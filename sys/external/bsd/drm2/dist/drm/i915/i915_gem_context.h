@@ -96,7 +96,7 @@ struct i915_gem_context {
 	 * name, pid and user handle in order to uniquely identify the
 	 * context in messages.
 	 */
-	const char *name;
+	char *name;
 
 	/** link: place with &drm_i915_private.context_list */
 	struct list_head link;

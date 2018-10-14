@@ -546,6 +546,7 @@ void i915_gem_shrinker_unregister(struct drm_i915_private *i915)
 
 void i915_gem_shrinker_taints_mutex(struct mutex *mutex)
 {
+#ifndef __NetBSD__		/* XXX fs reclaim */
 	if (!IS_ENABLED(CONFIG_LOCKDEP))
 		return;
 
@@ -553,4 +554,5 @@ void i915_gem_shrinker_taints_mutex(struct mutex *mutex)
 	mutex_lock(mutex);
 	mutex_unlock(mutex);
 	fs_reclaim_release(GFP_KERNEL);
+#endif
 }

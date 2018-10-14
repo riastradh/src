@@ -74,6 +74,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/err.h>
 #include <linux/bitops.h>
 #include <linux/printk.h>
+#include <linux/interrupt.h>
 #include <asm/param.h>
 #include <asm/page.h>
 #include <asm/cpufeature.h>
@@ -371,7 +372,10 @@ static int i915_gem_object_get_pages_phys(struct drm_i915_gem_object *obj)
 	obj->phys_handle = phys;
 
 #ifdef __NetBSD__
-	__i915_gem_object_set_dmamap(obj, obj->phys_handle->dmah_map, NULL);
+	unsigned sizes = 0, seg;
+	for (seg = 0; seg < obj->phys_handle->dmah_map->dm_nsegs; seg++)
+		sizes |= obj->phys_handle->dmah_map->dm_segs[i].ds_len;
+	__i915_gem_object_set_pages(obj, obj->phys_handle->dmah_map, sizes);
 #else
 	st = kmalloc(sizeof(*st), GFP_KERNEL);
 	if (!st) {
@@ -413,7 +417,11 @@ static void __start_cpu_write(struct drm_i915_gem_object *obj)
 
 static void
 __i915_gem_object_release_shmem(struct drm_i915_gem_object *obj,
+#ifdef __NetBSD__
+				bus_dmamap_t pages,
+#else
 				struct sg_table *pages,
+#endif
 				bool needs_clflush)
 {
 	GEM_BUG_ON(obj->mm.madv == __I915_MADV_PURGED);
@@ -424,7 +432,12 @@ __i915_gem_object_release_shmem(struct drm_i915_gem_object *obj,
 	if (needs_clflush &&
 	    (obj->read_domains & I915_GEM_DOMAIN_CPU) == 0 &&
 	    !(obj->cache_coherent & I915_BO_CACHE_COHERENT_FOR_READ))
+#ifdef __NetBSD__
+		/* XXX Shouldn't realy use obj->... here.  */
+		drm_clflush_pglist(&obj->mm.pageq);
+#else
 		drm_clflush_sg(pages);
+#endif
 
 	__start_cpu_write(obj);
 }
@@ -454,9 +467,8 @@ i915_gem_object_put_pages_phys(struct drm_i915_gem_object *obj,
 #ifdef __NetBSD__
 			struct pglist pageq = TAILQ_HEAD_INITIALIZER(pageq);
 			/* XXX errno NetBSD->Linux */
-			ret = -uvm_obj_wirepages(obj->base.filp,
-			    i*PAGE_SIZE, (i + 1)*PAGE_SIZE, &pageq);
-			if (ret)
+			if (uvm_obj_wirepages(obj->base.filp,
+				i*PAGE_SIZE, (i + 1)*PAGE_SIZE, &pageq) != 0)
 				continue;
 			page = container_of(TAILQ_FIRST(&pageq), struct page,
 			    p_vmp);
@@ -507,8 +519,10 @@ static const struct drm_i915_gem_object_ops i915_gem_object_ops;
 int i915_gem_object_unbind(struct drm_i915_gem_object *obj)
 {
 	struct i915_vma *vma;
-	LIST_HEAD(still_in_list);
+	struct list_head still_in_list;
 	int ret;
+
+	INIT_LIST_HEAD(&still_in_list);
 
 	lockdep_assert_held(&obj->base.dev->struct_mutex);
 
@@ -2751,7 +2765,7 @@ i915_gem_object_put_pages_gtt(struct drm_i915_gem_object *obj,
 
 #ifdef __NetBSD__
 	if (obj->mm.dirty) {
-		TAILQ_FOREACH(page, &obj->pageq, pageq.queue) {
+		TAILQ_FOREACH(page, &obj->mm.pageq, pageq.queue) {
 			page->flags &= ~PG_CLEAN;
 			/* XXX mark page accessed */
 		}
@@ -2909,7 +2923,7 @@ static int i915_gem_object_get_pages_gtt(struct drm_i915_gem_object *obj)
 
 	/* XXX errno NetBSD->Linux */
 	ret = -uvm_obj_wirepages(obj->base.filp, 0, obj->base.size,
-	    &obj->pageq);
+	    &obj->mm.pageq);
 	if (ret)		/* XXX Try purge, shrink.  */
 		goto fail1;
 
@@ -2921,7 +2935,7 @@ static int i915_gem_object_get_pages_gtt(struct drm_i915_gem_object *obj)
 	 *
 	 * XXX This should also be expanded for newer devices.
 	 */
-	TAILQ_FOREACH(page, &obj->pageq, pageq.queue) {
+	TAILQ_FOREACH(page, &obj->mm.pageq, pageq.queue) {
 		const uint64_t mask =
 		    (IS_I965G(dev_priv) || IS_I965GM(dev_priv)?
 			0xffffffffULL : 0xffffffffffULL);

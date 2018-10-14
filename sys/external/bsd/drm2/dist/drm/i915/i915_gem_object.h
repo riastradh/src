@@ -73,7 +73,11 @@ struct drm_i915_gem_object_ops {
 	 * reap pages for the shrinker).
 	 */
 	int (*get_pages)(struct drm_i915_gem_object *);
+#ifdef __NetBSD__
+	void (*put_pages)(struct drm_i915_gem_object *, bus_dmamap_t);
+#else
 	void (*put_pages)(struct drm_i915_gem_object *, struct sg_table *);
+#endif
 
 	int (*pwrite)(struct drm_i915_gem_object *,
 		      const struct drm_i915_gem_pwrite *);
@@ -190,8 +194,8 @@ struct drm_i915_gem_object {
 		struct sg_table *sg;	/* drm prime */
 #else
 		struct sg_table *pages;
-		void *mapping;
 #endif
+		void *mapping;
 
 		/* TODO: whack some of this into the error state */
 		struct i915_page_sizes {

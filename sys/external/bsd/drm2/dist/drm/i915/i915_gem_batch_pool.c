@@ -117,7 +117,7 @@ i915_gem_batch_pool_get(struct i915_gem_batch_pool *pool,
 			 * trapping a reference to all the old fences, rather
 			 * than replace the existing fence.
 			 */
-			if (rcu_access_pointer(resv->fence)) {
+			if (reservation_object_has_excl_fence(resv)) {
 				reservation_object_lock(resv, NULL);
 				reservation_object_add_excl_fence(resv, NULL);
 				reservation_object_unlock(resv);

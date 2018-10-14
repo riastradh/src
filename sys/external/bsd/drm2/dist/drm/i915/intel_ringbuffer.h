@@ -5,6 +5,7 @@
 #define _INTEL_RINGBUFFER_H_
 
 #include <asm/bug.h>
+#include <asm/cpufeature.h>
 #include <linux/hashtable.h>
 #include <linux/seqlock.h>
 
@@ -321,7 +322,11 @@ struct intel_engine_execlists {
 	 *
 	 * Note this register is always in mmio.
 	 */
+#ifdef __NetBSD__
+	bus_size_t csb_read;
+#else
 	u32 __iomem *csb_read;
+#endif
 
 	/**
 	 * @csb_write: control register for Context Switch buffer
@@ -717,7 +722,7 @@ static inline bool
 execlists_is_active(const struct intel_engine_execlists *execlists,
 		    unsigned int bit)
 {
-	return test_bit(bit, (unsigned long *)&execlists->active);
+	return test_bit(bit, (const unsigned long *)&execlists->active);
 }
 
 void execlists_user_begin(struct intel_engine_execlists *execlists,
@@ -842,7 +847,7 @@ static inline void intel_ring_advance(struct i915_request *rq, u32 *cs)
 	 * reserved for the command packet (i.e. the value passed to
 	 * intel_ring_begin()).
 	 */
-	GEM_BUG_ON((rq->ring->vaddr + rq->ring->emit) != cs);
+	GEM_BUG_ON(((char *)rq->ring->vaddr + rq->ring->emit) != (char *)cs);
 }
 
 static inline u32 intel_ring_wrap(const struct intel_ring *ring, u32 pos)
@@ -866,7 +871,7 @@ intel_ring_offset_valid(const struct intel_ring *ring,
 static inline u32 intel_ring_offset(const struct i915_request *rq, void *addr)
 {
 	/* Don't write ring->size (equivalent to 0) as that hangs some GPUs. */
-	u32 offset = addr - rq->ring->vaddr;
+	u32 offset = (char *)addr - (char *)rq->ring->vaddr;
 	GEM_BUG_ON(offset > rq->ring->size);
 	return intel_ring_wrap(rq->ring, offset);
 }
@@ -974,13 +979,17 @@ int intel_engine_init_breadcrumbs(struct intel_engine_cs *engine);
 
 static inline void intel_wait_init(struct intel_wait *wait)
 {
+#ifndef __NetBSD__		/* XXX */
 	wait->tsk = current;
+#endif
 	wait->request = NULL;
 }
 
 static inline void intel_wait_init_for_seqno(struct intel_wait *wait, u32 seqno)
 {
+#ifndef __NetBSD__		/* XXX */
 	wait->tsk = current;
+#endif
 	wait->seqno = seqno;
 }
 
@@ -1018,7 +1027,11 @@ intel_wait_check_request(const struct intel_wait *wait,
 
 static inline bool intel_wait_complete(const struct intel_wait *wait)
 {
+#ifdef __NetBSD__
+	return wait->complete;
+#else
 	return RB_EMPTY_NODE(&wait->node);
+#endif
 }
 
 bool intel_engine_add_wait(struct intel_engine_cs *engine,

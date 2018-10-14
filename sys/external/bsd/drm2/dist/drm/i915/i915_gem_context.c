@@ -138,7 +138,9 @@ static void i915_gem_context_free(struct i915_gem_context *ctx)
 	}
 
 	kfree(ctx->name);
+#ifndef __NetBSD__
 	put_pid(ctx->pid);
+#endif
 
 	list_del(&ctx->link);
 
@@ -314,10 +316,19 @@ __create_hw_context(struct drm_i915_private *dev_priv,
 
 	ctx->file_priv = file_priv;
 	if (file_priv) {
+#ifdef __NetBSD__
+		ctx->pid = NULL;
+#else
 		ctx->pid = get_task_pid(current, PIDTYPE_PID);
+#endif
 		ctx->name = kasprintf(GFP_KERNEL, "%s[%d]/%x",
+#ifdef __NetBSD__
+				      curproc->p_comm,
+				      (int)curproc->p_pid,
+#else
 				      current->comm,
 				      pid_nr(ctx->pid),
+#endif
 				      ctx->user_handle);
 		if (!ctx->name) {
 			ret = -ENOMEM;
@@ -348,7 +359,9 @@ __create_hw_context(struct drm_i915_private *dev_priv,
 	return ctx;
 
 err_pid:
+#ifndef __NetBSD__
 	put_pid(ctx->pid);
+#endif
 	idr_remove(&file_priv->context_idr, ctx->user_handle);
 err_lut:
 	context_close(ctx);
@@ -735,9 +748,15 @@ int i915_gem_context_create_ioctl(struct drm_device *dev, void *data,
 		return -EINVAL;
 
 	if (client_is_banned(file_priv)) {
+#ifdef __NetBSD__
+		DRM_DEBUG("client %s[%d] banned from creating ctx\n",
+		    curproc->p_comm,
+		    (int)curproc->p_pid);
+#else
 		DRM_DEBUG("client %s[%d] banned from creating ctx\n",
 			  current->comm,
 			  pid_nr(get_task_pid(current, PIDTYPE_PID)));
+#endif
 
 		return -EIO;
 	}

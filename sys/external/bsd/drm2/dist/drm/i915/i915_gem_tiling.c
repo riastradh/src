@@ -343,7 +343,6 @@ i915_gem_set_tiling_ioctl(struct drm_device *dev, void *data,
 	obj = i915_gem_object_lookup(file, args->handle);
 	if (!obj)
 		return -ENOENT;
-	obj = to_intel_bo(gobj);
 
 	/*
 	 * The tiling mode of proxy objects is handled by its generator, and

@@ -59,6 +59,7 @@
 #include <linux/pm_qos.h>
 #include <linux/reservation.h>
 #include <linux/shmem_fs.h>
+#include <linux/uuid.h>
 
 #include <drm/drmP.h>
 #include <drm/intel-gtt.h>
@@ -579,7 +580,7 @@ struct intel_fbc {
 		unsigned long flags;
 
 		struct {
-			enum pipe pipe;
+			enum i915_pipe pipe;
 			enum i9xx_plane_id i9xx_plane;
 			unsigned int fence_y_offset;
 		} crtc;
@@ -1355,9 +1356,11 @@ struct i915_oa_config {
 	const struct i915_oa_reg *flex_regs;
 	u32 flex_regs_len;
 
+#ifndef __NetBSD__		/* XXX sysfs */
 	struct attribute_group sysfs_metric;
 	struct attribute *attrs[2];
 	struct device_attribute sysfs_metric_id;
+#endif
 
 	atomic_t ref_count;
 };
@@ -1386,9 +1389,13 @@ struct i915_perf_stream_ops {
 	 * @poll_wait: Call poll_wait, passing a wait queue that will be woken
 	 * once there is something ready to read() for the stream
 	 */
+#ifdef __NetBSD__
+	/* XXX fill me in */
+#else
 	void (*poll_wait)(struct i915_perf_stream *stream,
 			  struct file *file,
 			  poll_table *wait);
+#endif
 
 	/**
 	 * @wait_unlocked: For handling a blocking read, wait until there is
@@ -1984,7 +1991,11 @@ struct drm_i915_private {
 			u32 specific_ctx_id_mask;
 
 			struct hrtimer poll_check_timer;
+#ifdef __NetBSD__
+			drm_waitqueue_t poll_wq;
+#else
 			wait_queue_head_t poll_wq;
+#endif
 			bool pollin;
 
 			/**
@@ -2163,7 +2174,7 @@ struct drm_i915_private {
 
 static inline struct drm_i915_private *to_i915(const struct drm_device *dev)
 {
-	return container_of(dev, struct drm_i915_private, drm);
+	return __UNCONST(const_container_of(dev, struct drm_i915_private, drm));
 }
 
 #ifndef __NetBSD__
@@ -2321,6 +2332,7 @@ static inline unsigned int i915_sg_page_sizes(struct scatterlist *sg)
 }
 #endif
 
+#ifndef __NetBSD__
 static inline unsigned int i915_sg_segment_size(void)
 {
 	unsigned int size = swiotlb_max_segment();
@@ -2335,6 +2347,7 @@ static inline unsigned int i915_sg_segment_size(void)
 
 	return size;
 }
+#endif
 
 static inline const struct intel_device_info *
 intel_info(const struct drm_i915_private *dev_priv)
@@ -2356,7 +2369,7 @@ intel_info(const struct drm_i915_private *dev_priv)
 #define INTEL_GEN_MASK(s, e) ( \
 	BUILD_BUG_ON_ZERO(!__builtin_constant_p(s)) + \
 	BUILD_BUG_ON_ZERO(!__builtin_constant_p(e)) + \
-	GENMASK((e) != GEN_FOREVER ? (e) - 1 : BITS_PER_LONG - 1, \
+	GENMASK((e) != GEN_FOREVER ? (e) - 1 : sizeof(long)*CHAR_BIT - 1, \
 		(s) != GEN_FOREVER ? (s) - 1 : 0) \
 )
 
@@ -2831,7 +2844,7 @@ static inline bool intel_vgpu_active(struct drm_i915_private *dev_priv)
 }
 
 u32 i915_pipestat_enable_mask(struct drm_i915_private *dev_priv,
-			      enum pipe pipe);
+			      enum i915_pipe pipe);
 void
 i915_enable_pipestat(struct drm_i915_private *dev_priv, enum i915_pipe pipe,
 		     u32 status_mask);
@@ -2859,16 +2872,16 @@ ilk_disable_display_irq(struct drm_i915_private *dev_priv, uint32_t bits)
 	ilk_update_display_irq(dev_priv, bits, 0);
 }
 void bdw_update_pipe_irq(struct drm_i915_private *dev_priv,
-			 enum pipe pipe,
+			 enum i915_pipe pipe,
 			 uint32_t interrupt_mask,
 			 uint32_t enabled_irq_mask);
 static inline void bdw_enable_pipe_irq(struct drm_i915_private *dev_priv,
-				       enum pipe pipe, uint32_t bits)
+				       enum i915_pipe pipe, uint32_t bits)
 {
 	bdw_update_pipe_irq(dev_priv, pipe, bits, bits);
 }
 static inline void bdw_disable_pipe_irq(struct drm_i915_private *dev_priv,
-					enum pipe pipe, uint32_t bits)
+					enum i915_pipe pipe, uint32_t bits)
 {
 	bdw_update_pipe_irq(dev_priv, pipe, bits, 0);
 }
@@ -2994,6 +3007,7 @@ void i915_gem_release_mmap(struct drm_i915_gem_object *obj);
 
 void i915_gem_runtime_suspend(struct drm_i915_private *dev_priv);
 
+#ifndef __NetBSD__
 static inline int __sg_page_count(const struct scatterlist *sg)
 {
 	return sg->length >> PAGE_SHIFT;
@@ -3002,6 +3016,7 @@ static inline int __sg_page_count(const struct scatterlist *sg)
 struct scatterlist *
 i915_gem_object_get_sg(struct drm_i915_gem_object *obj,
 		       unsigned int n, unsigned int *offset);
+#endif
 
 struct page *
 i915_gem_object_get_page(struct drm_i915_gem_object *obj,
@@ -3417,7 +3432,7 @@ int  intel_lpe_audio_init(struct drm_i915_private *dev_priv);
 void intel_lpe_audio_teardown(struct drm_i915_private *dev_priv);
 void intel_lpe_audio_irq_handler(struct drm_i915_private *dev_priv);
 void intel_lpe_audio_notify(struct drm_i915_private *dev_priv,
-			    enum pipe pipe, enum port port,
+			    enum i915_pipe pipe, enum port port,
 			    const void *eld, int ls_clock, bool dp_output);
 
 /* intel_i2c.c */
@@ -3481,7 +3496,6 @@ mkwrite_device_info(struct drm_i915_private *dev_priv)
 }
 
 /* modesetting */
-extern void i915_disable_vga(struct drm_device *dev);
 extern void intel_modeset_init_hw(struct drm_device *dev);
 extern int intel_modeset_init(struct drm_device *dev);
 extern void intel_modeset_cleanup(struct drm_device *dev);
@@ -3856,6 +3870,10 @@ __i915_request_irq_complete(const struct i915_request *rq)
 		 * irq_posted == false but we are still running).
 		 */
 		spin_lock_irq(&b->irq_lock);
+#ifdef __NetBSD__
+		if (b->irq_wait)
+			cv_broadcast(&b->irq_wait->cv);
+#else
 		if (b->irq_wait && b->irq_wait->tsk != current)
 			/* Note that if the bottom-half is changed as we
 			 * are sending the wake-up, the new bottom-half will
@@ -3864,6 +3882,7 @@ __i915_request_irq_complete(const struct i915_request *rq)
 			 * ourself.
 			 */
 			wake_up_process(b->irq_wait->tsk);
+#endif
 		spin_unlock_irq(&b->irq_lock);
 
 		if (__i915_request_completed(rq, seqno))
@@ -3893,9 +3912,11 @@ bool i915_memcpy_from_wc(void *dst, const void *src, unsigned long len);
 	i915_memcpy_from_wc(NULL, NULL, 0)
 
 /* i915_mm.c */
+#ifndef __NetBSD__
 int remap_io_mapping(struct vm_area_struct *vma,
 		     unsigned long addr, unsigned long pfn, unsigned long size,
 		     struct io_mapping *iomap);
+#endif
 
 static inline int intel_hws_csb_write_index(struct drm_i915_private *i915)
 {

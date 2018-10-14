@@ -43,7 +43,13 @@ struct i915_timeline;
 
 struct intel_wait {
 	struct rb_node node;
+#ifdef __NetBSD__
+	bool complete;
+	kcondvar_t cv;
+	/* XXX lock, condvar, ...?  */
+#else
 	struct task_struct *tsk;
+#endif
 	struct i915_request *request;
 	u32 seqno;
 };
@@ -110,8 +116,10 @@ struct i915_request {
 	 * It is used by the driver to then queue the request for execution.
 	 */
 	struct i915_sw_fence submit;
+#ifndef __NetBSD__		/* XXX */
 	wait_queue_entry_t submitq;
 	wait_queue_head_t execute;
+#endif
 
 	/*
 	 * A list of everyone we wait upon, and everyone who waits upon us.
@@ -318,7 +326,7 @@ static inline bool i915_request_started(const struct i915_request *rq)
 static inline bool i915_sched_node_signaled(const struct i915_sched_node *node)
 {
 	const struct i915_request *rq =
-		container_of(node, const struct i915_request, sched);
+		const_container_of(node, const struct i915_request, sched);
 
 	return i915_request_completed(rq);
 }

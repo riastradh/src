@@ -269,7 +269,7 @@ struct i915_gpu_error {
 #define I915_RESET_BACKOFF	0
 #define I915_RESET_HANDOFF	1
 #define I915_RESET_MODESET	2
-#define I915_WEDGED		(BITS_PER_LONG - 1)
+#define I915_WEDGED		(sizeof(long)*CHAR_BIT - 1)
 #define I915_RESET_ENGINE	(I915_WEDGED - I915_NUM_ENGINES)
 
 	/** Number of times an engine has been reset */
@@ -285,7 +285,11 @@ struct i915_gpu_error {
 	 * Waitqueue to signal when a hang is detected. Used to for waiters
 	 * to release the struct_mutex for the reset to procede.
 	 */
+#ifdef __NetBSD__
+	drm_waitqueue_t wait_queue;
+#else
 	wait_queue_head_t wait_queue;
+#endif
 
 	/**
 	 * Waitqueue to signal when the reset has completed. Used by clients

@@ -975,7 +975,7 @@ struct intel_plane {
 			     const struct intel_plane_state *plane_state);
 	void (*disable_plane)(struct intel_plane *plane,
 			      struct intel_crtc *crtc);
-	bool (*get_hw_state)(struct intel_plane *plane, enum pipe *pipe);
+	bool (*get_hw_state)(struct intel_plane *plane, enum i915_pipe *pipe);
 	int (*check_plane)(struct intel_plane *plane,
 			   struct intel_crtc_state *crtc_state,
 			   struct intel_plane_state *state);
@@ -1235,7 +1235,7 @@ vlv_pipe_to_channel(enum i915_pipe pipe)
 }
 
 static inline struct intel_crtc *
-intel_get_crtc_for_pipe(struct drm_i915_private *dev_priv, enum pipe pipe)
+intel_get_crtc_for_pipe(struct drm_i915_private *dev_priv, enum i915_pipe pipe)
 {
 	return dev_priv->pipe_to_crtc_mapping[pipe];
 }
@@ -1352,12 +1352,12 @@ intel_atomic_get_new_crtc_state(struct intel_atomic_state *state,
 bool intel_set_cpu_fifo_underrun_reporting(struct drm_i915_private *dev_priv,
 					   enum i915_pipe pipe, bool enable);
 bool intel_set_pch_fifo_underrun_reporting(struct drm_i915_private *dev_priv,
-					   enum pipe pch_transcoder,
+					   enum i915_pipe pch_transcoder,
 					   bool enable);
 void intel_cpu_fifo_underrun_irq_handler(struct drm_i915_private *dev_priv,
 					 enum i915_pipe pipe);
 void intel_pch_fifo_underrun_irq_handler(struct drm_i915_private *dev_priv,
-					 enum pipe pch_transcoder);
+					 enum i915_pipe pch_transcoder);
 void intel_check_cpu_fifo_underruns(struct drm_i915_private *dev_priv);
 void intel_check_pch_fifo_underruns(struct drm_i915_private *dev_priv);
 
@@ -1399,7 +1399,7 @@ void gen9_disable_guc_interrupts(struct drm_i915_private *dev_priv);
 
 /* intel_crt.c */
 bool intel_crt_port_enabled(struct drm_i915_private *dev_priv,
-			    i915_reg_t adpa_reg, enum pipe *pipe);
+			    i915_reg_t adpa_reg, enum i915_pipe *pipe);
 void intel_crt_init(struct drm_i915_private *dev_priv);
 void intel_crt_reset(struct drm_encoder *encoder);
 
@@ -1479,9 +1479,9 @@ void intel_dump_cdclk_state(const struct intel_cdclk_state *cdclk_state,
 			    const char *context);
 
 /* intel_display.c */
-void i830_enable_pipe(struct drm_i915_private *dev_priv, enum pipe pipe);
-void i830_disable_pipe(struct drm_i915_private *dev_priv, enum pipe pipe);
-enum pipe intel_crtc_pch_transcoder(struct intel_crtc *crtc);
+void i830_enable_pipe(struct drm_i915_private *dev_priv, enum i915_pipe pipe);
+void i830_disable_pipe(struct drm_i915_private *dev_priv, enum i915_pipe pipe);
+enum i915_pipe intel_crtc_pch_transcoder(struct intel_crtc *crtc);
 void intel_update_rawclk(struct drm_i915_private *dev_priv);
 int vlv_get_hpll_vco(struct drm_i915_private *dev_priv);
 int vlv_get_cck_clock(struct drm_i915_private *dev_priv,
@@ -1515,7 +1515,7 @@ bool intel_port_is_tc(struct drm_i915_private *dev_priv, enum port port);
 enum tc_port intel_port_to_tc(struct drm_i915_private *dev_priv,
 			      enum port port);
 
-enum pipe intel_get_pipe_from_connector(struct intel_connector *connector);
+enum i915_pipe intel_get_pipe_from_connector(struct intel_connector *connector);
 int intel_get_pipe_from_crtc_id_ioctl(struct drm_device *dev, void *data,
 				      struct drm_file *file_priv);
 enum transcoder intel_pipe_to_cpu_transcoder(struct drm_i915_private *dev_priv,
@@ -1535,7 +1535,7 @@ intel_crtc_has_dp_encoder(const struct intel_crtc_state *crtc_state)
 		 (1 << INTEL_OUTPUT_EDP));
 }
 static inline void
-intel_wait_for_vblank(struct drm_i915_private *dev_priv, enum pipe pipe)
+intel_wait_for_vblank(struct drm_i915_private *dev_priv, enum i915_pipe pipe)
 {
 	drm_wait_one_vblank(&dev_priv->drm, pipe);
 }
@@ -1588,7 +1588,7 @@ int intel_plane_atomic_calc_changes(const struct intel_crtc_state *old_crtc_stat
 				    struct drm_plane_state *plane_state);
 
 void assert_pch_transcoder_disabled(struct drm_i915_private *dev_priv,
-				    enum pipe pipe);
+				    enum i915_pipe pipe);
 
 int vlv_force_pll_on(struct drm_i915_private *dev_priv, enum i915_pipe pipe,
 		     const struct dpll *dpll);
@@ -1673,7 +1673,7 @@ void intel_csr_ucode_resume(struct drm_i915_private *);
 /* intel_dp.c */
 bool intel_dp_port_enabled(struct drm_i915_private *dev_priv,
 			   i915_reg_t dp_reg, enum port port,
-			   enum pipe *pipe);
+			   enum i915_pipe *pipe);
 bool intel_dp_init(struct drm_i915_private *dev_priv, i915_reg_t output_reg,
 		   enum port port);
 bool intel_dp_init_connector(struct intel_digital_port *intel_dig_port,
@@ -1855,7 +1855,7 @@ void intel_infoframe_init(struct intel_digital_port *intel_dig_port);
 
 /* intel_lvds.c */
 bool intel_lvds_port_enabled(struct drm_i915_private *dev_priv,
-			     i915_reg_t lvds_reg, enum pipe *pipe);
+			     i915_reg_t lvds_reg, enum i915_pipe *pipe);
 void intel_lvds_init(struct drm_i915_private *dev_priv);
 struct intel_encoder *intel_get_lvds_encoder(struct drm_device *dev);
 bool intel_is_dual_link_lvds(struct drm_device *dev);
@@ -2094,7 +2094,7 @@ void intel_enable_ipc(struct drm_i915_private *dev_priv);
 
 /* intel_sdvo.c */
 bool intel_sdvo_port_enabled(struct drm_i915_private *dev_priv,
-			     i915_reg_t sdvo_reg, enum pipe *pipe);
+			     i915_reg_t sdvo_reg, enum i915_pipe *pipe);
 bool intel_sdvo_init(struct drm_i915_private *dev_priv,
 		     i915_reg_t reg, enum port port);
 
