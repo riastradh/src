@@ -252,10 +252,14 @@ static void clear_pages(struct i915_vma *vma)
 {
 	GEM_BUG_ON(!vma->pages);
 
+#ifdef __NetBSD__		/* XXX rotate pages */
+	GEM_BUG_ON(vma->pages != vma->obj->mm.pages);
+#else
 	if (vma->pages != vma->obj->mm.pages) {
 		sg_free_table(vma->pages);
 		kfree(vma->pages);
 	}
+#endif
 	vma->pages = NULL;
 
 	memset(&vma->page_sizes, 0, sizeof(vma->page_sizes));
@@ -559,16 +563,18 @@ static void i915_address_space_init(struct i915_address_space *vm,
 	 * Do a dummy acquire now under fs_reclaim so that any allocation
 	 * attempt holding the lock is immediately reported by lockdep.
 	 */
+#ifdef __NetBSD__
+	linux_mutex_init(&vm->mutex);
+#else
 	mutex_init(&vm->mutex);
+#endif
 	i915_gem_shrinker_taints_mutex(&vm->mutex);
 
 	GEM_BUG_ON(!vm->total);
 	drm_mm_init(&vm->mm, 0, vm->total);
 	vm->mm.head_node.color = I915_COLOR_UNEVICTABLE;
 
-#ifdef __NetBSD__
-	vm->dmat = dev_priv->drm.dmat;
-#else
+#ifndef __NetBSD__
 	stash_init(&vm->free_pages);
 #endif
 
@@ -589,7 +595,11 @@ static void i915_address_space_fini(struct i915_address_space *vm)
 
 	drm_mm_takedown(&vm->mm);
 
+#ifdef __NetBSD__
+	linux_mutex_destroy(&vm->mutex);
+#else
 	mutex_destroy(&vm->mutex);
+#endif
 }
 
 static int __setup_page_dma(struct i915_address_space *vm,
@@ -601,7 +611,7 @@ static int __setup_page_dma(struct i915_address_space *vm,
 	int error;
 	int nseg = 1;
 
-	if (flags & __GFP_WAIT)
+	if (gfp & __GFP_WAIT)
 		busdmaflags |= BUS_DMA_WAITOK;
 	else
 		busdmaflags |= BUS_DMA_NOWAIT;
@@ -630,7 +640,7 @@ fail2: __unused
 	p->page = container_of(PHYS_TO_VM_PAGE(p->seg.ds_addr), struct page,
 	    p_vmp);
 
-	if (flags & __GFP_ZERO) {
+	if (gfp & __GFP_ZERO) {
 		void *va = kmap_atomic(p->page);
 		memset(va, 0, PAGE_SIZE);
 		kunmap_atomic(va);
@@ -724,6 +734,48 @@ setup_scratch_page(struct i915_address_space *vm, gfp_t gfp)
 	gfp |= __GFP_ZERO | __GFP_RETRY_MAYFAIL;
 
 	do {
+#ifdef __NetBSD__
+		struct vm_page *vm_page;
+		void *kva;
+		int nseg;
+		int ret;
+
+		/* Allocate a scratch page.  */
+		/* XXX errno NetBSD->Linux */
+		ret = -bus_dmamem_alloc(vm->dmat, size, size, 0,
+		    &vm->scratch_page.seg, 1, &nseg, BUS_DMA_NOWAIT);
+		if (ret)
+			goto skip;
+		KASSERT(nseg == 1);
+		KASSERT(vm->scratch_page.seg.ds_len == size);
+
+		/* Create a DMA map.  */
+		ret = -bus_dmamap_create(vm->dmat, size, 1, size, 0,
+		    BUS_DMA_NOWAIT, &vm->scratch_page.map);
+		if (ret)
+			goto free_dmamem;
+
+		/* Load the segment into the DMA map.  */
+		ret = -bus_dmamap_load_raw(vm->dmat, vm->scratch_page.map,
+		    &vm->scratch_page.seg, 1, size, BUS_DMA_NOWAIT);
+		if (ret)
+			goto destroy_dmamap;
+		KASSERT(vm->scratch_page.map->dm_nsegs == 1);
+		KASSERT(vm->scratch_page.map->dm_segs[0].ds_len == size);
+
+		/* Zero the page.  */
+		ret = -bus_dmamem_map(vm->dmat, &vm->scratch_page.seg, 1,
+		    size, &kva, BUS_DMA_NOWAIT);
+		if (ret)
+			goto unload_dmamap;
+		memset(kva, 0, size);
+		bus_dmamem_unmap(vm->dmat, kva, size);
+
+		/* XXX Is this page guaranteed to work as a huge page?  */
+		vm_page = PHYS_TO_VM_PAGE(vm->scratch_page.seg.ds_addr);
+		vm->scratch_page.page = container_of(vm_page, struct page,
+		    p_vmp);
+#else
 		int order = get_order(size);
 		struct page *page;
 		dma_addr_t addr;
@@ -746,12 +798,20 @@ setup_scratch_page(struct i915_address_space *vm, gfp_t gfp)
 		vm->scratch_page.page = page;
 		vm->scratch_page.daddr = addr;
 		vm->scratch_page.order = order;
+#endif
 		return 0;
 
+#ifdef __NetBSD__
+unload_dmamap:	bus_dmamap_unload(vm->dmat, vm->scratch_page.map);
+destroy_dmamap:	bus_dmamap_destroy(vm->dmat, vm->scratch_page.map);
+		vm->scratch_page.map = NULL; /* paranoia */
+free_dmamem:	bus_dmamem_free(vm->dmat, &vm->scratch_page.seg, 1);
+#else
 unmap_page:
 		dma_unmap_page(vm->dma, addr, size, PCI_DMA_BIDIRECTIONAL);
 free_page:
 		__free_pages(page, order);
+#endif
 skip:
 		if (size == I915_GTT_PAGE_SIZE_4K)
 			return -ENOMEM;
@@ -765,9 +825,16 @@ static void cleanup_scratch_page(struct i915_address_space *vm)
 {
 	struct i915_page_dma *p = &vm->scratch_page;
 
+#ifdef __NetBSD__
+	bus_dmamap_unload(vm->dmat, p->map);
+	bus_dmamap_destroy(vm->dmat, p->map);
+	vm->scratch_page.map = NULL; /* paranoia */
+	bus_dmamem_free(vm->dmat, &p->seg, 1);
+#else
 	dma_unmap_page(vm->dma, p->daddr, BIT(p->order) << PAGE_SHIFT,
 		       PCI_DMA_BIDIRECTIONAL);
 	__free_pages(p->page, p->order);
+#endif
 }
 
 static struct i915_page_table *alloc_pt(struct i915_address_space *vm)
@@ -797,7 +864,7 @@ static void gen8_initialize_pt(struct i915_address_space *vm,
 			       struct i915_page_table *pt)
 {
 	fill_px(vm, pt,
-		gen8_pte_encode(vm->scratch_page.daddr, I915_CACHE_LLC, 0));
+		gen8_pte_encode(i915_vm_scratch_daddr(vm), I915_CACHE_LLC, 0));
 }
 
 static void gen6_initialize_pt(struct gen6_hw_ppgtt *ppgtt,
@@ -945,7 +1012,7 @@ static bool gen8_ppgtt_clear_pt(struct i915_address_space *vm,
 	unsigned int pte = gen8_pte_index(start);
 	unsigned int pte_end = pte + num_entries;
 	const gen8_pte_t scratch_pte =
-		gen8_pte_encode(vm->scratch_page.daddr, I915_CACHE_LLC, 0);
+		gen8_pte_encode(i915_vm_scratch_daddr(vm), I915_CACHE_LLC, 0);
 	gen8_pte_t *vaddr;
 
 	GEM_BUG_ON(num_entries > pt->used_ptes);
@@ -1282,20 +1349,24 @@ static void gen8_ppgtt_insert_huge_entries(struct i915_vma *vma,
 
 		do {
 #ifdef __NetBSD__
-			GEM_BUG_ON((iter->map->ds_seg[iter->seg].ds_len -
+			GEM_BUG_ON((iter->map->dm_segs[iter->seg].ds_len -
 				iter->off) < page_size);
+			vaddr[index++] = encode |
+			    (iter->map->dm_segs[iter->seg].ds_addr +
+				iter->off);
 #else
 			GEM_BUG_ON(iter->sg->length < page_size);
-#endif
 			vaddr[index++] = encode | iter->dma;
+#endif
 
 			start += page_size;
 #ifdef __NetBSD__
 			iter->off += page_size;
 			rem -= page_size;
-			if (iter->off >= iter->map->ds_seg[iter->seg].ds_len) {
+			if (iter->off >=
+			    iter->map->dm_segs[iter->seg].ds_len) {
 				GEM_BUG_ON(iter->off >
-				    iter->map->ds_seg[iter->seg].ds_len);
+				    iter->map->dm_segs[iter->seg].ds_len);
 				iter->off = 0;
 				if (++iter->seg >= iter->map->dm_nsegs) {
 					GEM_BUG_ON(iter->seg >
@@ -1308,7 +1379,7 @@ static void gen8_ppgtt_insert_huge_entries(struct i915_vma *vma,
 				    !(IS_ALIGNED((seg->ds_addr + iter->off),
 					    I915_GTT_PAGE_SIZE_64K) &&
 					(IS_ALIGNED(rem,
-					    I915_GEM_PAGE_SIZE_64K) ||
+					    I915_GTT_PAGE_SIZE_64K) ||
 					    rem >= ((max - index) <<
 						PAGE_SHIFT))))
 					maybe_64K = false;
@@ -1375,7 +1446,7 @@ static void gen8_ppgtt_insert_huge_entries(struct i915_vma *vma,
 			if (I915_SELFTEST_ONLY(vma->vm->scrub_64K)) {
 				u16 i;
 
-				encode = pte_encode | vma->vm->scratch_page.daddr;
+				encode = pte_encode | i915_vm_scratch_daddr(vma->vm);
 				vaddr = kmap_atomic_px(pd->page_table[idx.pde]);
 
 				for (i = 1; i < index; i += 16)
@@ -1745,12 +1816,14 @@ static void gen8_dump_pdp(struct i915_hw_ppgtt *ppgtt,
 		}
 	}
 }
+#endif
 
 static void gen8_dump_ppgtt(struct i915_hw_ppgtt *ppgtt, struct seq_file *m)
 {
+#ifndef __NetBSD__		/* XXX debugfs */
 	struct i915_address_space *vm = &ppgtt->vm;
 	const gen8_pte_t scratch_pte =
-		gen8_pte_encode(vm->scratch_page.daddr, I915_CACHE_LLC, 0);
+		gen8_pte_encode(i915_vm_scratch_daddr(vm), I915_CACHE_LLC, 0);
 	u64 start = 0, length = ppgtt->vm.total;
 
 	if (use_4lvl(vm)) {
@@ -1768,8 +1841,8 @@ static void gen8_dump_ppgtt(struct i915_hw_ppgtt *ppgtt, struct seq_file *m)
 	} else {
 		gen8_dump_pdp(ppgtt, &ppgtt->pdp, start, length, scratch_pte, m);
 	}
-}
 #endif
+}
 
 static int gen8_preallocate_top_level_pdp(struct i915_hw_ppgtt *ppgtt)
 {
@@ -1822,7 +1895,11 @@ static struct i915_hw_ppgtt *gen8_ppgtt_create(struct drm_i915_private *i915)
 	kref_init(&ppgtt->ref);
 
 	ppgtt->vm.i915 = i915;
+#ifdef __NetBSD__
+	ppgtt->vm.dmat = i915->drm.dmat;
+#else
 	ppgtt->vm.dma = &i915->drm.pdev->dev;
+#endif
 
 	ppgtt->vm.total = USES_FULL_48BIT_PPGTT(i915) ?
 		1ULL << 48 :
@@ -1895,9 +1972,9 @@ err_free:
 	return ERR_PTR(err);
 }
 
-#ifndef __NetBSD__		/* XXX debugfs */
 static void gen6_dump_ppgtt(struct i915_hw_ppgtt *base, struct seq_file *m)
 {
+#ifndef __NetBSD__		/* XXX debugfs */
 	struct gen6_hw_ppgtt *ppgtt = to_gen6_ppgtt(base);
 	const gen6_pte_t scratch_pte = ppgtt->scratch_pte;
 	struct i915_page_table *pt;
@@ -1948,8 +2025,8 @@ static void gen6_dump_ppgtt(struct i915_hw_ppgtt *base, struct seq_file *m)
 		}
 		kunmap_atomic(vaddr);
 	}
-}
 #endif
+}
 
 /* Write pde (index) from the page directory @pd to the page table @pt */
 static inline void gen6_write_pde(const struct gen6_hw_ppgtt *ppgtt,
@@ -2172,7 +2249,7 @@ unwind_out:
 static int gen6_ppgtt_init_scratch(struct gen6_hw_ppgtt *ppgtt)
 {
 	struct i915_address_space * const vm = &ppgtt->base.vm;
-	struct i915_page_table *unused;
+	struct i915_page_table *unused __unused;
 	u32 pde;
 	int ret;
 
@@ -2181,7 +2258,7 @@ static int gen6_ppgtt_init_scratch(struct gen6_hw_ppgtt *ppgtt)
 		return ret;
 
 	ppgtt->scratch_pte =
-		vm->pte_encode(vm->scratch_page.daddr,
+		vm->pte_encode(i915_vm_scratch_daddr(vm),
 			       I915_CACHE_NONE, PTE_READ_ONLY);
 
 	vm->scratch_pt = alloc_pt(vm);
@@ -2330,7 +2407,7 @@ static struct i915_vma *pd_vma_create(struct gen6_hw_ppgtt *ppgtt, int size)
 	vma->ops = &pd_vma_ops;
 	vma->private = ppgtt;
 
-	vma->active = RB_ROOT;
+	i915_vma_active_init(vma);
 
 	vma->size = size;
 	vma->fence_size = size;
@@ -2390,7 +2467,11 @@ static struct i915_hw_ppgtt *gen6_ppgtt_create(struct drm_i915_private *i915)
 	kref_init(&ppgtt->base.ref);
 
 	ppgtt->base.vm.i915 = i915;
+#ifdef __NetBSD__
+	ppgtt->base.vm.dmat = i915->drm.dmat;
+#else
 	ppgtt->base.vm.dma = &i915->drm.pdev->dev;
+#endif
 
 	ppgtt->base.vm.total = I915_PDES * GEN6_PTES * PAGE_SIZE;
 
@@ -2576,7 +2657,7 @@ static void gen6_check_and_clear_faults(struct drm_i915_private *dev_priv)
 		fault = I915_READ(RING_FAULT_REG(engine));
 		if (fault & RING_FAULT_VALID) {
 			DRM_DEBUG_DRIVER("Unexpected fault\n"
-					 "\tAddr: 0x%08lx\n"
+					 "\tAddr: 0x%08"PRIx32"\n"
 					 "\tAddress space: %s\n"
 					 "\tSource ID: %d\n"
 					 "\tType: %d\n",
@@ -2667,7 +2748,7 @@ int i915_gem_gtt_prepare_pages(struct drm_i915_gem_object *obj,
 		 * map or page list.
 		 */
 		if (bus_dmamap_load_pglist(obj->base.dev->dmat, pages,
-			&obj->pageq, pages->dm_mapsize, BUS_DMA_NOWAIT) == 0)
+			&obj->mm.pageq, pages->dm_mapsize, BUS_DMA_NOWAIT) == 0)
 			return 0;
 #else
 		if (dma_map_sg_attrs(&obj->base.dev->pdev->dev,
@@ -2761,8 +2842,8 @@ static void gen8_ggtt_insert_entries(struct i915_address_space *vm,
 #ifdef __NetBSD__
 	pgno = vma->node.start >> PAGE_SHIFT;
 	for (seg = 0; seg < map->dm_nsegs; seg++) {
-		bus_addr_t addr = map->dm_segs[seg].ds_addr;
 		bus_size_t len = map->dm_segs[seg].ds_len;
+		addr = map->dm_segs[seg].ds_addr;
 		KASSERT((addr & (PAGE_SIZE - 1)) == 0);
 		KASSERT((len & (PAGE_SIZE - 1)) == 0);
 		for (; len >= PAGE_SIZE; addr += PAGE_SIZE, len -= PAGE_SIZE) {
@@ -2873,7 +2954,7 @@ static void gen8_ggtt_clear_range(struct i915_address_space *vm,
 	unsigned first_entry = start >> PAGE_SHIFT;
 	unsigned num_entries = length >> PAGE_SHIFT;
 	const gen8_pte_t scratch_pte =
-		gen8_pte_encode(vm->scratch_page.daddr, I915_CACHE_LLC, 0);
+		gen8_pte_encode(i915_vm_scratch_daddr(vm), I915_CACHE_LLC, 0);
 #ifndef __NetBSD__
 	gen8_pte_t __iomem *gtt_base =
 		(gen8_pte_t __iomem *)ggtt->gsm + first_entry;
@@ -3009,7 +3090,7 @@ static void gen6_ggtt_clear_range(struct i915_address_space *vm,
 		 first_entry, num_entries, max_entries))
 		num_entries = max_entries;
 
-	scratch_pte = vm->pte_encode(vm->scratch_page.daddr,
+	scratch_pte = vm->pte_encode(i915_vm_scratch_daddr(vm),
 				     I915_CACHE_LLC, 0);
 
 #ifdef __NetBSD__
@@ -3156,7 +3237,7 @@ void i915_gem_gtt_finish_pages(struct drm_i915_gem_object *obj,
 {
 	struct drm_i915_private *dev_priv = to_i915(obj->base.dev);
 #ifdef __NetBSD__
-	bus_dma_tag_t dmat = dev_priv->drm.dev->dmat;
+	bus_dma_tag_t dmat = dev_priv->drm.dmat;
 #else
 	struct device *kdev = &dev_priv->drm.pdev->dev;
 #endif
@@ -3781,6 +3862,7 @@ static int gen8_gmch_probe(struct i915_ggtt *ggtt)
 #endif
 
 #ifdef __NetBSD__
+	__USE(err);		/* caller applies mask */
 	ggtt->max_paddr = DMA_BIT_MASK(39);
 #else
 	err = pci_set_dma_mask(pdev, DMA_BIT_MASK(39));
@@ -3852,6 +3934,7 @@ static int gen6_gmch_probe(struct i915_ggtt *ggtt)
 	}
 
 #ifdef __NetBSD__
+	__USE(err);		/* caller applies mask */
 	ggtt->max_paddr = DMA_BIT_MASK(40);
 #else
 	err = pci_set_dma_mask(pdev, DMA_BIT_MASK(40));
@@ -3913,15 +3996,10 @@ static int i915_gmch_probe(struct i915_ggtt *ggtt)
 #ifdef __NetBSD__
 	ggtt->gmadr.start = gmadr_base;
 	/* Based on i915_drv.c, i915_driver_init_hw.  */
-	if (INTEL_INFO(dev)->gen <= 2)
+	if (IS_GEN2(dev_priv))
 		dev_priv->ggtt.max_paddr = DMA_BIT_MASK(30);
-	else if ((INTEL_INFO(dev)->gen <= 3) ||
-	    IS_BROADWATER(dev) || IS_CRESTLINE(dev))
+	else if (IS_I965G(dev_priv) || IS_I965GM(dev_priv))
 		dev_priv->ggtt.max_paddr = DMA_BIT_MASK(32);
-	else if (INTEL_INFO(dev)->gen <= 5)
-		dev_priv->ggtt.max_paddr = DMA_BIT_MASK(36);
-	else
-		dev_priv->ggtt.max_paddr = DMA_BIT_MASK(40);
 #else
 	ggtt->gmadr =
 		(struct resource) DEFINE_RES_MEM(gmadr_base,
@@ -3956,7 +4034,11 @@ int i915_ggtt_probe_hw(struct drm_i915_private *dev_priv)
 	int ret;
 
 	ggtt->vm.i915 = dev_priv;
+#ifdef __NetBSD__
+	ggtt->vm.dmat = dev_priv->drm.dmat;
+#else
 	ggtt->vm.dma = &dev_priv->drm.pdev->dev;
+#endif
 
 	if (INTEL_GEN(dev_priv) <= 5)
 		ret = i915_gmch_probe(ggtt);
@@ -4153,7 +4235,7 @@ void i915_gem_restore_gtt_mappings(struct drm_i915_private *dev_priv)
 	}
 }
 
-#ifndef __NetBSD__
+#ifndef __NetBSD__		/* XXX rotate pages */
 static struct scatterlist *
 rotate_pages(const dma_addr_t *in, unsigned int offset,
 	     unsigned int width, unsigned int height,
@@ -4315,7 +4397,7 @@ i915_get_ggtt_vma_pages(struct i915_vma *vma)
 		return 0;
 
 #ifdef __NetBSD__
-	case I915_GGTT_VIEW_ROTATED;
+	case I915_GGTT_VIEW_ROTATED:
 	case I915_GGTT_VIEW_PARTIAL:
 		WARN_ONCE(1, "GGTT view %u not implemented!\n",
 			  vma->ggtt_view.type);
