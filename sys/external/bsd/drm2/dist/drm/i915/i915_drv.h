@@ -3277,10 +3277,17 @@ void i915_gem_revoke_fences(struct drm_i915_private *dev_priv);
 void i915_gem_restore_fences(struct drm_i915_private *dev_priv);
 
 void i915_gem_detect_bit_6_swizzle(struct drm_i915_private *dev_priv);
+#ifdef __NetBSD__
+void i915_gem_object_do_bit_17_swizzle(struct drm_i915_gem_object *obj,
+				       struct pglist *pages);
+void i915_gem_object_save_bit_17_swizzle(struct drm_i915_gem_object *obj,
+					 struct pglist *pages);
+#else
 void i915_gem_object_do_bit_17_swizzle(struct drm_i915_gem_object *obj,
 				       struct sg_table *pages);
 void i915_gem_object_save_bit_17_swizzle(struct drm_i915_gem_object *obj,
 					 struct sg_table *pages);
+#endif
 
 static inline struct i915_gem_context *
 __i915_gem_context_lookup_rcu(struct drm_i915_file_private *file_priv, u32 id)
