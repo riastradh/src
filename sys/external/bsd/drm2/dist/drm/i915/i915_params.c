@@ -194,7 +194,7 @@ static __always_inline void _print_param(struct drm_printer *p,
 	else if (!__builtin_strcmp(type, "unsigned int"))
 		drm_printf(p, "i915.%s=%u\n", name, *(const unsigned int *)x);
 	else if (!__builtin_strcmp(type, "char *"))
-		drm_printf(p, "i915.%s=%s\n", name, *(const char **)x);
+		drm_printf(p, "i915.%s=%s\n", name, *(const char *const *)x);
 	else
 		BUILD_BUG();
 }

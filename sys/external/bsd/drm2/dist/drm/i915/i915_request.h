@@ -28,6 +28,7 @@
 #define I915_REQUEST_H
 
 #include <linux/dma-fence.h>
+#include <linux/sched.h>
 
 #include "i915_gem.h"
 #include "i915_scheduler.h"

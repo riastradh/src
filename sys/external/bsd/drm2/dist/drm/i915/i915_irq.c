@@ -41,6 +41,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/printk.h>
 #include <linux/sysrq.h>
 #include <linux/slab.h>
+#include <linux/wait_bit.h>
 #ifdef CONFIG_DEBUG_FS
 #include <linux/circ_buf.h>
 #endif
@@ -3163,7 +3164,7 @@ gen11_gu_misc_irq_handler(struct drm_i915_private *dev_priv,
 		DRM_ERROR("Unexpected GU_MISC interrupt 0x%x\n", iir);
 }
 
-static irqreturn_t gen11_irq_handler(int irq, void *arg)
+static irqreturn_t gen11_irq_handler(DRM_IRQ_ARGS)
 {
 	struct drm_i915_private * const i915 = to_i915(arg);
 	u32 master_ctl;
@@ -3211,16 +3212,22 @@ static void i915_reset_device(struct drm_i915_private *dev_priv,
 			      const char *reason)
 {
 	struct i915_gpu_error *error = &dev_priv->gpu_error;
+#ifndef __NetBSD__		/* XXX kobject uevent...?  */
 	struct kobject *kobj = &dev_priv->drm.primary->kdev->kobj;
 	char *error_event[] = { I915_ERROR_UEVENT "=1", NULL };
 	char *reset_event[] = { I915_RESET_UEVENT "=1", NULL };
 	char *reset_done_event[] = { I915_ERROR_UEVENT "=0", NULL };
+#endif
 	struct wedge_me w;
 
+#ifndef __NetBSD__
 	kobject_uevent_env(kobj, KOBJ_CHANGE, error_event);
+#endif
 
 	DRM_DEBUG_DRIVER("resetting chip\n");
+#ifndef __NetBSD__
 	kobject_uevent_env(kobj, KOBJ_CHANGE, reset_event);
+#endif
 
 	/* Use a watchdog to ensure that our reset completes */
 	i915_wedge_on_timeout(&w, dev_priv, 5*HZ) {
@@ -3232,7 +3239,15 @@ static void i915_reset_device(struct drm_i915_private *dev_priv,
 		/* Signal that locked waiters should reset the GPU */
 		smp_mb__before_atomic();
 		set_bit(I915_RESET_HANDOFF, &error->flags);
-#ifndef __NetBSD__
+#ifdef __NetBSD__
+		/*
+		  XXX Umm?  Waiting for I915_RESET_HANDOFF is done on
+		  reset_queue, not wait_queue.
+		*/
+		spin_lock(&error->reset_lock);
+		DRM_SPIN_WAKEUP_ALL(&error->reset_queue, &error->reset_lock);
+		spin_unlock(&error->reset_lock);
+#else
 		wake_up_all(&error->wait_queue);
 #endif
 
@@ -3255,8 +3270,10 @@ static void i915_reset_device(struct drm_i915_private *dev_priv,
 		intel_finish_reset(dev_priv);
 	}
 
+#ifndef __NetBSD__		/* XXX kobj uevent...?  */
 	if (!test_bit(I915_WEDGED, &error->flags))
 		kobject_uevent_env(kobj, KOBJ_CHANGE, reset_done_event);
+#endif
 }
 
 static void i915_clear_error_registers(struct drm_i915_private *dev_priv)
@@ -3359,9 +3376,20 @@ void i915_handle_error(struct drm_i915_private *dev_priv,
 
 	/* Full reset needs the mutex, stop any other user trying to do so. */
 	if (test_and_set_bit(I915_RESET_BACKOFF, &dev_priv->gpu_error.flags)) {
+#ifdef __NetBSD__
+		int ret;
+		spin_lock(&dev_priv->gpu_error.reset_lock);
+		DRM_SPIN_WAIT_NOINTR_UNTIL(ret,
+		    &dev_priv->gpu_error.reset_queue,
+		    &dev_priv->gpu_error.reset_lock,
+		    !test_bit(I915_RESET_BACKOFF,
+			&dev_priv->gpu_error.flags));
+		spin_unlock(&dev_priv->gpu_error.reset_lock);
+#else
 		wait_event(dev_priv->gpu_error.reset_queue,
 			   !test_bit(I915_RESET_BACKOFF,
 				     &dev_priv->gpu_error.flags));
+#endif
 		goto out;
 	}
 
@@ -3382,7 +3410,14 @@ void i915_handle_error(struct drm_i915_private *dev_priv,
 	}
 
 	clear_bit(I915_RESET_BACKOFF, &dev_priv->gpu_error.flags);
+#ifdef __NetBSD__
+	spin_lock(&dev_priv->gpu_error.reset_lock);
+	DRM_SPIN_WAKEUP_ALL(&dev_priv->gpu_error.reset_queue,
+	    &dev_priv->gpu_error.reset_lock);
+	spin_unlock(&dev_priv->gpu_error.reset_lock);
+#else
 	wake_up_all(&dev_priv->gpu_error.reset_queue);
+#endif
 
 out:
 	intel_runtime_pm_put(dev_priv);
@@ -3863,7 +3898,7 @@ static void gen11_hpd_detection_setup(struct drm_i915_private *dev_priv)
 
 static void gen11_hpd_irq_setup(struct drm_i915_private *dev_priv)
 {
-	u32 hotplug_irqs, enabled_irqs;
+	u32 hotplug_irqs, enabled_irqs __unused;
 	u32 val;
 
 	enabled_irqs = intel_hpd_enabled_irqs(dev_priv, hpd_gen11);

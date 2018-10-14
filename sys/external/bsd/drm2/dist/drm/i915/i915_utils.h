@@ -27,6 +27,8 @@
 #ifndef __I915_UTILS_H
 #define __I915_UTILS_H
 
+#include <linux/workqueue.h>
+
 #undef WARN_ON
 /* Many gcc seem to no see through this and fall over :( */
 #if 0
