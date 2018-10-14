@@ -101,6 +101,7 @@ bool i915_memcpy_from_wc(void *dst, const void *src, unsigned long len)
 
 void i915_memcpy_init_early(struct drm_i915_private *dev_priv)
 {
+#ifdef CONFIG_AS_MOVNTDQA
 	/*
 	 * Some hypervisors (e.g. KVM) don't support VEX-prefix instructions
 	 * emulation. So don't enable movntdqa in hypervisor guest.
@@ -108,4 +109,5 @@ void i915_memcpy_init_early(struct drm_i915_private *dev_priv)
 	if (static_cpu_has(X86_FEATURE_XMM4_1) &&
 	    !boot_cpu_has(X86_FEATURE_HYPERVISOR))
 		static_branch_enable(&has_movntdqa);
+#endif
 }
