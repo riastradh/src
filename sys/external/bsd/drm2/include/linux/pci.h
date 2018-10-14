@@ -62,6 +62,7 @@ struct acpi_devnode;
 #endif
 
 #include <linux/dma-mapping.h>
+#include <linux/interrupt.h>
 #include <linux/ioport.h>
 #include <linux/kernel.h>
 
