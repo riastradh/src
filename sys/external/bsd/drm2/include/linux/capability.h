@@ -38,12 +38,14 @@
 #include <sys/kauth.h>
 
 #define	CAP_SYS_ADMIN	0
+#define	CAP_SYS_NICE	1
 
 static inline bool
 capable(int cap)
 {
 	switch (cap) {
 	case CAP_SYS_ADMIN:
+	case CAP_SYS_NICE:
 		return (kauth_authorize_generic(kauth_cred_get(),
 			KAUTH_GENERIC_ISSUSER, NULL) == 0);
 	default:
