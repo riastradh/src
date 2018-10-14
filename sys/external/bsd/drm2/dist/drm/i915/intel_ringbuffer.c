@@ -1472,6 +1472,7 @@ void intel_engine_cleanup(struct intel_engine_cs *engine)
 	intel_engine_cleanup_common(engine);
 
 	dev_priv->engine[engine->id] = NULL;
+	seqlock_destroy(&engine->stats.lock);
 	kfree(engine);
 }
 

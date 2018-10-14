@@ -374,8 +374,10 @@ int intel_engines_init_mmio(struct drm_i915_private *dev_priv)
 	return 0;
 
 cleanup:
-	for_each_engine(engine, dev_priv, id)
+	for_each_engine(engine, dev_priv, id) {
+		seqlock_destroy(&engine->stats.lock);
 		kfree(engine);
+	}
 	return err;
 }
 
@@ -419,6 +421,7 @@ int intel_engines_init(struct drm_i915_private *dev_priv)
 cleanup:
 	for_each_engine(engine, dev_priv, id) {
 		if (id >= err_id) {
+			seqlock_destroy(&engine->stats.lock);
 			kfree(engine);
 			dev_priv->engine[id] = NULL;
 		} else {

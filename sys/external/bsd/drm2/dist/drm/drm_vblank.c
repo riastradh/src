@@ -438,6 +438,7 @@ void drm_vblank_cleanup(struct drm_device *dev)
 		del_timer_sync(&vblank->disable_timer);
 #ifdef __NetBSD__
 		teardown_timer(&vblank->disable_timer);
+		seqlock_destroy(&vblank->seqlock);
 #endif
 	}
 

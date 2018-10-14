@@ -2311,6 +2311,7 @@ void intel_logical_ring_cleanup(struct intel_engine_cs *engine)
 
 	engine->i915 = NULL;
 	dev_priv->engine[engine->id] = NULL;
+	seqlock_destroy(&engine->stats.lock);
 	kfree(engine);
 }
 
