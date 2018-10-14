@@ -280,12 +280,11 @@ static bool gen11_reset_one_iir(struct drm_i915_private * const i915,
 				const unsigned int bank,
 				const unsigned int bit)
 {
-	void __iomem * const regs = i915->regs;
 	u32 dw;
 
 	lockdep_assert_held(&i915->irq_lock);
 
-	dw = raw_reg_read(regs, GEN11_GT_INTR_DW(bank));
+	dw = raw_reg_read(i915, GEN11_GT_INTR_DW(bank));
 	if (dw & BIT(bit)) {
 		/*
 		 * According to the BSpec, DW_IIR bits cannot be cleared without
@@ -299,7 +298,7 @@ static bool gen11_reset_one_iir(struct drm_i915_private * const i915,
 		 * our bit, otherwise we are locking the register for
 		 * everybody.
 		 */
-		raw_reg_write(regs, GEN11_GT_INTR_DW(bank), BIT(bit));
+		raw_reg_write(i915, GEN11_GT_INTR_DW(bank), BIT(bit));
 
 		return true;
 	}
@@ -1541,7 +1540,6 @@ gen8_cs_irq_handler(struct intel_engine_cs *engine, u32 iir)
 static void gen8_gt_irq_ack(struct drm_i915_private *i915,
 			    u32 master_ctl, u32 gt_iir[4])
 {
-	void __iomem * const regs = i915->regs;
 
 #define GEN8_GT_IRQS (GEN8_GT_RCS_IRQ | \
 		      GEN8_GT_BCS_IRQ | \
@@ -1552,30 +1550,30 @@ static void gen8_gt_irq_ack(struct drm_i915_private *i915,
 		      GEN8_GT_GUC_IRQ)
 
 	if (master_ctl & (GEN8_GT_RCS_IRQ | GEN8_GT_BCS_IRQ)) {
-		gt_iir[0] = raw_reg_read(regs, GEN8_GT_IIR(0));
+		gt_iir[0] = raw_reg_read(i915, GEN8_GT_IIR(0));
 		if (likely(gt_iir[0]))
-			raw_reg_write(regs, GEN8_GT_IIR(0), gt_iir[0]);
+			raw_reg_write(i915, GEN8_GT_IIR(0), gt_iir[0]);
 	}
 
 	if (master_ctl & (GEN8_GT_VCS1_IRQ | GEN8_GT_VCS2_IRQ)) {
-		gt_iir[1] = raw_reg_read(regs, GEN8_GT_IIR(1));
+		gt_iir[1] = raw_reg_read(i915, GEN8_GT_IIR(1));
 		if (likely(gt_iir[1]))
-			raw_reg_write(regs, GEN8_GT_IIR(1), gt_iir[1]);
+			raw_reg_write(i915, GEN8_GT_IIR(1), gt_iir[1]);
 	}
 
 	if (master_ctl & (GEN8_GT_PM_IRQ | GEN8_GT_GUC_IRQ)) {
-		gt_iir[2] = raw_reg_read(regs, GEN8_GT_IIR(2));
+		gt_iir[2] = raw_reg_read(i915, GEN8_GT_IIR(2));
 		if (likely(gt_iir[2] & (i915->pm_rps_events |
 					i915->pm_guc_events)))
-			raw_reg_write(regs, GEN8_GT_IIR(2),
+			raw_reg_write(i915, GEN8_GT_IIR(2),
 				      gt_iir[2] & (i915->pm_rps_events |
 						   i915->pm_guc_events));
 	}
 
 	if (master_ctl & GEN8_GT_VECS_IRQ) {
-		gt_iir[3] = raw_reg_read(regs, GEN8_GT_IIR(3));
+		gt_iir[3] = raw_reg_read(i915, GEN8_GT_IIR(3));
 		if (likely(gt_iir[3]))
-			raw_reg_write(regs, GEN8_GT_IIR(3), gt_iir[3]);
+			raw_reg_write(i915, GEN8_GT_IIR(3), gt_iir[3]);
 	}
 }
 
@@ -3012,13 +3010,12 @@ static u32
 gen11_gt_engine_identity(struct drm_i915_private * const i915,
 			 const unsigned int bank, const unsigned int bit)
 {
-	void __iomem * const regs = i915->regs;
 	u32 timeout_ts;
 	u32 ident;
 
 	lockdep_assert_held(&i915->irq_lock);
 
-	raw_reg_write(regs, GEN11_IIR_REG_SELECTOR(bank), BIT(bit));
+	raw_reg_write(i915, GEN11_IIR_REG_SELECTOR(bank), BIT(bit));
 
 	/*
 	 * NB: Specs do not specify how long to spin wait,
@@ -3026,7 +3023,7 @@ gen11_gt_engine_identity(struct drm_i915_private * const i915,
 	 */
 	timeout_ts = (local_clock() >> 10) + 100;
 	do {
-		ident = raw_reg_read(regs, GEN11_INTR_IDENTITY_REG(bank));
+		ident = raw_reg_read(i915, GEN11_INTR_IDENTITY_REG(bank));
 	} while (!(ident & GEN11_INTR_DATA_VALID) &&
 		 !time_after32(local_clock() >> 10, timeout_ts));
 
@@ -3036,7 +3033,7 @@ gen11_gt_engine_identity(struct drm_i915_private * const i915,
 		return 0;
 	}
 
-	raw_reg_write(regs, GEN11_INTR_IDENTITY_REG(bank),
+	raw_reg_write(i915, GEN11_INTR_IDENTITY_REG(bank),
 		      GEN11_INTR_DATA_VALID);
 
 	return ident;
@@ -3096,13 +3093,12 @@ static void
 gen11_gt_bank_handler(struct drm_i915_private * const i915,
 		      const unsigned int bank)
 {
-	void __iomem * const regs = i915->regs;
 	unsigned long intr_dw;
 	unsigned int bit;
 
 	lockdep_assert_held(&i915->irq_lock);
 
-	intr_dw = raw_reg_read(regs, GEN11_GT_INTR_DW(bank));
+	intr_dw = raw_reg_read(i915, GEN11_GT_INTR_DW(bank));
 
 	if (unlikely(!intr_dw)) {
 		DRM_ERROR("GT_INTR_DW%u blank!\n", bank);
@@ -3117,7 +3113,7 @@ gen11_gt_bank_handler(struct drm_i915_private * const i915,
 	}
 
 	/* Clear must be after shared has been served for engine */
-	raw_reg_write(regs, GEN11_GT_INTR_DW(bank), intr_dw);
+	raw_reg_write(i915, GEN11_GT_INTR_DW(bank), intr_dw);
 }
 
 static void
@@ -3140,14 +3136,13 @@ static void
 gen11_gu_misc_irq_ack(struct drm_i915_private *dev_priv, const u32 master_ctl,
 		      u32 *iir)
 {
-	void __iomem * const regs = dev_priv->regs;
 
 	if (!(master_ctl & GEN11_GU_MISC_IRQ))
 		return;
 
-	*iir = raw_reg_read(regs, GEN11_GU_MISC_IIR);
+	*iir = raw_reg_read(dev_priv, GEN11_GU_MISC_IIR);
 	if (likely(*iir))
-		raw_reg_write(regs, GEN11_GU_MISC_IIR, *iir);
+		raw_reg_write(dev_priv, GEN11_GU_MISC_IIR, *iir);
 }
 
 static void
@@ -3171,27 +3166,26 @@ gen11_gu_misc_irq_handler(struct drm_i915_private *dev_priv,
 static irqreturn_t gen11_irq_handler(int irq, void *arg)
 {
 	struct drm_i915_private * const i915 = to_i915(arg);
-	void __iomem * const regs = i915->regs;
 	u32 master_ctl;
 	u32 gu_misc_iir;
 
 	if (!intel_irqs_enabled(i915))
 		return IRQ_NONE;
 
-	master_ctl = raw_reg_read(regs, GEN11_GFX_MSTR_IRQ);
+	master_ctl = raw_reg_read(i915, GEN11_GFX_MSTR_IRQ);
 	master_ctl &= ~GEN11_MASTER_IRQ;
 	if (!master_ctl)
 		return IRQ_NONE;
 
 	/* Disable interrupts. */
-	raw_reg_write(regs, GEN11_GFX_MSTR_IRQ, 0);
+	raw_reg_write(i915, GEN11_GFX_MSTR_IRQ, 0);
 
 	/* Find, clear, then process each source of interrupt. */
 	gen11_gt_irq_handler(i915, master_ctl);
 
 	/* IRQs are synced during runtime_suspend, we don't require a wakeref */
 	if (master_ctl & GEN11_DISPLAY_IRQ) {
-		const u32 disp_ctl = raw_reg_read(regs, GEN11_DISPLAY_INT_CTL);
+		const u32 disp_ctl = raw_reg_read(i915, GEN11_DISPLAY_INT_CTL);
 
 		disable_rpm_wakeref_asserts(i915);
 		/*
@@ -3205,7 +3199,7 @@ static irqreturn_t gen11_irq_handler(int irq, void *arg)
 	gen11_gu_misc_irq_ack(i915, master_ctl, &gu_misc_iir);
 
 	/* Acknowledge and enable interrupts. */
-	raw_reg_write(regs, GEN11_GFX_MSTR_IRQ, GEN11_MASTER_IRQ | master_ctl);
+	raw_reg_write(i915, GEN11_GFX_MSTR_IRQ, GEN11_MASTER_IRQ | master_ctl);
 
 	gen11_gu_misc_irq_handler(i915, master_ctl, gu_misc_iir);
 
