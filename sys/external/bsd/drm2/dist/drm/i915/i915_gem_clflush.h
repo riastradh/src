@@ -35,4 +35,8 @@ bool i915_gem_clflush_object(struct drm_i915_gem_object *obj,
 #define I915_CLFLUSH_FORCE BIT(0)
 #define I915_CLFLUSH_SYNC BIT(1)
 
+#ifdef __NetBSD__
+extern spinlock_t i915_gem_clflush_lock;
+#endif
+
 #endif /* __I915_GEM_CLFLUSH_H__ */

@@ -31,7 +31,12 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "intel_frontbuffer.h"
 #include "i915_gem_clflush.h"
 
+#ifdef __NetBSD__
+spinlock_t i915_gem_clflush_lock;
+#define	clflush_lock	i915_gem_clflush_lock
+#else
 static DEFINE_SPINLOCK(clflush_lock);
+#endif
 
 struct clflush {
 	struct dma_fence dma; /* Must be first for dma_fence_free() */
