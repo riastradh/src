@@ -34,9 +34,16 @@
 
 #include <sys/cpu.h>
 
+#include <linux/hardirq.h>
 #include <linux/kernel.h>
 #include <linux/tasklet.h>
 
 #define	in_interrupt()	(cpu_intr_p() || cpu_softintr_p())
+
+#define	disable_irq		linux_disable_irq
+#define	enable_irq		linux_enable_irq
+
+void	disable_irq(int);
+void	enable_irq(int);
 
 #endif  /* _LINUX_INTERRUPT_H_ */
