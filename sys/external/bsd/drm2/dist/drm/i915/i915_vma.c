@@ -145,7 +145,7 @@ vma_create(struct drm_i915_gem_object *obj,
 	if (vma == NULL)
 		return ERR_PTR(-ENOMEM);
 
-	vma->active = RB_ROOT;
+	i915_vma_active_init(vma);
 
 	init_request_active(&vma->last_active, i915_vma_last_retire);
 	init_request_active(&vma->last_fence, NULL);
@@ -1037,6 +1037,50 @@ int i915_vma_move_to_active(struct i915_vma *vma,
 
 	export_fence(vma, rq, flags);
 	return 0;
+}
+
+#ifdef __NetBSD__
+static int
+compare_active(void *cookie, const void *va, const void *vb)
+{
+	const struct i915_vma_active *a = va;
+	const struct i915_vma_active *b = vb;
+
+	if (a->timeline < b->timeline)
+		return -1;
+	if (a->timeline > b->timeline)
+		return +1;
+	return 0;
+}
+
+static int
+compare_active_key(void *cookie, const void *vn, const void *vk)
+{
+	const struct i915_vma_active *a = vn;
+	const uint64_t *k = vk;
+
+	if (a->timeline < *k)
+		return -1;
+	if (a->timeline > *k)
+		return +1;
+	return 0;
+}
+
+static const rb_tree_ops_t vma_active_rb_ops = {
+	.rbto_compare_nodes = compare_active,
+	.rbto_compare_key = compare_active_key,
+	.rbto_node_offset = offsetof(struct i915_vma_active, node),
+};
+#endif
+
+void
+i915_vma_active_init(struct i915_vma *vma)
+{
+#ifdef __NetBSD__
+	rb_tree_init(&vma->active, &vma_active_rb_ops);
+#else
+	*root = RB_ROOT;
+#endif
 }
 
 int i915_vma_unbind(struct i915_vma *vma)
