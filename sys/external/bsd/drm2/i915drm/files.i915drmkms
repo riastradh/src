@@ -89,7 +89,7 @@ file	external/bsd/drm2/dist/drm/i915/i915_timeline.c	i915drmkms
 #file	external/bsd/drm2/dist/drm/i915/i915_trace_points.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_vgpu.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/i915_vma.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/icl_dsi.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/icl_dsi.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_acpi.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_atomic.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_atomic_plane.c	i915drmkms
