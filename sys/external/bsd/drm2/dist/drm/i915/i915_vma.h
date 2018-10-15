@@ -162,6 +162,7 @@ int __must_check i915_vma_move_to_active(struct i915_vma *vma,
 					 struct i915_request *rq,
 					 unsigned int flags);
 
+void i915_vma_tree_init(struct drm_i915_gem_object *);
 void i915_vma_active_init(struct i915_vma *);
 
 static inline bool i915_vma_is_ggtt(const struct i915_vma *vma)

@@ -5313,6 +5313,8 @@ void i915_gem_object_init(struct drm_i915_gem_object *obj,
 	mutex_init(&obj->mm.get_page.lock);
 #endif
 
+	i915_vma_tree_init(obj);
+
 	i915_gem_info_add_obj(to_i915(obj->base.dev), obj->base.size);
 }
 

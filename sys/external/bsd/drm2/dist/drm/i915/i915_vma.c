@@ -30,8 +30,10 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "i915_vma.h"
 
 #include "i915_drv.h"
+#include "intel_drv.h"
 #include "intel_ringbuffer.h"
 #include "intel_frontbuffer.h"
+#include "i915_trace.h"
 
 #include <drm/drm_gem.h>
 
@@ -130,6 +132,49 @@ i915_vma_last_retire(struct i915_gem_active *base, struct i915_request *rq)
 	__i915_vma_retire(container_of(base, struct i915_vma, last_active), rq);
 }
 
+#ifdef __NetBSD__
+struct i915_vma_key {
+	struct i915_address_space *vm;
+	const struct i915_ggtt_view *view;
+};
+
+static int
+compare_vma(void *cookie, const void *va, const void *vb)
+{
+	const struct i915_vma *a = va;
+	const struct i915_vma *b = vb;
+	long cmp = i915_vma_compare(__UNCONST(a), b->vm, &b->ggtt_view);
+
+	return (cmp < 0 ? -1 : cmp > 0 ? +1 : 0);
+}
+
+static int
+compare_vma_key(void *cookie, const void *vn, const void *vk)
+{
+	const struct i915_vma *vma = vn;
+	const struct i915_vma_key *key = vk;
+	long cmp = i915_vma_compare(__UNCONST(vma), key->vm, key->view);
+
+	return (cmp < 0 ? -1 : cmp > 0 ? +1 : 0);
+}
+
+static const rb_tree_ops_t vma_tree_rb_ops = {
+	.rbto_compare_nodes = compare_vma,
+	.rbto_compare_key = compare_vma_key,
+	.rbto_node_offset = offsetof(struct i915_vma, obj_node),
+};
+#endif
+
+void
+i915_vma_tree_init(struct drm_i915_gem_object *obj)
+{
+#ifdef __NetBSD__
+	rb_tree_init(&obj->vma_tree.rbr_tree, &vma_tree_rb_ops);
+#else
+	obj->vma_tree = RB_ROOT;
+#endif
+}
+
 static struct i915_vma *
 vma_create(struct drm_i915_gem_object *obj,
 	   struct i915_address_space *vm,
@@ -207,6 +252,13 @@ vma_create(struct drm_i915_gem_object *obj,
 		list_add_tail(&vma->obj_link, &obj->vma_list);
 	}
 
+#ifdef __NetBSD__
+	__USE(rb);
+	__USE(p);
+	struct i915_vma *collision __diagused;
+	collision = rb_tree_insert_node(&obj->vma_tree.rbr_tree, vma);
+	KASSERT(collision == vma);
+#else
 	rb = NULL;
 	p = &obj->vma_tree.rb_node;
 	while (*p) {
@@ -221,6 +273,7 @@ vma_create(struct drm_i915_gem_object *obj,
 	}
 	rb_link_node(&vma->obj_node, rb, p);
 	rb_insert_color(&vma->obj_node, &obj->vma_tree);
+#endif
 	list_add(&vma->vm_link, &vm->unbound_list);
 
 	return vma;
@@ -235,6 +288,11 @@ vma_lookup(struct drm_i915_gem_object *obj,
 	   struct i915_address_space *vm,
 	   const struct i915_ggtt_view *view)
 {
+#ifdef __NetBSD__
+	const struct i915_vma_key key = { .vm = vm, .view = view };
+
+	return rb_tree_find_node(&obj->vma_tree.rbr_tree, &key);
+#else
 	struct rb_node *rb;
 
 	rb = obj->vma_tree.rb_node;
@@ -253,6 +311,7 @@ vma_lookup(struct drm_i915_gem_object *obj,
 	}
 
 	return NULL;
+#endif
 }
 
 /**
@@ -588,7 +647,7 @@ i915_vma_insert(struct i915_vma *vma, u64 size, u64 alignment, u64 flags)
 	 * attempt to find space.
 	 */
 	if (size > end) {
-		DRM_DEBUG("Attempting to bind an object larger than the aperture: request=%llu > %s aperture=%llu\n",
+		DRM_DEBUG("Attempting to bind an object larger than the aperture: request=%"PRIu64" > %s aperture=%"PRIu64"\n",
 			  size, flags & PIN_MAPPABLE ? "mappable" : "total",
 			  end);
 		return -ENOSPC;
@@ -860,7 +919,11 @@ static void __i915_vma_iounmap(struct i915_vma *vma)
 	if (vma->iomap == NULL)
 		return;
 
+#ifdef __NetBSD__
+	io_mapping_unmap(&i915_vm_to_ggtt(vma->vm)->iomap, vma->iomap);
+#else
 	io_mapping_unmap(vma->iomap);
+#endif
 	vma->iomap = NULL;
 }
 
@@ -877,11 +940,21 @@ void i915_vma_revoke_mmap(struct i915_vma *vma)
 	GEM_BUG_ON(!i915_vma_is_map_and_fenceable(vma));
 	GEM_BUG_ON(!vma->obj->userfault_count);
 
+#ifdef __NetBSD__
+	__USE(vma_offset);
+	__USE(node);
+	struct drm_i915_private *i915 = to_i915(vma->obj->base.dev);
+	paddr_t pa = i915->ggtt.gmadr.start + vma->node.start;
+	vsize_t npgs = vma->size >> PAGE_SHIFT;
+	while (npgs --> 0)
+		pmap_pv_protect(pa = (npgs << PAGE_SHIFT), VM_PROT_NONE);
+#else
 	vma_offset = vma->ggtt_view.partial.offset << PAGE_SHIFT;
 	unmap_mapping_range(vma->vm->i915->drm.anon_inode->i_mapping,
 			    drm_vma_node_offset_addr(node) + vma_offset,
 			    vma->size,
 			    1);
+#endif
 
 	i915_vma_unset_userfault(vma);
 	if (!--vma->obj->userfault_count)
@@ -935,6 +1008,15 @@ static struct i915_gem_active *active_instance(struct i915_vma *vma, u64 idx)
 	/* Move the currently active fence into the rbtree */
 	idx = old->fence.context;
 
+#ifdef __NetBSD__
+	__USE(parent);
+	__USE(p);
+	active = rb_tree_find_node(&vma->active.rbr_tree, &idx);
+	if (active) {
+		KASSERT(active->timeline == idx);
+		goto replace;
+	}
+#else
 	parent = NULL;
 	p = &vma->active.rb_node;
 	while (*p) {
@@ -949,6 +1031,7 @@ static struct i915_gem_active *active_instance(struct i915_vma *vma, u64 idx)
 		else
 			p = &parent->rb_left;
 	}
+#endif
 
 	active = kmalloc(sizeof(*active), GFP_KERNEL);
 
@@ -966,8 +1049,14 @@ static struct i915_gem_active *active_instance(struct i915_vma *vma, u64 idx)
 	active->vma = vma;
 	active->timeline = idx;
 
+#ifdef __NetBSD__
+	struct i915_vma_active *collision __diagused;
+	collision = rb_tree_insert_node(&vma->active.rbr_tree, active);
+	KASSERT(collision == active);
+#else
 	rb_link_node(&active->node, parent, p);
 	rb_insert_color(&active->node, &vma->active);
+#endif
 
 replace:
 	/*
@@ -1077,7 +1166,7 @@ void
 i915_vma_active_init(struct i915_vma *vma)
 {
 #ifdef __NetBSD__
-	rb_tree_init(&vma->active, &vma_active_rb_ops);
+	rb_tree_init(&vma->active.rbr_tree, &vma_active_rb_ops);
 #else
 	*root = RB_ROOT;
 #endif
