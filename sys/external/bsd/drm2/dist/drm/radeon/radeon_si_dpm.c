@@ -6907,8 +6907,8 @@ int si_dpm_init(struct radeon_device *rdev)
 	struct atom_clock_dividers dividers;
 #ifndef __NetBSD__		/* XXX radeon pcie */
 	enum pci_bus_speed speed_cap;
-#endif
 	struct pci_dev *root = rdev->pdev->bus->self;
+#endif
 	int ret;
 
 	si_pi = kzalloc(sizeof(struct si_power_info), GFP_KERNEL);
