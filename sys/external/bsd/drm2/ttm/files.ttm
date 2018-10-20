@@ -2,7 +2,12 @@
 
 # TTM, the texture and tiling manager.
 
+version	20180827
+
 define	drmkms_ttm: drmkms
+
+makeoptions	drmkms_ttm	"CWARNFLAGS.drmkms_ttm"+="-Wno-missing-field-initializers"
+makeoptions	drmkms_ttm	"CWARNFLAGS.drmkms_ttm"+="-Wno-shadow"
 
 file	external/bsd/drm2/ttm/ttm_agp_backend.c			drmkms_ttm
 file	external/bsd/drm2/dist/drm/ttm/ttm_memory.c		drmkms_ttm
