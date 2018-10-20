@@ -6,6 +6,8 @@ version	20180827
 
 define	drmkms_ttm: drmkms
 
+makeoptions	drmkms_ttm	"CPPFLAGS.drmkms_ttm"+="-DCONFIG_AGP=1"
+
 makeoptions	drmkms_ttm	"CWARNFLAGS.drmkms_ttm"+="-Wno-missing-field-initializers"
 makeoptions	drmkms_ttm	"CWARNFLAGS.drmkms_ttm"+="-Wno-shadow"
 
