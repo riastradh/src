@@ -462,17 +462,9 @@ int amdgpu_ucode_init_bo(struct amdgpu_device *adev)
 				cp_hdr = (const struct gfx_firmware_header_v1_0 *)ucode->fw->data;
 				amdgpu_ucode_patch_jt(ucode,  adev->firmware.fw_buf_mc + fw_offset,
 						    (char *)adev->firmware.fw_buf_ptr + fw_offset);
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 				fw_offset += round_up(le32_to_cpu(cp_hdr->jt_size) << 2, PAGE_SIZE);
-#else
-				fw_offset += ALIGN(le32_to_cpu(cp_hdr->jt_size) << 2, PAGE_SIZE);
-#endif
 			}
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 			fw_offset += round_up(ucode->ucode_size, PAGE_SIZE);
-#else
-			fw_offset += ALIGN(ucode->ucode_size, PAGE_SIZE);
-#endif
 		}
 	}
 	return 0;

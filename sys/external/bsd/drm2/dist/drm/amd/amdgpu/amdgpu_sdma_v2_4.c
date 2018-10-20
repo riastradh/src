@@ -172,11 +172,7 @@ static int sdma_v2_4_init_microcode(struct amdgpu_device *adev)
 			info->fw = adev->sdma.instance[i].fw;
 			header = (const struct common_firmware_header *)info->fw->data;
 			adev->firmware.fw_size +=
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 				round_up(le32_to_cpu(header->ucode_size_bytes), PAGE_SIZE);
-#else
-				ALIGN(le32_to_cpu(header->ucode_size_bytes), PAGE_SIZE);
-#endif
 		}
 	}
 

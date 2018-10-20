@@ -441,11 +441,7 @@ static int amdgpu_bo_do_create(struct amdgpu_device *adev,
 	int r;
 
 	page_align = roundup(bp->byte_align, PAGE_SIZE) >> PAGE_SHIFT;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 	size = round_up(size, PAGE_SIZE);
-#else
-	size = ALIGN(size, PAGE_SIZE);
-#endif
 
 	if (!amdgpu_bo_validate_size(adev, size, bp->domain))
 		return -ENOMEM;

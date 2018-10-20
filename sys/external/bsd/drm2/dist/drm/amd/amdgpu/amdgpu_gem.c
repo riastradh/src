@@ -776,11 +776,7 @@ int amdgpu_mode_dumb_create(struct drm_file *file_priv,
 	args->pitch = amdgpu_align_pitch(adev, args->width,
 					 DIV_ROUND_UP(args->bpp, 8), 0);
 	args->size = (u64)args->pitch * args->height;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 	args->size = round_up(args->size, PAGE_SIZE);
-#else
-	args->size = ALIGN(args->size, PAGE_SIZE);
-#endif
 	domain = amdgpu_bo_get_preferred_pin_domain(adev,
 				amdgpu_display_supported_domains(adev));
 	r = amdgpu_gem_object_create(adev, args->size, 0, domain,

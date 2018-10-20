@@ -511,7 +511,6 @@ static inline struct gen6_hw_ppgtt *to_gen6_ppgtt(struct i915_hw_ppgtt *base)
  * so each of the other parameters should preferably be a simple variable, or
  * at most an lvalue with no side-effects!
  */
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 #define gen6_for_each_pde(pt, pd, start, length, iter)			\
 	for (iter = gen6_pde_index(start);				\
 	     length > 0 && iter < I915_PDES &&				\
@@ -519,15 +518,6 @@ static inline struct gen6_hw_ppgtt *to_gen6_ppgtt(struct i915_hw_ppgtt *base)
 	     ({ u32 temp = round_up(start+1, 1 << GEN6_PDE_SHIFT);	\
 		    temp = min(temp - start, length);			\
 		    start += temp, length -= temp; }), ++iter)
-#else
-#define gen6_for_each_pde(pt, pd, start, length, iter)			\
-	for (iter = gen6_pde_index(start);				\
-	     length > 0 && iter < I915_PDES &&				\
-		(pt = (pd)->page_table[iter], true);			\
-	     ({ u32 temp = ALIGN(start+1, 1 << GEN6_PDE_SHIFT);		\
-		    temp = min(temp - start, length);			\
-		    start += temp, length -= temp; }), ++iter)
-#endif
 
 #define gen6_for_all_pdes(pt, pd, iter)					\
 	for (iter = 0;							\
@@ -595,7 +585,6 @@ i915_pdpes_per_pdp(const struct i915_address_space *vm)
  * between from start until start + length. On gen8+ it simply iterates
  * over every page directory entry in a page directory.
  */
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 
 #define gen8_for_each_pde(pt, pd, start, length, iter)			\
 	for (iter = gen8_pde_index(start);				\
@@ -620,34 +609,6 @@ i915_pdpes_per_pdp(const struct i915_address_space *vm)
 	     ({ u64 temp = round_up(start+1, 1ULL << GEN8_PML4E_SHIFT);	\
 		    temp = min(temp - start, length);			\
 		    start += temp, length -= temp; }), ++iter)
-
-#else  /* !__NetBSD__ */
-
-#define gen8_for_each_pde(pt, pd, start, length, iter)			\
-	for (iter = gen8_pde_index(start);				\
-	     length > 0 && iter < I915_PDES &&				\
-		(pt = (pd)->page_table[iter], true);			\
-	     ({ u64 temp = ALIGN(start+1, 1 << GEN8_PDE_SHIFT);		\
-		    temp = min(temp - start, length);			\
-		    start += temp, length -= temp; }), ++iter)
-
-#define gen8_for_each_pdpe(pd, pdp, start, length, iter)		\
-	for (iter = gen8_pdpe_index(start);				\
-	     length > 0 && iter < i915_pdpes_per_pdp(vm) &&		\
-		(pd = (pdp)->page_directory[iter], true);		\
-	     ({ u64 temp = ALIGN(start+1, 1 << GEN8_PDPE_SHIFT);	\
-		    temp = min(temp - start, length);			\
-		    start += temp, length -= temp; }), ++iter)
-
-#define gen8_for_each_pml4e(pdp, pml4, start, length, iter)		\
-	for (iter = gen8_pml4e_index(start);				\
-	     length > 0 && iter < GEN8_PML4ES_PER_PML4 &&		\
-		(pdp = (pml4)->pdps[iter], true);			\
-	     ({ u64 temp = ALIGN(start+1, 1ULL << GEN8_PML4E_SHIFT);	\
-		    temp = min(temp - start, length);			\
-		    start += temp, length -= temp; }), ++iter)
-
-#endif	/* __NetBSD__ */
 
 static inline u32 gen8_pte_index(u64 address)
 {

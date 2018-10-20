@@ -153,17 +153,9 @@ static int radeonfb_create_pinned_object(struct radeon_fbdev *rfbdev,
 						  fb_tiled);
 
 	if (rdev->family >= CHIP_R600)
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 		height = round_up(mode_cmd->height, 8);
-#else
-		height = ALIGN(mode_cmd->height, 8);
-#endif
 	size = mode_cmd->pitches[0] * height;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 	aligned_size = round_up(size, PAGE_SIZE);
-#else
-	aligned_size = ALIGN(size, PAGE_SIZE);
-#endif
 	ret = radeon_gem_object_create(rdev, aligned_size, 0,
 				       RADEON_GEM_DOMAIN_VRAM,
 				       0, true, &gobj);

@@ -386,11 +386,7 @@ int amdgpu_fence_driver_start_ring(struct amdgpu_ring *ring,
 		ring->fence_drv.gpu_addr = adev->wb.gpu_addr + (ring->fence_offs * 4);
 	} else {
 		/* put fence directly behind firmware */
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 		index = round_up(adev->uvd.fw->size, 8);
-#else
-		index = ALIGN(adev->uvd.fw->size, 8);
-#endif
 		ring->fence_drv.cpu_addr = (void *)((char *)adev->uvd.inst[ring->me].cpu_addr + index);
 		ring->fence_drv.gpu_addr = (void *)((char *)adev->uvd.inst[ring->me].gpu_addr + index);
 	}

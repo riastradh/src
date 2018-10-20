@@ -2002,11 +2002,7 @@ intel_fb_align_height(const struct drm_framebuffer *fb,
 {
 	unsigned int tile_height = intel_tile_height(fb, plane);
 
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 	return round_up(height, tile_height);
-#else
-	return ALIGN(height, tile_height);
-#endif
 }
 
 unsigned int intel_rotation_info_size(const struct intel_rotation_info *rot_info)

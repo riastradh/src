@@ -1697,11 +1697,7 @@ static int si_init_microcode(struct radeon_device *rdev)
 		rlc_req_size = SI_RLC_UCODE_SIZE * 4;
 		mc_req_size = SI_MC_UCODE_SIZE * 4;
 		mc2_req_size = TAHITI_MC_UCODE_SIZE * 4;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 		smc_req_size = round_up(TAHITI_SMC_UCODE_SIZE, 4);
-#else
-		smc_req_size = ALIGN(TAHITI_SMC_UCODE_SIZE, 4);
-#endif
 		break;
 	case CHIP_PITCAIRN:
 		chip_name = "PITCAIRN";
@@ -1716,11 +1712,7 @@ static int si_init_microcode(struct radeon_device *rdev)
 		rlc_req_size = SI_RLC_UCODE_SIZE * 4;
 		mc_req_size = SI_MC_UCODE_SIZE * 4;
 		mc2_req_size = PITCAIRN_MC_UCODE_SIZE * 4;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 		smc_req_size = round_up(PITCAIRN_SMC_UCODE_SIZE, 4);
-#else
-		smc_req_size = ALIGN(PITCAIRN_SMC_UCODE_SIZE, 4);
-#endif
 		break;
 	case CHIP_VERDE:
 		chip_name = "VERDE";
@@ -1741,11 +1733,7 @@ static int si_init_microcode(struct radeon_device *rdev)
 		rlc_req_size = SI_RLC_UCODE_SIZE * 4;
 		mc_req_size = SI_MC_UCODE_SIZE * 4;
 		mc2_req_size = VERDE_MC_UCODE_SIZE * 4;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 		smc_req_size = round_up(VERDE_SMC_UCODE_SIZE, 4);
-#else
-		smc_req_size = ALIGN(VERDE_SMC_UCODE_SIZE, 4);
-#endif
 		break;
 	case CHIP_OLAND:
 		chip_name = "OLAND";
@@ -1763,11 +1751,7 @@ static int si_init_microcode(struct radeon_device *rdev)
 		ce_req_size = SI_CE_UCODE_SIZE * 4;
 		rlc_req_size = SI_RLC_UCODE_SIZE * 4;
 		mc_req_size = mc2_req_size = OLAND_MC_UCODE_SIZE * 4;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 		smc_req_size = round_up(OLAND_SMC_UCODE_SIZE, 4);
-#else
-		smc_req_size = ALIGN(OLAND_SMC_UCODE_SIZE, 4);
-#endif
 		break;
 	case CHIP_HAINAN:
 		chip_name = "HAINAN";
@@ -1788,11 +1772,7 @@ static int si_init_microcode(struct radeon_device *rdev)
 		ce_req_size = SI_CE_UCODE_SIZE * 4;
 		rlc_req_size = SI_RLC_UCODE_SIZE * 4;
 		mc_req_size = mc2_req_size = OLAND_MC_UCODE_SIZE * 4;
-#ifdef __NetBSD__		/* XXX ALIGN means something else.  */
 		smc_req_size = round_up(HAINAN_SMC_UCODE_SIZE, 4);
-#else
-		smc_req_size = ALIGN(HAINAN_SMC_UCODE_SIZE, 4);
-#endif
 		break;
 	default: BUG();
 	}
