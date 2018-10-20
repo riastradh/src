@@ -270,9 +270,7 @@ radeonfb_genfb_mmap(void *v, void *vs, off_t offset, int prot)
 	    struct radeonfb_softc, sc_genfb);
 	struct drm_fb_helper *const helper = sc->sc_rfa.rfa_fb_helper;
 	struct drm_framebuffer *const fb = helper->fb;
-	struct radeon_framebuffer *const rfb = container_of(fb,
-	    struct radeon_framebuffer, base);
-	struct drm_gem_object *const gobj = rfb->obj;
+	struct drm_gem_object *const gobj = fb->obj[0];
 	struct radeon_bo *const rbo = gem_to_radeon_bo(gobj);
 	struct drm_device *const dev = helper->dev;
 	const struct pci_attach_args *const pa = &dev->pdev->pd_pa;
