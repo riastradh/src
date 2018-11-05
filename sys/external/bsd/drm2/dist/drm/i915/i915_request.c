@@ -34,6 +34,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/sched/signal.h>
 
 #include "i915_drv.h"
+#include "i915_trace.h"
 
 static const char *i915_fence_get_driver_name(struct dma_fence *fence)
 {
@@ -87,6 +88,9 @@ static void i915_fence_release(struct dma_fence *fence)
 	 */
 	i915_sw_fence_fini(&rq->submit);
 
+	DRM_DESTROY_WAITQUEUE(&rq->execute);
+	dma_fence_destroy(&rq->fence);
+	spin_lock_destroy(&rq->lock);
 	kmem_cache_free(rq->i915->requests, rq);
 }
 
@@ -361,7 +365,11 @@ static void __retire_engine_request(struct intel_engine_cs *engine,
 
 	GEM_BUG_ON(!i915_request_completed(rq));
 
+#ifdef __NetBSD__
+	int s = splvm();
+#else
 	local_irq_disable();
+#endif
 
 	spin_lock(&engine->timeline.lock);
 	GEM_BUG_ON(!list_is_first(&rq->link, &engine->timeline.requests));
@@ -379,7 +387,11 @@ static void __retire_engine_request(struct intel_engine_cs *engine,
 	}
 	spin_unlock(&rq->lock);
 
+#ifdef __NetBSD__
+	splx(s);
+#else
 	local_irq_enable();
+#endif
 
 	/*
 	 * The backing object for the context is done after switching to the
@@ -542,14 +554,20 @@ void __i915_request_submit(struct i915_request *request)
 	spin_unlock(&request->lock);
 
 	engine->emit_breadcrumb(request,
-				request->ring->vaddr + request->postfix);
+	    (void *)((char *)request->ring->vaddr + request->postfix));
 
 	/* Transfer from per-context onto the global per-engine timeline */
 	move_to_timeline(request, &engine->timeline);
 
 	trace_i915_request_execute(request);
 
+#ifdef __NetBSD__
+	spin_lock(&request->lock);
+	DRM_SPIN_WAKEUP_ALL(&request->execute, &request->lock);
+	spin_unlock(&request->lock);
+#else
 	wake_up_all(&request->execute);
+#endif
 }
 
 void i915_request_submit(struct i915_request *request)
@@ -782,7 +800,11 @@ i915_request_alloc(struct intel_engine_cs *engine, struct i915_gem_context *ctx)
 
 	/* We bump the ref for the fence chain */
 	i915_sw_fence_init(&i915_request_get(rq)->submit, submit_notify);
+#ifdef __NetBSD__
+	DRM_INIT_WAITQUEUE(&rq->execute, "i915exec");
+#else
 	init_waitqueue_head(&rq->execute);
+#endif
 
 	i915_sched_node_init(&rq->sched);
 
@@ -1035,10 +1057,10 @@ void i915_request_skip(struct i915_request *rq, int error)
 	 */
 	head = rq->infix;
 	if (rq->postfix < head) {
-		memset(vaddr + head, 0, rq->ring->size - head);
+		memset((char *)vaddr + head, 0, rq->ring->size - head);
 		head = 0;
 	}
-	memset(vaddr + head, 0, rq->postfix - head);
+	memset((char *)vaddr + head, 0, rq->postfix - head);
 }
 
 /*
@@ -1129,13 +1151,21 @@ void i915_request_add(struct i915_request *request)
 	 * decide whether to preempt the entire chain so that it is ready to
 	 * run at the earliest possible convenience.
 	 */
+#ifdef __NetBSD__
+	int s = splsoftserial();
+#else
 	local_bh_disable();
+#endif
 	rcu_read_lock(); /* RCU serialisation for set-wedged protection */
 	if (engine->schedule)
 		engine->schedule(request, &request->gem_context->sched);
 	rcu_read_unlock();
 	i915_sw_fence_commit(&request->submit);
+#ifdef __NetBSD__
+	splx(s);
+#else
 	local_bh_enable(); /* Kick the execlists tasklet if just scheduled */
+#endif
 
 	/*
 	 * In typical scenarios, we do not expect the previous request on

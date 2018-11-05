@@ -117,7 +117,10 @@ struct i915_request {
 	 * It is used by the driver to then queue the request for execution.
 	 */
 	struct i915_sw_fence submit;
-#ifndef __NetBSD__		/* XXX */
+#ifdef __NetBSD__		/* XXX */
+	struct i915_sw_fence_wait submitq;
+	drm_waitqueue_t execute;
+#else
 	wait_queue_entry_t submitq;
 	wait_queue_head_t execute;
 #endif
