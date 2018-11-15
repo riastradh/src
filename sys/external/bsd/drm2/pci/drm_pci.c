@@ -107,6 +107,14 @@ drm_pci_attach(device_t self, const struct pci_attach_args *pa,
 			continue;
 		}
 
+		/*
+		 * If it's a 64-bit mapping, don't interpret the second
+		 * half of it as another BAR in the next iteration of
+		 * the loop -- move on to the next unit.
+		 */
+		if (PCI_MAPREG_MEM_TYPE(type) == PCI_MAPREG_MEM_TYPE_64BIT)
+			unit++;
+
 		/* Inquire about it.  We'll map it in drm_legacy_ioremap.  */
 		if (pci_mapreg_info(pa->pa_pc, pa->pa_tag, reg, type,
 			&bm->bm_base, &bm->bm_size, &bm->bm_flags) != 0) {
