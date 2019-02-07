@@ -407,12 +407,10 @@ struct uvm_pageid {
 		UVM_PAGEID_TYPE_ANON = 2,
 	} type;
 	union {
-		struct {
-			struct uvm_object *uobj;
-			voff_t offset;
-		} object;
+		struct uvm_object *uobj;
 		struct vm_anon *anon;
 	};
+	voff_t offset;
 };
 
 bool	uvm_pageid_acquire(struct vm_map * const, const vaddr_t,

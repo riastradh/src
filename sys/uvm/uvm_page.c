@@ -2162,6 +2162,9 @@ uvm_pagereadonly_p(struct vm_page *pg)
  * specified virtual address.
  *
  * => acquires a reference on the page's owner (uvm_object or vm_anon).
+ *
+ * => the ID also includes the offset into the page; thus two different
+ *    locations within the same backing page will have distinct IDs.
  */
 bool
 uvm_pageid_acquire(
@@ -2172,9 +2175,11 @@ uvm_pageid_acquire(
 	struct vm_map_entry *entry;
 	bool result = false;
 
+	const vaddr_t page_va = trunc_page(va);
+
 	vm_map_lock_read(map);
 
-	if (!uvm_map_lookup_entry(map, va, &entry)) {
+	if (!uvm_map_lookup_entry(map, page_va, &entry)) {
 		vm_map_unlock_read(map);
 		return false;
 	}
@@ -2184,12 +2189,13 @@ uvm_pageid_acquire(
 		struct vm_anon *anon;
 
 		amap_lock(entry->aref.ar_amap, RW_WRITER);
-		anon = amap_lookup(&entry->aref, va - entry->start);
+		anon = amap_lookup(&entry->aref, page_va - entry->start);
 		if (anon) {
 			anon->an_ref++;
 			KASSERT(anon->an_ref != 0);
 			pageid->type = UVM_PAGEID_TYPE_ANON;
 			pageid->anon = anon;
+			pageid->offset = va & PAGE_MASK;
 			result = true;
 		}
 		amap_unlock(entry->aref.ar_amap);
@@ -2202,8 +2208,8 @@ uvm_pageid_acquire(
 		KASSERT(uobj != NULL);
 		(*uobj->pgops->pgo_reference)(uobj);
 		pageid->type = UVM_PAGEID_TYPE_OBJECT;
-		pageid->object.uobj = uobj;
-		pageid->object.offset = entry->offset + (va - entry->start);
+		pageid->uobj = uobj;
+		pageid->offset = entry->offset + (va - entry->start);
 		result = true;
 	}
 
@@ -2269,36 +2275,32 @@ uvm_pageid_compare(
 	if (pageid1->type > pageid2->type)
 		return 1;
 
+	uintptr_t addr1, addr2;
+
 	switch (pageid1->type) {
-	case UVM_PAGEID_TYPE_OBJECT: {
-		const uintptr_t addr1 = (uintptr_t)pageid1->object.uobj;
-		const uintptr_t addr2 = (uintptr_t)pageid2->object.uobj;
-
-		if (addr1 < addr2)
-			return -1;
-		if (addr1 > addr2)
-			return 1;
-
-		if (pageid1->object.offset < pageid2->object.offset)
-			return -1;
-		if (pageid1->object.offset > pageid2->object.offset)
-			return 1;
+	case UVM_PAGEID_TYPE_OBJECT:
+		addr1 = (uintptr_t)pageid1->uobj;
+		addr2 = (uintptr_t)pageid2->uobj;
 		break;
-	}
 
-	case UVM_PAGEID_TYPE_ANON: {
-		const uintptr_t addr1 = (uintptr_t)pageid1->anon;
-		const uintptr_t addr2 = (uintptr_t)pageid2->anon;
-
-		if (addr1 < addr2)
-			return -1;
-		if (addr1 > addr2)
-			return 1;
+	case UVM_PAGEID_TYPE_ANON:
+		addr1 = (uintptr_t)pageid1->anon;
+		addr2 = (uintptr_t)pageid2->anon;
 		break;
-	}
+
 	default:
 		panic("uvm_pageid_compare");
 	}
+
+	if (addr1 < addr2)
+		return -1;
+	if (addr1 > addr2)
+		return 1;
+
+	if (pageid1->offset < pageid2->offset)
+		return -1;
+	if (pageid1->offset > pageid2->offset)
+		return 1;
 
 	return 0;
 }
