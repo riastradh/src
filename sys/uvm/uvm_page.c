@@ -2157,6 +2157,152 @@ uvm_pagereadonly_p(struct vm_page *pg)
 	return UVM_OBJ_NEEDS_WRITEFAULT(uobj);
 }
 
+/*
+ * uvm_pageid_acquire: returns the identity of the page backing the
+ * specified virtual address.
+ *
+ * => acquires a reference on the page's owner (uvm_object or vm_anon).
+ */
+bool
+uvm_pageid_acquire(
+    struct vm_map * const map,
+    const vaddr_t va,
+    struct uvm_pageid * const pageid)
+{
+	struct vm_map_entry *entry;
+	bool result = false;
+
+	vm_map_lock_read(map);
+
+	if (!uvm_map_lookup_entry(map, va, &entry)) {
+		vm_map_unlock_read(map);
+		return false;
+	}
+
+	/* Check the upper layer first. */
+	if (entry->aref.ar_amap) {
+		struct vm_anon *anon;
+
+		amap_lock(entry->aref.ar_amap, RW_WRITER);
+		anon = amap_lookup(&entry->aref, va - entry->start);
+		if (anon) {
+			anon->an_ref++;
+			KASSERT(anon->an_ref != 0);
+			pageid->type = UVM_PAGEID_TYPE_ANON;
+			pageid->anon = anon;
+			result = true;
+		}
+		amap_unlock(entry->aref.ar_amap);
+	}
+
+	/* Check lower layer. */
+	if (result == false && UVM_ET_ISOBJ(entry)) {
+		struct uvm_object *uobj = entry->object.uvm_obj;
+
+		KASSERT(uobj != NULL);
+		(*uobj->pgops->pgo_reference)(uobj);
+		pageid->type = UVM_PAGEID_TYPE_OBJECT;
+		pageid->object.uobj = uobj;
+		pageid->object.offset = entry->offset + (va - entry->start);
+		result = true;
+	}
+
+	vm_map_unlock_read(map);
+	return result;
+}
+
+/*
+ * uvm_pageid_release: release the references helded by the page ID
+ */
+void
+uvm_pageid_release(struct uvm_pageid * const pageid)
+{
+
+	switch (pageid->type) {
+	case UVM_PAGEID_TYPE_OBJECT: {
+		struct uvm_object *uobj = pageid->object.uobj;
+
+		KASSERT(uobj != NULL);
+		KASSERT(uobj->pgops->pgo_detach != NULL);
+		(*uobj->pgops->pgo_detach)(uobj);
+		break;
+	}
+	case UVM_PAGEID_TYPE_ANON: {
+		struct vm_anon *anon = pageid->anon;
+
+		KASSERT(anon != NULL);
+		rw_enter(anon->an_lock, RW_WRITER);
+		KASSERT(anon->an_ref > 0);
+		anon->an_ref--;
+		if (anon->an_ref == 0) {
+			uvm_anon_release(anon);
+		} else {
+			rw_exit(anon->an_lock);
+		}
+		break;
+	}
+	default:
+		panic("uvm_pageid_release");
+	}
+	memset(pageid, 0, sizeof(*pageid));
+}
+
+/*
+ * uvm_pageid_compare: compare two uvm_pageid objects.
+ *
+ * => memcmp() semantics
+ */
+int
+uvm_pageid_compare(
+    const struct uvm_pageid * const pageid1,
+    const struct uvm_pageid * const pageid2)
+{
+
+	KASSERT(pageid1->type == UVM_PAGEID_TYPE_OBJECT ||
+	        pageid1->type == UVM_PAGEID_TYPE_ANON);
+
+	KASSERT(pageid2->type == UVM_PAGEID_TYPE_OBJECT ||
+	        pageid2->type == UVM_PAGEID_TYPE_ANON);
+
+	if (pageid1->type < pageid2->type)
+		return -1;
+	if (pageid1->type > pageid2->type)
+		return 1;
+
+	switch (pageid1->type) {
+	case UVM_PAGEID_TYPE_OBJECT: {
+		const uintptr_t addr1 = (uintptr_t)pageid1->object.uobj;
+		const uintptr_t addr2 = (uintptr_t)pageid2->object.uobj;
+
+		if (addr1 < addr2)
+			return -1;
+		if (addr1 > addr2)
+			return 1;
+
+		if (pageid1->object.offset < pageid2->object.offset)
+			return -1;
+		if (pageid1->object.offset > pageid2->object.offset)
+			return 1;
+		break;
+	}
+
+	case UVM_PAGEID_TYPE_ANON: {
+		const uintptr_t addr1 = (uintptr_t)pageid1->anon;
+		const uintptr_t addr2 = (uintptr_t)pageid2->anon;
+
+		if (addr1 < addr2)
+			return -1;
+		if (addr1 > addr2)
+			return 1;
+		break;
+	}
+	default:
+		panic("uvm_pageid_compare");
+	}
+
+	return 0;
+}
+
 #ifdef PMAP_DIRECT
 /*
  * Call pmap to translate physical address into a virtual and to run a callback

@@ -383,6 +383,44 @@ int uvm_page_lookup_freelist(struct vm_page *);
 struct vm_page *uvm_phys_to_vm_page(paddr_t);
 paddr_t uvm_vm_page_to_phys(const struct vm_page *);
 
+/*
+ *	uvm_pageid:
+ *
+ *	This structure encapsulates UVM's unique identity for a
+ *	given pageable page.  There are two different flavors:
+ *
+ *	UVM_PAGEID_TYPE_OBJECT:
+ *	The uvm_object the page is associated with combined with it's
+ *	offset into that object.
+ *
+ *	UVM_PAGEID_TYPE_ANON:
+ *	The vm_anon the page is associated with.
+ *
+ *	When someone wants the page ID for a page, an extra reference
+ *	is taken on the owning entity while the caller uses the ID.
+ *	This ensures that the identity is stable for the duration of its
+ *	use.
+ */
+struct uvm_pageid {
+	enum {
+		UVM_PAGEID_TYPE_OBJECT = 1,
+		UVM_PAGEID_TYPE_ANON = 2,
+	} type;
+	union {
+		struct {
+			struct uvm_object *uobj;
+			voff_t offset;
+		} object;
+		struct vm_anon *anon;
+	};
+};
+
+bool	uvm_pageid_acquire(struct vm_map * const, const vaddr_t,
+			   struct uvm_pageid * const);
+void	uvm_pageid_release(struct uvm_pageid * const);
+int	uvm_pageid_compare(const struct uvm_pageid * const,
+			   const struct uvm_pageid * const);
+
 #if defined(PMAP_DIRECT)
 extern bool ubc_direct;
 int uvm_direct_process(struct vm_page **, u_int, voff_t, vsize_t,
