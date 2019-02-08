@@ -1,0 +1,2233 @@
+/*	$NetBSD$	*/
+
+/*-
+ * Copyright (c) 2018, 2019 The NetBSD Foundation, Inc.
+ * All rights reserved.
+ *
+ * This code is derived from software contributed to The NetBSD Foundation
+ * by Taylor R. Campbell.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE NETBSD FOUNDATION, INC. AND CONTRIBUTORS
+ * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <sys/cdefs.h>
+__KERNEL_RCSID(0, "$NetBSD$");
+
+/*
+ * Futexes
+ *
+ *	The futex system call coordinates notifying threads waiting for
+ *	changes on a 32-bit word of memory.  The word can be managed by
+ *	CPU atomic operations in userland, without system calls, as long
+ *	as there is no contention.
+ *
+ *	The simplest use case demonstrating the utility is:
+ *
+ *		// 32-bit word of memory shared among threads or
+ *		// processes in userland.  lock & 1 means owned;
+ *		// lock & 2 means there are waiters waiting.
+ *		volatile int lock = 0;
+ *
+ *		int v;
+ *
+ *		// Acquire a lock.
+ *		do {
+ *			v = lock;
+ *			if (v & 1) {
+ *				// Lock is held.  Set a bit to say that
+ *				// there are waiters, and wait for lock
+ *				// to change to anything other than v;
+ *				// then retry.
+ *				if (atomic_cas_uint(&lock, v, v | 2) != v)
+ *					continue;
+ *				futex(FUTEX_WAIT, &lock, v | 2, NULL, NULL, 0);
+ *				continue;
+ *			}
+ *		} while (atomic_cas_uint(&lock, v, v & ~1) != v);
+ *		membar_enter();
+ *
+ *		...
+ *
+ *		// Release the lock.  Optimistically assume there are
+ *		// no waiters first until demonstrated otherwise.
+ *		membar_exit();
+ *		if (atomic_cas_uint(&lock, 1, 0) != 1) {
+ *			// There may be waiters.
+ *			v = atomic_swap_uint(&lock, 0);
+ *			// If there are still waiters, wake one.
+ *			if (v & 2)
+ *				futex(FUTEX_WAKE, &lock, 1, NULL, NULL, 0);
+ *		}
+ *
+ *	The goal is to avoid the futex system call unless there is
+ *	contention; then if there is contention, to guarantee no missed
+ *	wakeups.
+ *
+ *	For a simple implementation, futex(FUTEX_WAIT) could queue
+ *	itself to be woken, double-check the lock word, and then sleep;
+ *	spurious wakeups are generally a fact of life, so any
+ *	FUTEX_WAKE could just wake every FUTEX_WAIT in the system.
+ *
+ *	If this were all there is to it, we could then increase
+ *	parallelism by refining the approximation: partition the
+ *	waiters into buckets by hashing the lock addresses to reduce
+ *	the incidence of spurious wakeups.  But this is not all.
+ *
+ *	The futex(FUTEX_CMP_REQUEUE, &lock, n, &lock2, m, val)
+ *	operation not only wakes n waiters on lock if lock == val, but
+ *	also _transfers_ m additional waiters to lock2.  Unless wakeups
+ *	on lock2 also trigger wakeups on lock, we cannot move waiters
+ *	to lock2 if they merely share the same hash as waiters on lock.
+ *	Thus, we can't approximately distribute waiters into queues by
+ *	a hash function; we must distinguish futex queues exactly by
+ *	lock address.
+ *
+ *	For now, we use a global red/black tree to index futexes.  This
+ *	should be replaced by a lockless radix tree with a thread to
+ *	free entries no longer in use once all lookups on all CPUs have
+ *	completed.
+ *
+ *	Specifically, we maintain two maps:
+ *
+ *	futex_tab.va[vmspace, va] is a struct futex
+ *	futex_tab.oa[uvmobj, offset] is a struct futex_shared
+ *
+ *	If a futex is shared, the struct futex points to the
+ *	corresponding struct futex_shared; each struct futex_shared
+ *	may, naturally, be shared by many struct futex objects.
+ *
+ *	vmspace/va		futex	futex_shared	uvmobj
+ *
+ *	pid71 addr1284 ------->	f0 --->	fs0 <---------- (anon), offset1280
+ *	pid87 addr0212 ------->	f1 --->	fs1 <----------	/tmp/shared, offset8376
+ *				     /
+ *	pid42 addr8312 ------->	f2 -^
+ *
+ *	This implementation does not support priority inheritance.
+ */
+
+#include <sys/types.h>
+#include <sys/atomic.h>
+#include <sys/condvar.h>
+#include <sys/futex.h>
+#include <sys/mutex.h>
+#include <sys/rbtree.h>
+#include <sys/queue.h>
+
+#include <uvm/uvm_extern.h>
+
+/*
+ * Lock order:
+ *
+ *	futex_tab.lock
+ *	futex_queue::fq_lock		ordered by kva of struct futex_queue
+ *	 -> futex_wait::fw_lock		only one at a time
+ *	futex_wait::fw_lock		only one at a time
+ *	 -> futex_queue::fq_abortlock	only one at a time
+ */
+
+/*
+ * struct futex_queue
+ *
+ *	A queue of waiters on a futex, with access serialized by a
+ *	lock.
+ */
+struct futex_queue {
+	kmutex_t			fq_lock;
+	TAILQ_HEAD(, futex_wait)	fq_queue;
+
+	kmutex_t			fq_abortlock;
+	LIST_HEAD(, futex_wait)		fq_abortlist;
+	kcondvar_t			fq_abortcv;
+};
+
+/*
+ * struct futex
+ *
+ *	Kernel state for a futex located at a particular address in a
+ *	particular virtual address space.
+ */
+struct futex {
+	struct vmspace		*fx_vmspace;
+	vaddr_t			fx_va;
+	unsigned		fx_refcnt;
+	bool			fx_shared;
+	bool			fx_on_tree;
+	struct rb_node		fx_node;
+	union {
+		struct futex_shared		*shared;
+		struct futex_queue		private;
+	}			fx_u;
+};
+
+/*
+ * struct futex_shared
+ *
+ *	Kernel state for a process-shared futex.  Records the VM object
+ *	where the futex lives, and a count of all virtual addresses
+ *	mapped to it.
+ */
+struct futex_shared {
+	struct uvm_pageid	fs_pageid;
+	unsigned		fs_refcnt;
+	bool			fs_on_tree;
+	struct rb_node		fs_node;
+	struct futex_queue	fs_queue;
+};
+
+/*
+ * futex_queue(f)
+ *
+ *	Return pointer to the struct futex_queue for waiters on f.
+ */
+static struct futex_queue *
+futex_queue(struct futex *f)
+{
+
+	return (f->fx_shared ? &f->fx_u.shared->fs_queue : &f->fx_u.private);
+}
+
+/*
+ * struct futex_wait
+ *
+ *	State for a thread to wait on a futex.  Threads wait on fw_cv
+ *	for fw_bitset to be set to zero.  The thread may transition to
+ *	a different futex queue at any time under the futex's lock.
+ */
+struct futex_wait {
+	kmutex_t		fw_lock;
+	kcondvar_t		fw_cv;
+	struct futex_queue	*fw_queue;
+	TAILQ_ENTRY(futex_wait)	fw_entry;	/* queue lock */
+	LIST_ENTRY(futex_wait)	fw_abort;	/* queue abortlock */
+	int			fw_bitset;
+};
+
+/*
+ * futex_tab
+ *
+ *	Global trees of futexes by vmspace/va and VM object address.
+ *
+ *	XXX This obviously doesn't scale in parallel.  We could use a
+ *	pserialize-safe data structure, but there may be a high cost to
+ *	frequent deletion since we don't cache futexes after we're done
+ *	with them.  We could use hashed locks.  But for now, just make
+ *	sure userland can't DoS the serial performance, by using a
+ *	balanced binary tree for lookup.
+ *
+ *	XXX We could use a per-process tree for the table indexed by
+ *	virtual address to reduce contention between processes.
+ */
+static struct {
+	kmutex_t	lock;
+	struct rb_tree	va;
+	struct rb_tree	oa;
+} futex_tab __cacheline_aligned;
+
+struct futex_key {
+	struct vmspace	*fk_vmspace;
+	vaddr_t		fk_va;
+};
+
+static int
+compare_futex(void *cookie, const void *na, const void *nb)
+{
+	const struct futex *fa = na;
+	const struct futex *fb = nb;
+
+	if ((uintptr_t)fa->fx_vmspace < (uintptr_t)fb->fx_vmspace)
+		return -1;
+	if ((uintptr_t)fa->fx_vmspace > (uintptr_t)fb->fx_vmspace)
+		return +1;
+	if (fa->fx_va < fb->fx_va)
+		return -1;
+	if (fa->fx_va > fb->fx_va)
+		return -1;
+	return 0;
+}
+
+static int
+compare_futex_key(void *cookie, const void *n, const void *k)
+{
+	const struct futex *f = n;
+	const struct futex_key *fk = k;
+
+	if ((uintptr_t)f->fx_vmspace < (uintptr_t)fk->fk_vmspace)
+		return -1;
+	if ((uintptr_t)f->fx_vmspace > (uintptr_t)fk->fk_vmspace)
+		return +1;
+	if (f->fx_va < fk->fk_va)
+		return -1;
+	if (f->fx_va > fk->fk_va)
+		return -1;
+	return 0;
+}
+
+static const rb_tree_ops_t futex_rb_ops = {
+	.rbto_compare_nodes = compare_futex,
+	.rbto_compare_key = compare_futex_key,
+	.rbto_node_offset = offsetof(struct futex, fx_node),
+};
+
+static int
+compare_futex_shared(void *cookie, const void *na, const void *nb)
+{
+	const struct futex_shared *fsa = na;
+	const struct futex_shared *fsb = nb;
+
+	return uvm_pageid_compare(&fsa->fs_pageid, &fsb->fs_pageid);
+}
+
+static int
+compare_futex_shared_key(void *cookie, const void *n, const void *k)
+{
+	const struct futex_shared *fs = n;
+	const struct uvm_pageid *pageid = k;
+
+	return uvm_pageid_compare(&fs->fs_pageid, pageid);
+}
+
+static const rb_tree_ops_t futex_shared_rb_ops = {
+	.rbto_compare_nodes = compare_futex_shared,
+	.rbto_compare_key = compare_futex_shared_key,
+	.rbto_node_offset = offsetof(struct futex_shared, fs_node),
+};
+
+static void	futex_wait_dequeue(struct futex_wait *, struct futex_queue *);
+
+/*
+ * futex_load(uaddr, kaddr)
+ *
+ *	Perform a single atomic load to read *uaddr, and return the
+ *	result in *kaddr.  Return 0 on success, EFAULT if uaddr is not
+ *	mapped.
+ *
+ *	XXX This may confuse unmapped uaddr with *uaddr == -1 on LP32
+ *	machines because fuword is stupid.
+ */
+static int
+futex_load(int *uaddr, int *kaddr)
+{
+#ifdef _LP64
+	long val;
+
+	val = fuword(uaddr);
+	if (val == -1)
+		return EFAULT;
+	*kaddr = val;
+
+	return 0;
+#else
+	/* XXX Gakkkk...  */
+	*kaddr = fuword(uaddr);
+
+	return 0;
+#endif
+}
+
+/*
+ * futex_test(uaddr, expected)
+ *
+ *	True if *uaddr == expected.  False if *uaddr != expected, or if
+ *	uaddr is not mapped.
+ *
+ *	XXX This may confuse unmapped uaddr with *uaddr == -1 on LP32
+ *	machines because fuword is stupid.
+ */
+static bool
+futex_test(int *uaddr, int expected)
+{
+	int val;
+	int error;
+
+	error = futex_load(uaddr, &val);
+	if (error)
+		return false;
+	return val == expected;
+}
+
+/*
+ * futex_sys_init()
+ *
+ *	Initialize the futex subsystem.
+ */
+void
+futex_sys_init(void)
+{
+
+	mutex_init(&futex_tab.lock, MUTEX_DEFAULT, IPL_NONE);
+	rb_tree_init(&futex_tab.va, &futex_rb_ops);
+	rb_tree_init(&futex_tab.oa, &futex_shared_rb_ops);
+}
+
+/*
+ * futex_sys_fini()
+ *
+ *	Finalize the futex subsystem.
+ */
+void
+futex_sys_fini(void)
+{
+
+	KASSERT(RB_TREE_MIN(&futex_tab.oa) == NULL);
+	KASSERT(RB_TREE_MIN(&futex_tab.va) == NULL);
+	mutex_destroy(&futex_tab.lock);
+}
+
+/*
+ * futex_queue_init(fq)
+ *
+ *	Initialize the struct futex_queue at fq.  Caller must call
+ *	futex_queue_fini when done.
+ *
+ *	Never sleeps.
+ */
+static void
+futex_queue_init(struct futex_queue *fq)
+{
+
+	mutex_init(&fq->fq_lock, MUTEX_DEFAULT, IPL_NONE);
+	TAILQ_INIT(&fq->fq_queue);
+}
+
+/*
+ * futex_queue_drain(fq)
+ *
+ *	Wait for any aborting waiters in fq; then empty the queue of
+ *	any stragglers and wake them.  Caller must guarantee no new
+ *	references to fq.
+ *
+ *	May sleep.
+ */
+static void
+futex_queue_drain(struct futex_queue *fq)
+{
+	struct futex_wait *fw, *fw_next;
+
+	mutex_enter(&fq->fq_abortlock);
+	while (!LIST_EMPTY(&fq->fq_abortlist))
+		cv_wait(&fq->fq_abortcv, &fq->fq_abortlock);
+	mutex_exit(&fq->fq_abortlock);
+
+	mutex_enter(&fq->fq_lock);
+	TAILQ_FOREACH_SAFE(fw, &fq->fq_queue, fw_entry, fw_next) {
+		mutex_enter(&fw->fw_lock);
+		futex_wait_dequeue(fw, fq);
+		cv_broadcast(&fw->fw_cv);
+		mutex_exit(&fw->fw_lock);
+	}
+	mutex_exit(&fq->fq_lock);
+}
+
+/*
+ * futex_queue_fini(fq)
+ *
+ *	Finalize the struct futex_queue at fq initialized by
+ *	futex_queue_init.  Queue must be empty.  Caller must not use fq
+ *	again until a subsequent futex_queue_init.
+ */
+static void
+futex_queue_fini(struct futex_queue *fq)
+{
+
+	KASSERT(TAILQ_EMPTY(&fq->fq_queue));
+	mutex_destroy(&fq->fq_lock);
+}
+
+/*
+ * futex_shared_create(&objaddr)
+ *
+ *	Create a kernel record for a futex located at the VM object
+ *	address objaddr.  Initial reference count is 1, representing
+ *	the caller.  Returns NULL on failure.
+ *
+ *	Never sleeps.
+ */
+static struct futex_shared *
+futex_shared_create(struct uvm_pageid *pageid)
+{
+	struct futex_shared *fs;
+
+	ASSERT_SLEEPABLE();
+
+	fs = kmem_alloc(sizeof(*fs), KM_NOSLEEP);
+	if (fs == NULL)
+		return NULL;
+
+	fs->fs_pageid = *pageid;
+	fs->fs_refcnt = 1;
+	fs->fs_on_tree = false;
+	futex_queue_init(&fs->fs_queue);
+
+	return fs;
+}
+
+/*
+ * futex_shared_destroy(fs)
+ *
+ *	Destroy a kernel record for a shared futex.  Must have no more
+ *	references.
+ *
+ *	May sleep.
+ */
+static void
+futex_shared_destroy(struct futex_shared *fs)
+{
+
+	ASSERT_SLEEPABLE();
+
+	futex_queue_drain(&fs->fs_queue);
+	futex_queue_fini(&fs->fs_queue);
+	KASSERT(!fs->fs_on_tree);
+	KASSERT(fs->fs_refcnt == 0);
+	uvm_put_voaddr(&fs->fs_objaddr);
+
+	kmem_free(fs, sizeof(*fs));
+}
+
+/*
+ * futex_shared_hold(fs)
+ *
+ *	Attempt to acquire a reference to the shared futex fs.  Return
+ *	0 on success, ENFILE on too many references.
+ *
+ *	Never sleeps.
+ */
+static int
+futex_shared_hold(struct futex_shared *fs)
+{
+	unsigned refcnt;
+
+	do {
+		refcnt = fs->fs_refcnt;
+		KASSERT(refcnt > 0);
+		if (refcnt == UINT_MAX)
+			return ENFILE;
+	} while (atomic_cas_uint(&fs->fs_refcnt, refcnt, refcnt + 1) !=
+	    refcnt);
+
+	return 0;
+}
+
+/*
+ * futex_shared_rele(fs)
+ *
+ *	Release a reference to the shared futex fs acquired with
+ *	futex_shared_create or futex_shared_hold.
+ *
+ *	May sleep to free fs.
+ */
+static void
+futex_shared_rele(struct futex_shared *fs)
+{
+	unsigned refcnt;
+
+	ASSERT_SLEEPABLE();
+
+	do {
+		refcnt = fs->fs_refcnt;
+		if (refcnt == 1)
+			goto trylast;
+	} while (atomic_cas_uint(&fs->fs_refcnt, refcnt, refcnt - 1) !=
+	    refcnt);
+	return;
+
+trylast:
+	mutex_enter(&futex_tab.lock);
+	if (atomic_dec_uint_nv(&fs->fs_refcnt) == 0) {
+		if (fs->fs_on_tree) {
+			rb_tree_remove_node(&futex_tab.oa, fs);
+			fs->fs_on_tree = false;
+		}
+	} else {
+		/* References remain -- don't destroy it.  */
+		fs = NULL;
+	}
+	mutex_exit(&futex_tab.lock);
+	if (fs != NULL)
+		futex_shared_destroy(fs);
+}
+
+/*
+ * futex_shared_insert(fs, fsp)
+ *
+ *	Try to insert the shared futex fs into the tree by its VM
+ *	object address.  If there already is a shared futex for its
+ *	objaddra, attempt to acquire a reference to it, and store that
+ *	in *fsp; otherwise store fs in *fsp.
+ *
+ *	Return 0 on success, ENFILE if there already is a shared futex
+ *	but its reference count is too high.
+ */
+static int
+futex_shared_insert(struct futex_shared *fs, struct futex_shared **fsp)
+{
+	struct futex_shared *fs0;
+	int error;
+
+	KASSERT(fs->fs_refcnt);
+	KASSERT(!fs->fs_on_tree);
+
+	mutex_enter(&futex_tab.lock);
+	fs0 = rb_tree_insert_node(&futex_tab.oa, fs);
+	if (fs0 == fs) {
+		/* Caller should hold the only reference so far.  */
+		KASSERT(fs->fs_refcnt == 1);
+		error = futex_shared_hold(fs);
+		KASSERT(error == 0);
+		fs->fs_on_tree = true;
+		error = 0;
+	} else {
+		KASSERT(fs0->fs_refcnt);
+		KASSERT(fs0->fs_on_tree);
+		error = futex_shared_hold(fs0);
+		if (error)
+			goto out;
+	}
+	*fsp = fs0;
+out:	mutex_exit(&futex_tab.lock);
+
+	return error;
+}
+
+/*
+ * futex_shared_lookup(&objaddr, &f)
+ *
+ *	Try to find an existing futex at the specified virtual object
+ *	address.  On success, return 0, set f to found futex or to NULL
+ *	if not found, and increment f's reference count if found.
+ *
+ *	Return ENFILE if reference count was too high.
+ *
+ *	Internal subroutine of futex_shared_get.
+ */
+static int
+futex_shared_lookup(const struct uvm_pageid *pageid,
+    struct futex_shared **fsp)
+{
+	struct futex_shared *fs;
+	int error;
+
+	mutex_enter(&futex_tab.lock);
+	fs = rb_tree_find_node(&futex_tab.oa, pageid);
+	if (fs == NULL)
+		goto out;
+	error = futex_shared_hold(fs);
+	if (error)
+		goto out;
+out:	*fsp = fs;
+	error = 0;
+	mutex_exit(&futex_tab.lock);
+
+	return error;
+}
+
+/*
+ * futex_create(vm, va, shared)
+ *
+ *	Create a futex.  Initial reference count is 1, representing the
+ *	caller.  Returns NULL on failure.
+ *
+ *	Never sleeps.
+ */
+static struct futex *
+futex_create(struct vmspace *vm, vaddr_t va, bool shared)
+{
+	struct futex *f;
+
+	KASSERT((va & 3) == 0);
+
+	f = kmem_alloc(sizeof(*f), KM_NOSLEEP);
+	if (f == NULL)
+		return NULL;
+	f->fx_vmspace = vm;
+	f->fx_va = va;
+	f->fx_refcnt = 1;
+	f->fx_shared = shared;
+	f->fx_on_tree = false;
+	if (shared) {
+		f->fx_u.shared = NULL;
+	} else {
+		futex_queue_init(&f->fx_u.private);
+	}
+
+	return f;
+}
+
+/*
+ * futex_destroy(f)
+ *
+ *	Destroy a futex created with futex_create.  Reference count
+ *	must be zero.
+ *
+ *	May sleep.
+ */
+static void
+futex_destroy(struct futex *f)
+{
+
+	ASSERT_SLEEPABLE();
+
+	KASSERT(f->fx_refcnt == 0);
+	KASSERT(!f->fx_on_tree);
+
+	if (f->fx_shared) {
+		/* Release our reference to the shared state, if any.  */
+		if (f->fx_u.shared) {
+			futex_shared_rele(f->fx_u.shared);
+			f->fx_u.shared = NULL;
+		}
+	} else {
+		/* Drain and destroy the private queue.  */
+		futex_queue_drain(&f->fx_u.private);
+		futex_queue_fini(&f->fx_u.private);
+	}
+
+	f->fx_vmspace = NULL;	/* paranoia */
+	f->fx_va = (vaddr_t)-1;	/* paranoia */
+
+	kmem_free(f, sizeof(*f));
+}
+
+/*
+ * futex_hold(f)
+ *
+ *	Attempt to acquire a reference to f.  Return 0 on success,
+ *	ENFILE on too many references.
+ *
+ *	Never sleeps.
+ */
+static int
+futex_hold(struct futex *f)
+{
+	unsigned refcnt;
+
+	do {
+		refcnt = f->fx_refcnt;
+		KASSERT(refcnt > 0);
+		if (refcnt == UINT_MAX)
+			return ENFILE;
+	} while (atomic_cas_uint(&f->fx_refcnt, refcnt, refcnt + 1) != refcnt);
+
+	return 0;
+}
+
+/*
+ * futex_rele(f)
+ *
+ *	Release a reference to f acquired with futex_create or
+ *	futex_hold.
+ *
+ *	May sleep to free f.
+ */
+static void
+futex_rele(struct futex *f)
+{
+	unsigned refcnt;
+
+	ASSERT_SLEEPABLE();
+
+	do {
+		refcnt = f->fx_refcnt;
+		if (refcnt == 1)
+			goto trylast;
+	} while (atomic_cas_uint(&f->fx_refcnt, refcnt, refcnt - 1) != refcnt);
+	return;
+
+trylast:
+	mutex_enter(&futex_tab.lock);
+	if (atomic_dec_uint_nv(&f->fx_refcnt) == 0) {
+		if (f->fx_on_tree) {
+			rb_tree_remove_node(&futex_tab.va, f);
+			f->fx_on_tree = false;
+		}
+	} else {
+		/* References remain -- don't destroy it.  */
+		f = NULL;
+	}
+	mutex_exit(&futex_tab.lock);
+	if (f != NULL)
+		futex_destroy(f);
+}
+
+/*
+ * futex_insert(f, fp)
+ *
+ *	Try to insert the futex f into the tree by va.  If there
+ *	already is a futex for its va, acquire a reference to it, and
+ *	store it in *fp; otherwise store f in *fp.
+ *
+ *	Return 0 on success, ENFILE if there already is a futex but its
+ *	reference count is too high.
+ */
+static int
+futex_insert(struct futex *f, struct futex **fp)
+{
+	struct futex *f0;
+	int error;
+
+	KASSERT(f->fx_refcnt);
+	KASSERT(!f->fx_on_tree);
+
+	mutex_enter(&futex_tab.lock);
+	f0 = rb_tree_insert_node(&futex_tab.va, f);
+	if (f0 == f) {
+		KASSERT(!f->fx_shared || f->fx_u.shared == f0->fx_u.shared);
+		f->fx_on_tree = true;
+		error = 0;
+	} else {
+		KASSERT(f0->fx_refcnt);
+		KASSERT(f0->fx_on_tree);
+		error = futex_hold(f0);
+		if (error)
+			goto out;
+	}
+	*fp = f0;
+out:	mutex_exit(&futex_tab.lock);
+
+	return error;
+}
+
+/*
+ * futex_vm_lookup(vm, va, &f)
+ *
+ *	Try to find an existing futex va reference in the specified VM
+ *	space with at virtual address va.  On success, return 0, set f
+ *	to found futex or to NULL if not found, and increment f's
+ *	reference count if found.
+ *
+ *	Return ENFILE if reference count too high.
+ *
+ *	Internal subroutine of futex_lookup and futex_get.
+ */
+static int
+futex_vm_lookup(struct vmspace *vm, vaddr_t va, struct futex **fp)
+{
+	struct futex *f;
+	const struct futex_key fk = { .fk_vmspace = vm, .fk_va = va };
+	int error;
+
+	/* Search for a futex by the virtual address.  */
+	mutex_enter(&futex_tab.lock);
+	f = rb_tree_find_node(&futex_tab.va, &fk);
+	if (f == NULL)
+		goto out;
+	error = futex_hold(f);
+	if (error)
+		goto out;
+out:	*fp = f;
+	error = 0;
+	mutex_exit(&futex_tab.lock);
+
+	return error;
+}
+
+/*
+ * futex_shared_get(&pageid, &fs)
+ *
+ *	Find or create a shared futex at the virtual object address
+ *	objaddr.  On success, return the shared futex in fs and
+ *	increment its reference count.
+ *
+ *	Internal subroutine of futex_get.
+ */
+static int
+futex_shared_get(const struct uvm_pageid *pageid, struct futex_shared **fsp)
+{
+	struct futex_shared *fs = NULL;
+	int error;
+
+	/*
+	 * Optimistically assume there is already a shared futex for
+	 * the pageid, and try to find it.
+	 */
+	error = futex_shared_lookup(pageid, fsp);
+	if (error)
+		goto out;
+
+	/* If we found one, we're done.  */
+	if (*fsp != NULL)
+		goto out;
+
+	/* Not found.  Create one.  */
+	fs = futex_shared_create(pageid);
+	if (fs == NULL) {
+		error = ENOMEM;
+		goto out;
+	}
+
+	/* Insert it, or use existing if someone beat us to it.  */
+	error = futex_shared_insert(fs, fsp);
+	if (error)
+		goto out;
+	if (*fsp == fs)
+		fs = NULL;	/* don't release on exit */
+
+	/* Success!  */
+	error = 0;
+
+out:	if (fs != NULL)
+		futex_shared_rele(fs);
+	return error;
+}
+
+/*
+ * futex_lookup(uaddr, shared, &f)
+ *
+ *	Find a futex at the userland pointer uaddr in the current
+ *	process's VM space.  On success, return the futex in f and
+ *	increment its reference count.
+ *
+ *	Caller must call futex_put when done.
+ */
+static int
+futex_lookup(int *uaddr, bool shared, struct futex **fp)
+{
+	struct vmspace *vm = curproc->p_vmspace;
+	struct futex *f = NULL;
+	struct futex_shared *fs = NULL;
+	vaddr_t va = (vaddr_t)uaddr;
+	int error;
+
+	/*
+	 * Reject unaligned user pointers so we don't cross page
+	 * boundaries and so atomics will work.
+	 */
+	if ((va & 3) != 0) {
+		error = EINVAL;
+		goto out;
+	}
+	CTASSERT((PAGE_SIZE & 3) == 0);
+
+	/* Look it up.  */
+	error = futex_vm_lookup(vm, va, fp);
+	if (error)
+		return error;
+
+	/* If we found one, we're done.  */
+	if (*fp != NULL) {
+		if (shared && !(*fp)->fx_shared) {
+			/*
+			 * Caller requested a shared futex, but this
+			 * address is already in use as non-shared.
+			 * This is the caller's mistake.
+			 */
+			futex_rele(*fp);
+			*fp = NULL;
+			error = EINVAL;
+		} else {
+			error = 0;
+		}
+		goto out;
+	}
+
+	/* If it's shared, get the shared futex.  */
+	if (shared) {
+		struct uvm_pageid pageid;
+
+		/*
+		 * Get the virtual object address for this virtual
+		 * address.
+		 */
+		if (!uvm_pageid_acquire(&vm->vm_map, va, &pageid)) {
+			error = EFAULT;
+			goto out;
+		}
+
+		/*
+		 * Get a shared futex record for this physical address,
+		 * or fail if there is none.
+		 */
+		error = futex_shared_lookup(&pageid, &fs);
+		if (error || fs == NULL) {
+			uvm_pageid_release(&pageid);
+			goto out;
+		}
+
+		/* Create a futex record for our reference to it.  */
+		f = futex_create(vm, va, /*shared*/true);
+		if (f == NULL) {
+			error = ENOMEM;
+			goto out;
+		}
+
+		/* Hook up the shared futex record.  */
+		f->fx_u.shared = fs;
+
+		/*
+		 * Insert our new shared futex reference, or use
+		 * existing if someone else beat us to it.
+		 */
+		error = futex_insert(f, fp);
+		if (error)
+			goto out;
+		if (*fp == f)
+			f = NULL;	/* don't release on exit */
+		if (shared) {
+			KASSERT((*fp)->fx_u.shared == fs);
+			fs = NULL;	/* don't release on exit */
+		}
+	}
+
+	/*
+	 * Success!  (Caller must still check whether we found
+	 * anything, but nothing went _wrong_ like trying to use
+	 * unmapped memory.)
+	 */
+	error = 0;
+
+out:	if (f != NULL)
+		futex_rele(f);
+	if (fs != NULL)
+		futex_shared_rele(fs);
+	KASSERT(*fp == NULL || (*fp)->fx_refcnt);
+	KASSERT(*fp == NULL || !shared || (*fp)->fx_u.shared->fs_refcnt);
+	return error;
+}
+
+/*
+ * futex_get(uaddr, shared, &f)
+ *
+ *	Find or create a futex at the userland pointer uaddr in the
+ *	current process's VM space.  On success, return the futex in f
+ *	and increment its reference count.
+ *
+ *	Caller must call futex_put when done.
+ */
+static int
+futex_get(int *uaddr, bool shared, struct futex **fp)
+{
+	struct vmspace *vm = curproc->p_vmspace;
+	struct futex *f = NULL;
+	struct futex_shared *fs = NULL;
+	vaddr_t va = (vaddr_t)uaddr;
+	int error;
+
+	/*
+	 * Reject unaligned user pointers so we don't cross page
+	 * boundaries and so atomics will work.
+	 */
+	if ((va & 3) != 0) {
+		error = EINVAL;
+		goto out;
+	}
+	CTASSERT((PAGE_SIZE & 3) == 0);
+
+	/*
+	 * Optimistically assume there already is one, and try to find
+	 * it.
+	 */
+	error = futex_vm_lookup(vm, va, fp);
+	if (error)
+		goto out;
+
+	/* If we found one, we're done.  */
+	if (*fp != NULL) {
+		/* Found one!  */
+		if (shared && !(*fp)->fx_shared) {
+			/*
+			 * Caller requested a shared futex, but this
+			 * address is already in use as non-shared.
+			 * This is the caller's mistake.
+			 */
+			futex_rele(*fp);
+			*fp = NULL;
+			error = EINVAL;
+		} else {
+			error = 0;
+		}
+		goto out;
+	}
+
+	/* If it's shared, get the shared futex.  */
+	if (shared) {
+		struct uvm_voaddr objaddr;
+
+		/*
+		 * Get the virtual object address for this virtual
+		 * address.
+		 */
+		if (!uvm_get_voaddr(&vm->vm_map, va, &objaddr)) {
+			error = EFAULT;
+			goto out;
+		}
+
+		/*
+		 * Get a shared futex record for this physical address.
+		 */
+		error = futex_shared_get(&objaddr, &fs);
+		if (error) {
+			uvm_put_voaddr(&objaddr);
+			goto out;
+		}
+	}
+
+	/* Create a futex record.  */
+	f = futex_create(vm, va, shared);
+	if (f == NULL) {
+		error = ENOMEM;
+		goto out;
+	}
+
+	/*
+	 * If it's shared, we should have gotten a shared futex record
+	 * already.  Hook it up.
+	 */
+	if (shared) {
+		KASSERT(fs != NULL);
+		f->fx_u.shared = fs;
+	}
+
+	/*
+	 * Insert our new futex, or use existing if someone else beat
+	 * us to it.
+	 */
+	error = futex_insert(f, fp);
+	if (error)
+		goto out;
+	if (*fp == f)
+		f = NULL;	/* don't release on exit */
+	if (shared) {
+		KASSERT((*fp)->fx_u.shared == fs);
+		fs = NULL;	/* don't release on exit */
+	}
+
+	/* Success!  */
+	error = 0;
+
+out:	if (f != NULL)
+		futex_rele(f);
+	if (fs != NULL)
+		futex_shared_rele(fs);
+	KASSERT(error || *fp != NULL);
+	KASSERT(error || (*fp)->fx_refcnt);
+	KASSERT(error || !shared || (*fp)->fx_u.shared->fs_refcnt);
+	return error;
+}
+
+/*
+ * futex_put(f)
+ *
+ *	Release a futex acquired with futex_get or futex_lookup.
+ */
+static void
+futex_put(struct futex *f)
+{
+
+	futex_rele(f);
+}
+
+/*
+ * futex_wait_init(fw, bitset)
+ *
+ *	Initialize a record for a thread to wait on a futex matching
+ *	the specified bit set.  Should be passed to futex_wait_enqueue
+ *	before futex_wait, and should be passed to futex_wait_fini when
+ *	done.
+ */
+static void
+futex_wait_init(struct futex_wait *fw, int bitset)
+{
+
+	mutex_init(&fw->fw_lock, MUTEX_DEFAULT, IPL_NONE);
+	cv_init(&fw->fw_cv, "futex");
+	fw->fw_queue = NULL;
+	fw->fw_bitset = bitset;
+}
+
+/*
+ * futex_wait_fini(fw)
+ *
+ *	Finalize a record for a futex waiter.  Must not be on any
+ *	futex's queue.
+ */
+static void
+futex_wait_fini(struct futex_wait *fw)
+{
+
+	cv_destroy(&fw->fw_cv);
+	mutex_destroy(&fw->fw_lock);
+}
+
+/*
+ * futex_wait_enqueue(fw, fq)
+ *
+ *	Put fw on the futex queue fq.  Must be done before futex_wait.
+ *	Caller must hold fw's lock and fq's lock, and fw must not be on
+ *	any existing futex's waiter list.
+ */
+static void
+futex_wait_enqueue(struct futex_wait *fw, struct futex_queue *fq)
+{
+
+	KASSERT(mutex_owned(&fq->fq_lock));
+	KASSERT(mutex_owned(&fw->fw_lock));
+	KASSERT(fw->fw_queue == NULL);
+
+	fw->fw_queue = fq;
+	TAILQ_INSERT_TAIL(&fq->fq_queue, fw, fw_entry);
+}
+
+/*
+ * futex_wait_dequeue(fw, fq)
+ *
+ *	Remove fw from the futex queue fq.  Precludes subsequent
+ *	futex_wait until a futex_wait_enqueue.  Caller must hold fw's
+ *	lock and f's lock, and fw must be on fq.
+ */
+static void
+futex_wait_dequeue(struct futex_wait *fw, struct futex_queue *fq)
+{
+
+	KASSERT(mutex_owned(&fq->fq_lock));
+	KASSERT(mutex_owned(&fw->fw_lock));
+	KASSERT(fw->fw_queue == fq);
+
+	TAILQ_REMOVE(&fq->fq_queue, fw, fw_entry);
+	fw->fw_queue = NULL;
+}
+
+/*
+ * futex_wait_abort(fw)
+ *
+ *	Caller is no longer waiting for fw.  Remove it from any queue
+ *	if it was on one.
+ */
+static void
+futex_wait_abort(struct futex_wait *fw)
+{
+	struct futex_queue *fq;
+
+	/* Acquire fw_lock so that the content of fw won't change.  */
+	mutex_enter(&fw->fw_lock);
+
+	/*
+	 * Grab the futex queue.  It can't go away as long as we hold
+	 * fw_lock.  However, we can't take the queue lock because
+	 * that's a lock order reversal.
+	 */
+	fq = fw->fw_queue;
+
+	/* Put us on the abort list so that fq won't go away.  */
+	mutex_enter(&fq->fq_abortlock);
+	LIST_INSERT_HEAD(&fq->fq_abortlist, fw, fw_abort);
+	mutex_exit(&fq->fq_abortlock);
+
+	/* fq is now stable, so we can release fw_lock.  */
+	mutex_exit(&fw->fw_lock);
+
+	/* Now we can remove fw under the queue lock.  */
+	mutex_enter(&fq->fq_lock);
+	TAILQ_REMOVE(&fq->fq_queue, fw, fw_entry);
+	mutex_exit(&fq->fq_lock);
+
+	/*
+	 * Finally, remove us from the abort list and notify anyone
+	 * waiting for the abort to complete if we were the last to go.
+	 */
+	mutex_enter(&fq->fq_abortlock);
+	LIST_REMOVE(fw, fw_abort);
+	if (LIST_EMPTY(&fq->fq_abortlist))
+		cv_broadcast(&fq->fq_abortcv);
+	mutex_exit(&fq->fq_abortlock);
+}
+
+/*
+ * futex_wait(fw, deadline, clkid)
+ *
+ *	fw must be a waiter on a futex's queue.  Wait until deadline on
+ *	the clock clkid, or forever if deadline is NULL, for a futex
+ *	wakeup.  Return 0 on explicit wakeup or destruction of futex,
+ *	ETIMEDOUT on timeout, EINTR/ERESTART on signal.
+ */
+static int
+futex_wait(struct futex_wait *fw, const struct timespec *deadline,
+    clockid_t clkid)
+{
+	int error = 0;
+
+	/* Test and wait under the wait lock.  */
+	mutex_enter(&fw->fw_lock);
+	while (fw->fw_bitset && fw->fw_queue != NULL) {
+		/* Not done yet.  Wait.  */
+		if (deadline) {
+			struct timespec ts;
+
+			/* Check our watch.  */
+			error = clock_gettime1(clkid, &ts);
+			if (error)
+				break;
+
+			/* If we're past the deadline, ETIMEDOUT.  */
+			if (timespeccmp(deadline, &ts, <=)) {
+				error = ETIMEDOUT;
+				break;
+			}
+
+			/* Count how much time is left.  */
+			timespecsub(deadline, &ts, &ts);
+
+			/* Wait for that much time, allowing signals.  */
+			error = cv_timedwait_sig(&fw->fw_cv, &fw->fw_lock,
+			    tstohz(&ts));
+		} else {
+			/* Wait indefinitely, allowing signals. */
+			error = cv_wait_sig(&fw->fw_cv, &fw->fw_lock);
+		}
+		if (error) {
+			/* Convert EWOULDBLOCK to ETIMEDOUT.  */
+			if (error == EWOULDBLOCK)
+				error = ETIMEDOUT;
+			break;
+		}
+	}
+	mutex_exit(&fw->fw_lock);
+
+	return error;
+}
+
+/*
+ * futex_wake(f, nwake, f2, nrequeue, bitset)
+ *
+ *	Wake up to nwake waiters on f matching bitset; then, if f2 is
+ *	provided, move up to nrequeue remaining waiters on f matching
+ *	bitset to f2.  Return the number of waiters actually woken.
+ *	Caller must hold the locks of f and f2, if provided.
+ */
+static unsigned
+futex_wake(struct futex *f, unsigned nwake, struct futex *f2,
+    unsigned nrequeue, int bitset)
+{
+	struct futex_queue *fq = futex_queue(f);
+	struct futex_queue *fq2 = (f2 == NULL ? NULL : futex_queue(f2));
+	struct futex_wait *fw, *fw_next;
+	unsigned nwoken = 0;
+
+	KASSERT(mutex_owned(&fq->fq_lock));
+	KASSERT(f2 == NULL || mutex_owned(&fq2->fq_lock));
+
+	/* Wake up to nwake waiters, and count the number woken.  */
+	TAILQ_FOREACH_SAFE(fw, &fq->fq_queue, fw_entry, fw_next) {
+		if ((fw->fw_bitset & bitset) == 0)
+			continue;
+		if (nwake --> 0) {
+			mutex_enter(&fw->fw_lock);
+			futex_wait_dequeue(fw, fq);
+			fw->fw_bitset = 0;
+			cv_broadcast(&fw->fw_cv);
+			mutex_exit(&fw->fw_lock);
+			nwoken++;
+		} else {
+			break;
+		}
+	}
+
+	if (f2) {
+		/* Move up to nrequeue waiters from f's queue to f2's queue. */
+		TAILQ_FOREACH_SAFE(fw, &fq2->fq_queue, fw_entry, fw_next) {
+			if ((fw->fw_bitset & bitset) == 0)
+				continue;
+			if (nrequeue --> 0) {
+				mutex_enter(&fw->fw_lock);
+				futex_wait_dequeue(fw, fq);
+				futex_wait_enqueue(fw, fq2);
+				mutex_exit(&fw->fw_lock);
+			} else {
+				break;
+			}
+		}
+	} else {
+		KASSERT(nrequeue == 0);
+	}
+
+	/* Return the number of waiters woken.  */
+	return nwoken;
+}
+
+/*
+ * futex_queue_lock(f)
+ *
+ *	Acquire the queue lock of f.  Pair with futex_queue_unlock.  Do
+ *	not use if caller needs to acquire two locks; use
+ *	futex_queue_lock2 instead.
+ */
+static void
+futex_queue_lock(struct futex *f)
+{
+	struct futex_queue *fq = futex_queue(f);
+
+	mutex_enter(&fq->fq_lock);
+}
+
+/*
+ * futex_queue_unlock(f)
+ *
+ *	Release the queue lock of f.
+ */
+static void
+futex_queue_unlock(struct futex *f)
+{
+	struct futex_queue *fq = futex_queue(f);
+
+	mutex_exit(&fq->fq_lock);
+}
+
+/*
+ * futex_queue_lock2(f, f2)
+ *
+ *	Acquire the queue locks of both f and f2, which may be null, or
+ *	which may have the same underlying queue.  If they are
+ *	distinct, an arbitrary total order is chosen on the locks.
+ *
+ *	Callers should only ever acquire multiple queue locks
+ *	simultaneously using futex_queue_lock2.
+ */
+static void
+futex_queue_lock2(struct futex *f, struct futex *f2)
+{
+	struct futex_queue *fq;
+	struct futex_queue *fq2;
+
+	/*
+	 * If both are null, do nothing; if one is null and the other
+	 * is not, lock the other and be done with it.
+	 */
+	if (f == NULL && f2 == NULL) {
+		return;
+	} else if (f == NULL) {
+		mutex_enter(&futex_queue(f2)->fq_lock);
+		return;
+	} else if (f2 == NULL) {
+		mutex_enter(&futex_queue(f)->fq_lock);
+		return;
+	}
+
+	/* Both locks are provided.  Get their queues.  */
+	fq = futex_queue(f);
+	fq2 = futex_queue(f2);
+
+	/* If the queues are shared, acquire only one lock.  */
+	if (fq == fq2) {
+		mutex_enter(&fq->fq_lock);
+		return;
+	}
+
+	/* Otherwise, use the ordering on the kva of the queue pointer.  */
+	if ((uintptr_t)fq < (uintptr_t)fq2) {
+		mutex_enter(&fq->fq_lock);
+		mutex_enter(&fq2->fq_lock);
+	} else {
+		mutex_enter(&fq2->fq_lock);
+		mutex_enter(&fq->fq_lock);
+	}
+}
+
+/*
+ * futex_queue_unlock2(f, f2)
+ *
+ *	Release the queue locks of both f and f2, which may be null, or
+ *	which may have the same underlying queue.
+ */
+static void
+futex_queue_unlock2(struct futex *f, struct futex *f2)
+{
+	struct futex_queue *fq;
+	struct futex_queue *fq2;
+
+	/*
+	 * If both are null, do nothing; if one is null and the other
+	 * is not, unlock the other and be done with it.
+	 */
+	if (f == NULL && f2 == NULL) {
+		return;
+	} else if (f == NULL) {
+		mutex_enter(&futex_queue(f2)->fq_lock);
+		return;
+	} else if (f2 == NULL) {
+		mutex_enter(&futex_queue(f)->fq_lock);
+		return;
+	}
+
+	/* Both locks are provided.  Get their queues.  */
+	fq = futex_queue(f);
+	fq2 = futex_queue(f2);
+
+	/* If the queues are shared, release only one lock.  */
+	if (fq == fq2) {
+		mutex_exit(&fq->fq_lock);
+		return;
+	}
+
+	/* Otherwise, use the ordering on the kva of the queue pointer.  */
+	if ((uintptr_t)fq < (uintptr_t)fq2) {
+		mutex_exit(&fq2->fq_lock);
+		mutex_exit(&fq->fq_lock);
+	} else {
+		mutex_exit(&fq->fq_lock);
+		mutex_exit(&fq2->fq_lock);
+	}
+}
+
+/*
+ * linux_do_futex_wait(uaddr, val, val3, timeout, clkid, clkflags, retval)
+ *
+ *	Implement Linux futex(FUTEX_WAIT).
+ */
+static int
+linux_do_futex_wait(bool shared, int *uaddr, int val, int val3,
+    const struct timespec *timeout, clockid_t clkid, int clkflags,
+    register_t *retval)
+{
+	struct futex *f;
+	struct futex_wait wait, *fw = &wait;
+	struct timespec ts;
+	const struct timespec *deadline;
+	int error;
+
+	/* Optimistically test before anything else.  */
+	if (!futex_test(uaddr, val))
+		return EAGAIN;
+
+	/* Determine a deadline on the specified clock.  */
+	if (timeout == NULL || (clkflags & TIMER_ABSTIME) == TIMER_ABSTIME) {
+		deadline = timeout;
+	} else {
+		error = clock_gettime1(clkid, &ts);
+		if (error)
+			return error;
+		timespecadd(&ts, timeout, &ts);
+		deadline = &ts;
+	}
+
+	/* Get the futex, creating it if necessary.  */
+	error = futex_get(uaddr, shared, &f);
+	if (error)
+		return error;
+	KASSERT(f);
+
+	/* Get ready to wait.  */
+	futex_wait_init(fw, val3);
+
+	/*
+	 * Under the queue lock, check the value again: if it has
+	 * already changed, EAGAIN; otherwise enqueue the waiter.
+	 * Since FUTEX_WAKE will use the same lock and be done after
+	 * modifying the value, the order in which we check and enqueue
+	 * is immaterial.
+	 */
+	futex_queue_lock(f);
+	if (!futex_test(uaddr, val)) {
+		futex_queue_unlock(f);
+		error = EAGAIN;
+		goto out;
+	}
+	futex_wait_enqueue(fw, futex_queue(f));
+	futex_queue_unlock(f);
+
+	/* We are now done with the futex.  We only need the waiter.  */
+	futex_put(f);
+	f = NULL;
+
+	/* Wait.  */
+	error = futex_wait(fw, deadline, clkid);
+	if (error) {
+		futex_wait_abort(fw);
+		goto out;
+	}
+
+	/* Return 0 on success, error on failure.  */
+	*retval = 0;
+
+out:	futex_wait_fini(fw);
+	if (f != NULL)
+		futex_put(f);
+	return error;
+}
+
+/*
+ * linux_do_futex_wake(uaddr, val, val3, retval)
+ *
+ *	Implement Linux futex(FUTEX_WAKE) and futex(FUTEX_WAKE_BITSET).
+ */
+static int
+linux_do_futex_wake(bool shared, int *uaddr, int val, int val3,
+    register_t *retval)
+{
+	struct futex *f;
+	unsigned nwoken = 0;
+	int error;
+
+	/* Reject negative number of wakeups.  */
+	if (val < 0) {
+		error = EINVAL;
+		goto out;
+	}
+
+	/* Look up the futex, if any.  */
+	error = futex_lookup(uaddr, shared, &f);
+	if (error)
+		goto out;
+
+	/* If there's no futex, there are no waiters to wake.  */
+	if (f == NULL)
+		goto out;
+
+	/*
+	 * Under f's queue lock, wake the waiters and remember the
+	 * number woken.
+	 */
+	futex_queue_lock(f);
+	nwoken = futex_wake(f, val, NULL, 0, val3);
+	futex_queue_unlock(f);
+
+	/* Release the futex.  */
+	futex_put(f);
+
+out:
+	/* Return the number of waiters woken.  */
+	*retval = nwoken;
+
+	/* Success!  */
+	return 0;
+}
+
+/*
+ * linux_do_futex_requeue(uaddr, val, uaddr2, val2, retval)
+ *
+ *	Implement Linux futex(FUTEX_REQUEUE).
+ */
+static int
+linux_do_futex_requeue(bool shared, int *uaddr, int val, int *uaddr2, int val2,
+    register_t *retval)
+{
+	struct futex *f = NULL, *f2 = NULL;
+	unsigned nwoken = 0;	/* default to zero woken on early return */
+	int error;
+
+	/* Reject negative number of wakeups.  */
+	if (val < 0) {
+		error = EINVAL;
+		goto out;
+	}
+
+	/* Look up the source futex, if any.  */
+	error = futex_lookup(uaddr, shared, &f);
+	if (error)
+		goto out;
+
+	/* If there is none, nothing to do.  */
+	if (f == NULL)
+		goto out;
+
+	/* Look up the destination futex, if any.  */
+	error = futex_lookup(uaddr2, shared, &f2);
+	if (error)
+		goto out;
+
+	/*
+	 * Under the futexes' queue locks, wake the waiters and return
+	 * the number woken.
+	 */
+	futex_queue_lock2(f, f2);
+	nwoken = futex_wake(f, val, f2, val2, FUTEX_BITSET_MATCH_ANY);
+	futex_queue_unlock2(f, f2);
+
+out:
+	/* Return the number of waiters woken.  */
+	*retval = nwoken;
+
+	/* Release the futexes if we got them.  */
+	if (f2)
+		futex_put(f2);
+	if (f)
+		futex_put(f);
+	return error;
+}
+
+/*
+ * linux_do_futex_cmp_requeue(uaddr, val, uaddr2, val2, val3, retval)
+ *
+ *	Implement Linux futex(FUTEX_CMP_REQUEUE).
+ */
+static int
+linux_do_futex_cmp_requeue(bool shared, int *uaddr, int val, int *uaddr2,
+    int val2, int val3, register_t *retval)
+{
+	struct futex *f = NULL, *f2 = NULL;
+	unsigned nwoken = 0;	/* default to zero woken on early return */
+	int error;
+
+	/* Reject negative number of wakeups.  */
+	if (val < 0) {
+		error = EINVAL;
+		goto out;
+	}
+
+	/* Look up the source futex, if any.  */
+	error = futex_lookup(uaddr, shared, &f);
+	if (error)
+		goto out;
+
+	/* If there is none, nothing to do.  */
+	if (f == NULL)
+		goto out;
+
+	/* Look up the destination futex, if any.  */
+	error = futex_lookup(uaddr2, shared, &f2);
+	if (error)
+		goto out;
+
+	/*
+	 * Under the futexes' queue locks, check the value; if
+	 * unchanged from val3, wake the waiters.
+	 */
+	futex_queue_lock2(f, f2);
+	if (!futex_test(uaddr, val3)) {
+		error = EAGAIN;
+		nwoken = 0;
+	} else {
+		error = 0;
+		nwoken = futex_wake(f, val, f2, val2, FUTEX_BITSET_MATCH_ANY);
+	}
+	futex_queue_unlock2(f, f2);
+
+out:
+	/* Return the number of waiters woken.  */
+	*retval = nwoken;
+
+	/* Release the futexes if we got them.  */
+	if (f2)
+		futex_put(f2);
+	if (f)
+		futex_put(f);
+	return error;
+}
+
+#define	FUTEX_OP_OP		__BITS(31,28)
+#define	FUTEX_OP_CMP		__BITS(27,24)
+#define	FUTEX_OP_OPARG		__BITS(23,12)
+#define	FUTEX_OP_CMPARG		__BITS(11,0)
+
+/*
+ * futex_validate_op_cmp(val3)
+ *
+ *	Validate an op/cmp argument for FUTEX_WAKE_OP.
+ */
+static int
+futex_validate_op_cmp(int val3)
+{
+	int op = __SHIFTOUT(val3, FUTEX_OP_OP);
+	int oparg = __SHIFTOUT(val3, FUTEX_OP_OPARG);
+	int cmp = __SHIFTOUT(val3, FUTEX_OP_CMP);
+	int cmparg __unused = __SHIFTOUT(val3, FUTEX_OP_CMPARG);
+
+	if (op & FUTEX_OP_OPARG_SHIFT) {
+		if (oparg < 0)
+			return EINVAL;
+		if (oparg >= 32)
+			return EINVAL;
+		op &= ~FUTEX_OP_OPARG_SHIFT;
+	}
+
+	switch (op) {
+	case FUTEX_OP_SET:
+	case FUTEX_OP_ADD:
+	case FUTEX_OP_OR:
+	case FUTEX_OP_ANDN:
+	case FUTEX_OP_XOR:
+		break;
+	default:
+		return EINVAL;
+	}
+
+	switch (cmp) {
+	case FUTEX_OP_CMP_EQ:
+	case FUTEX_OP_CMP_NE:
+	case FUTEX_OP_CMP_LT:
+	case FUTEX_OP_CMP_LE:
+	case FUTEX_OP_CMP_GT:
+	case FUTEX_OP_CMP_GE:
+		break;
+	default:
+		return EINVAL;
+	}
+
+	return 0;
+}
+
+/*
+ * futex_compute_op(oldval, val3)
+ *
+ *	Apply a FUTEX_WAIT_OP operation to oldval.
+ */
+static int
+futex_compute_op(int oldval, int val3)
+{
+	int op = __SHIFTOUT(val3, FUTEX_OP_OP);
+	int oparg = __SHIFTOUT(val3, FUTEX_OP_OPARG);
+
+	if (op & FUTEX_OP_OPARG_SHIFT) {
+		KASSERT(oparg >= 0);
+		KASSERT(oparg < 32);
+		oparg = 1u << oparg;
+		op &= ~FUTEX_OP_OPARG_SHIFT;
+	}
+
+	switch (op) {
+	case FUTEX_OP_SET:
+		return oparg;
+	case FUTEX_OP_ADD:
+		/*
+		 * Avoid signed arithmetic overflow by doing
+		 * arithmetic unsigned and converting back to signed
+		 * at the end.
+		 */
+		return (int)((unsigned)oldval + (unsigned)oparg);
+	case FUTEX_OP_OR:
+		return oldval | oparg;
+	case FUTEX_OP_ANDN:
+		return oldval & ~oparg;
+	case FUTEX_OP_XOR:
+		return oldval ^ oparg;
+	default:
+		panic("invalid futex op");
+	}
+}
+
+/*
+ * futex_compute_cmp(oldval, val3)
+ *
+ *	Apply a FUTEX_WAIT_OP comparison to oldval.
+ */
+static bool
+futex_compute_cmp(int oldval, int val3)
+{
+	int cmp = __SHIFTOUT(val3, FUTEX_OP_CMP);
+	int cmparg = __SHIFTOUT(val3, FUTEX_OP_CMPARG);
+
+	switch (cmp) {
+	case FUTEX_OP_CMP_EQ:
+		return (oldval == cmparg);
+	case FUTEX_OP_CMP_NE:
+		return (oldval != cmparg);
+	case FUTEX_OP_CMP_LT:
+		return (oldval < cmparg);
+	case FUTEX_OP_CMP_LE:
+		return (oldval <= cmparg);
+	case FUTEX_OP_CMP_GT:
+		return (oldval > cmparg);
+	case FUTEX_OP_CMP_GE:
+		return (oldval >= cmparg);
+	default:
+		panic("invalid futex cmp operation");
+	}
+}
+
+/*
+ * linux_do_futex_wake_op(uaddr, val, uaddr2, val2, val3, retval)
+ *
+ *	Implement Linux futex(FUTEX_WAKE_OP).
+ */
+static int
+linux_do_futex_wake_op(bool shared, int *uaddr, int val, int *uaddr2, int val2,
+    int val3, register_t *retval)
+{
+	struct futex *f = NULL, *f2 = NULL;
+	int oldval, newval, actual;
+	unsigned nwoken = 0;
+	int error;
+
+	/* Reject negative number of wakeups.  */
+	if (val < 0) {
+		error = EINVAL;
+		goto out;
+	}
+
+	/* Reject invalid operations before we start doing things.  */
+	if (!futex_validate_op_cmp(val3)) {
+		error = EINVAL;
+		goto out;
+	}
+
+	/* Look up the first futex, if any.  */
+	error = futex_lookup(uaddr, shared, &f);
+	if (error)
+		goto out;
+
+	/* Look up the second futex, if any.  */
+	error = futex_lookup(uaddr2, shared, &f2);
+	if (error)
+		goto out;
+
+	/*
+	 * Under the queue locks:
+	 *
+	 * 1. Read/modify/write: *uaddr2 op= oparg.
+	 * 2. Unconditionally wake uaddr.
+	 * 3. Conditionally wake uaddr2, if it previously matched val2.
+	 */
+	futex_queue_lock2(f, f2);
+	do {
+		error = futex_load(uaddr2, &oldval);
+		if (error)
+			goto out_unlock;
+		newval = futex_compute_op(oldval, val3);
+		error = ucas_int(uaddr2, oldval, newval, &actual);
+		if (error)
+			goto out_unlock;
+	} while (actual != oldval);
+	nwoken = (f ? futex_wake(f, val, NULL, 0, FUTEX_BITSET_MATCH_ANY) : 0);
+	if (f2 && futex_compute_cmp(oldval, val3))
+		nwoken += futex_wake(f2, val2, NULL, 0,
+		    FUTEX_BITSET_MATCH_ANY);
+
+	/* Success!  */
+	error = 0;
+out_unlock:
+	futex_queue_unlock2(f, f2);
+
+out:
+	/* Return the number of waiters woken.  */
+	*retval = nwoken;
+
+	/* Release the futexes, if we got them.  */
+	if (f2)
+		futex_put(f2);
+	if (f)
+		futex_put(f);
+	return error;
+}
+
+/*
+ * futex_op(uaddr, op, val, timeout, uaddr2, val2, val3)
+ *
+ *	Implement the futex system call with all the parameters
+ *	parsed out.
+ */
+int
+futex_op(int *uaddr, int op, int val, const struct timespec *timeout,
+    int *uaddr2, int val2, int val3, register_t *retval)
+{
+	bool shared;
+	clockid_t clkid;
+
+	if (op & LINUX_FUTEX_PRIVATE_FLAG)
+		shared = false;
+	else
+		shared = true;
+
+	if (op & LINUX_FUTEX_CLOCK_REALTIME)
+		clkid = CLOCK_REALTIME;
+	else
+		clkid = CLOCK_MONOTONIC;
+
+	switch (op & LINUX_FUTEX_CMD_MASK) {
+	case LINUX_FUTEX_WAIT:
+		return linux_do_futex_wait(shared, uaddr, val,
+		    FUTEX_BITSET_MATCH_ANY, timeout, clkid, TIMER_RELTIME,
+		    retval);
+	case LINUX_FUTEX_WAKE:
+		return linux_do_futex_wake(shared, uaddr, val,
+		    FUTEX_BITSET_MATCH_ANY, retval);
+	case LINUX_FUTEX_FD:
+		return ENOSYS;
+	case LINUX_FUTEX_REQUEUE:
+		return linux_do_futex_requeue(shared, uaddr, val, uaddr2, val2,
+		    retval);
+	case LINUX_FUTEX_CMP_REQUEUE:
+		return linux_do_futex_cmp_requeue(shared, uaddr, val, uaddr2,
+		    val2, val3, retval);
+	case LINUX_FUTEX_WAIT_BITSET:
+		return linux_do_futex_wait(shared, uaddr, val, val3, timeout,
+		    clkid, TIMER_ABSTIME, retval);
+	case LINUX_FUTEX_WAKE_BITSET:
+		return linux_do_futex_wake(shared, uaddr, val, val3, retval);
+	case LINUX_FUTEX_WAKE_OP:
+		return linux_do_futex_wake_op(shared, uaddr, val, uaddr2, val2,
+		    val3, retval);
+	default:
+		return ENOSYS;
+	}
+}
+
+/*
+ * linux_sys_futex(l, uap, retval)
+ *
+ *	Linux futex system call: generic futex operations.
+ */
+int
+linux_sys_futex(struct lwp *l, const struct linux_sys_futex_args *uap,
+    register_t *retval)
+{
+	/* {
+		syscallarg(int *) uaddr;
+		syscallarg(int) op;
+		syscallarg(int) val;
+		syscallarg(const struct linux_timespec *) timeout;
+		syscallarg(int *) uaddr2;
+		syscallarg(int) val3;
+	} */
+	struct linux_timespec lts;
+	struct timespec ts, *tsp;
+	int op = SCARG(uap, op);
+	int val2;
+	int error;
+
+	/*
+	 * Discriminate between whether
+	 *
+	 * (a) the `timeout' argument is actually a pointer to a Linux
+	 *     struct timespec for a futex wait operation, or whether
+	 *
+	 * (b) it is actually an int shoehorned into a pointer for any
+	 *     other futex operation.
+	 */
+	switch (op & LINUX_FUTEX_CMD_MASK) {
+	case LINUX_FUTEX_WAIT:
+	case LINUX_FUTEX_WAIT_BITSET:
+		error = copyin(SCARG(uap, timeout), &lts, sizeof lts);
+		if (error)
+			return error;
+		linux_to_native_timespec(&ts, &lts);
+		tsp = &ts;
+		val2 = -1;
+		break;
+	default:
+		tsp = NULL;
+		val2 = (int)(intptr_t)SCARG(uap, timeout);
+		break;
+	}
+
+	return linux_do_futex(SCARG(uap, uaddr), op, SCARG(uap, val), tsp,
+	    SCARG(uap, uaddr2), val2, SCARG(uap, val3), retval);
+}
+
+/*
+ * linux_sys_set_robust_list(l, uap, retval)
+ *
+ *	Linux set_robust_list system call for robust futexes.
+ */
+int
+linux_sys_set_robust_list(struct lwp *l,
+    const struct linux_sys_set_robust_list_args *uap, register_t *retval)
+{
+	/* {
+		syscallarg(struct linux_robust_list_head *) head;
+		syscallarg(size_t) len;
+	} */
+	struct linux_emuldata *led = l->l_emuldata;
+	struct linux_robust_list_head *head = SCARG(uap, head);
+
+	if (SCARG(uap, len) != sizeof(struct linux_robust_list_head))
+		return EINVAL;
+	if ((uintptr_t)head % sizeof(head))
+		return EINVAL;
+	led->led_robust_head = head;
+
+	*retval = 0;
+	return 0;
+}
+
+/*
+ * linux_sys_get_robust_list(l, uap, retval)
+ *
+ *	Linux get_robust_list system call for robust futexes.
+ */
+int
+linux_sys_get_robust_list(struct lwp *l,
+    const struct linux_sys_get_robust_list_args *uap, register_t *retval)
+{
+	/* {
+		syscallarg(int) pid;
+		syscallarg(struct linux_robust_list_head **) head;
+		syscallarg(size_t *) len;
+	} */
+	struct linux_emuldata *led = l->l_emuldata;
+	struct proc *p = curproc;
+	struct linux_robust_list_head *head;
+	const size_t len = sizeof(*head);
+	int error;
+
+	KASSERT(p == l->l_proc);
+
+	/* Find the other lwp, if requested; otherwise use our robust head.  */
+	if (SCARG(uap, pid)) {
+		mutex_enter(p->p_lock);
+		l = lwp_find(p, SCARG(uap, pid));
+		if (l == NULL) {
+			mutex_exit(p->p_lock);
+			return ESRCH;
+		}
+		head = led->led_robust_head;
+		mutex_exit(p->p_lock);
+	} else {
+		head = led->led_robust_head;
+	}
+
+	/* Copy out the head pointer and the head structure length.  */
+	error = copyout(&head, SCARG(uap, head), sizeof(head));
+	if (error)
+		return error;
+	error = copyout(&len, SCARG(uap, len), sizeof(len));
+	if (error)
+		return error;
+
+	/* Success!  */
+	return 0;
+}
+
+/*
+ * linux_lwp_tid(l)
+ *
+ *	Return the Linux tid for the lwp l.
+ *
+ *	XXX THIS IS CURRENTLY BROKEN AND SHOULD LIVE ELSEWHERE
+ */
+static int
+linux_lwp_tid(struct lwp *l)
+{
+
+	/*
+	 * XXX This is wrong...  There's a global namespace of Linux
+	 * tids, not a per-process namespace.
+	 */
+	return l->l_lid;
+}
+
+/*
+ * release_futex(uva)
+ *
+ *	Try to release the robust futex at uva in the current process
+ *	on lwp exit.  If anything goes wrong, silently fail.  It is the
+ *	userland program's obligation to arrange correct behaviour.
+ */
+static void
+release_futex(uintptr_t uptr)
+{
+	int *uaddr;
+	struct futex *f;
+	int oldval, newval, actual;
+	int error;
+
+	/* If it's misaligned, tough.  */
+	if (uptr & 3)
+		return;
+	uaddr = (int *)uptr;
+
+	/* Optimistically test whether we need to do anything at all.  */
+	error = futex_load(uaddr, &oldval);
+	if (error == 0 &&
+	    (oldval & FUTEX_TID_MASK) != linux_lwp_tid(curlwp))
+		return;
+
+	/*
+	 * Look for a shared futex since we have no positive indication
+	 * it is private.  If we can't, tough.
+	 */
+	error = futex_lookup(uaddr, /*shared*/true, &f);
+	if (error)
+		return;
+
+	/* If there's no futex, there's nothing to release.  */
+	if (f == NULL)
+		return;
+
+	/* Work under the futex queue lock.  */
+	futex_queue_lock(f);
+
+	/*
+	 * Fetch the word: if the tid doesn't match ours, skip;
+	 * otherwise, set the owner-died bit, atomically.
+	 */
+	do {
+		error = futex_load(uaddr, &oldval);
+		if (error)
+			goto out;
+		if ((oldval & FUTEX_TID_MASK) != linux_lwp_tid(curlwp))
+			goto out;
+		newval = oldval | FUTEX_OWNER_DIED;
+		error = ucas_int(uaddr, oldval, newval, &actual);
+		if (error)
+			goto out;
+	} while (actual != oldval);
+
+	/*
+	 * If there may be waiters, try to wake them.  If anything goes
+	 * wrong, tough.
+	 */
+	if (oldval & FUTEX_WAITERS)
+		(void)futex_wake(f, UINT_MAX, NULL, 0, FUTEX_BITSET_MATCH_ANY);
+
+	/* Unlock the queue and release the futex.  */
+out:	futex_queue_unlock(f);
+	futex_put(f);
+}
+
+/*
+ * futex_release_all_lwp(l)
+ *
+ *	Release all l's robust futexes.  If anything looks funny in
+ *	the process, give up -- it's userland's responsibility to dot
+ *	the i's and cross the t's.
+ */
+void
+futex_release_all_lwp(struct lwp *l)
+{
+	struct linux_emuldata *led = l->l_emuldata;
+	struct linux_robust_list_head head;
+	struct linux_robust_list entry, *next;
+	unsigned limit = 1000000;
+	int error;
+
+	/* If there's no robust list, nothing to do.  */
+	if (led->led_robust_head == NULL)
+		return;
+
+	/* Read the final snapshot of the robust list head.  */
+	error = copyin(led->led_robust_head, &head, sizeof head);
+	if (error) {
+		printf("WARNING: pid %jd (%s) lwp %jd:"
+		    " unmapped robust futex list head\n",
+		    (uintmax_t)l->l_proc->p_pid, l->l_proc->p_comm,
+		    (uintmax_t)l->l_lid);
+		return;
+	}
+
+	/*
+	 * Walk down the list of locked futexes and release them, up
+	 * to one million of them before we give up.
+	 */
+	for (next = head.list.next;
+	     limit --> 0 && next != &led->led_robust_head->list;
+	     next = entry.next) {
+		release_futex((uintptr_t)next + head.futex_offset);
+		error = copyin(next, &entry, sizeof entry);
+		if (error)
+			break;
+	}
+
+	/* If there's a pending futex, it may need to be released too.  */
+	if (head.pending_list != NULL) {
+		release_futex((uintptr_t)head.pending_list +
+		    head.futex_offset);
+	}
+}
