@@ -34,6 +34,8 @@
 #ifndef _SYS_FUTEX_H_
 #define _SYS_FUTEX_H_
 
+#include <sys/timespec.h>
+
 #define FUTEX_WAIT			  0 
 #define FUTEX_WAKE			  1
 #define FUTEX_FD			  2
@@ -51,7 +53,7 @@
 #define FUTEX_PRIVATE_FLAG		128
 #define FUTEX_CLOCK_REALTIME		256
 #define FUTEX_CMD_MASK		\
-    (~(LINUX_FUTEX_PRIVATE_FLAG|LINUX_FUTEX_CLOCK_REALTIME))
+    (~(FUTEX_PRIVATE_FLAG|FUTEX_CLOCK_REALTIME))
 
 #define FUTEX_OP_SET		0
 #define FUTEX_OP_ADD		1
@@ -84,8 +86,10 @@ struct futex_robust_list_head {
 #define FUTEX_BITSET_MATCH_ANY  0xffffffff
 
 #ifdef _KERNEL
+struct lwp;
+
 void	futex_release_all_lwp(struct lwp *);
-int	futex_op(int *, int, int, const struct timespec *, int *, int,
+int	futex_func(int *, int, int, const struct timespec *, int *, int,
 	    int, register_t *);
 void	futex_sys_init(void);
 void	futex_sys_fini(void);

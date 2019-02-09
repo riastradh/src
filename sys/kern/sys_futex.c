@@ -133,6 +133,10 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <sys/rbtree.h>
 #include <sys/queue.h>
 
+#include <sys/syscall.h>
+#include <sys/syscallargs.h>
+#include <sys/syscallvar.h>
+
 #include <uvm/uvm_extern.h>
 
 /*
@@ -454,7 +458,7 @@ futex_queue_fini(struct futex_queue *fq)
 }
 
 /*
- * futex_shared_create(&objaddr)
+ * futex_shared_create(&pageid)
  *
  *	Create a kernel record for a futex located at the VM object
  *	address objaddr.  Initial reference count is 1, representing
@@ -463,7 +467,7 @@ futex_queue_fini(struct futex_queue *fq)
  *	Never sleeps.
  */
 static struct futex_shared *
-futex_shared_create(struct uvm_pageid *pageid)
+futex_shared_create(const struct uvm_pageid *pageid)
 {
 	struct futex_shared *fs;
 
@@ -499,7 +503,7 @@ futex_shared_destroy(struct futex_shared *fs)
 	futex_queue_fini(&fs->fs_queue);
 	KASSERT(!fs->fs_on_tree);
 	KASSERT(fs->fs_refcnt == 0);
-	uvm_put_voaddr(&fs->fs_objaddr);
+	uvm_pageid_release(&fs->fs_pageid);
 
 	kmem_free(fs, sizeof(*fs));
 }
@@ -1060,13 +1064,13 @@ futex_get(int *uaddr, bool shared, struct futex **fp)
 
 	/* If it's shared, get the shared futex.  */
 	if (shared) {
-		struct uvm_voaddr objaddr;
+		struct uvm_pageid pageid;
 
 		/*
 		 * Get the virtual object address for this virtual
 		 * address.
 		 */
-		if (!uvm_get_voaddr(&vm->vm_map, va, &objaddr)) {
+		if (!uvm_pageid_acquire(&vm->vm_map, va, &pageid)) {
 			error = EFAULT;
 			goto out;
 		}
@@ -1074,9 +1078,9 @@ futex_get(int *uaddr, bool shared, struct futex **fp)
 		/*
 		 * Get a shared futex record for this physical address.
 		 */
-		error = futex_shared_get(&objaddr, &fs);
+		error = futex_shared_get(&pageid, &fs);
 		if (error) {
-			uvm_put_voaddr(&objaddr);
+			uvm_pageid_release(&pageid);
 			goto out;
 		}
 	}
@@ -1488,12 +1492,12 @@ futex_queue_unlock2(struct futex *f, struct futex *f2)
 }
 
 /*
- * linux_do_futex_wait(uaddr, val, val3, timeout, clkid, clkflags, retval)
+ * futex_func_wait(uaddr, val, val3, timeout, clkid, clkflags, retval)
  *
- *	Implement Linux futex(FUTEX_WAIT).
+ *	Implement futex(FUTEX_WAIT).
  */
 static int
-linux_do_futex_wait(bool shared, int *uaddr, int val, int val3,
+futex_func_wait(bool shared, int *uaddr, int val, int val3,
     const struct timespec *timeout, clockid_t clkid, int clkflags,
     register_t *retval)
 {
@@ -1564,13 +1568,12 @@ out:	futex_wait_fini(fw);
 }
 
 /*
- * linux_do_futex_wake(uaddr, val, val3, retval)
+ * futex_func_wake(uaddr, val, val3, retval)
  *
- *	Implement Linux futex(FUTEX_WAKE) and futex(FUTEX_WAKE_BITSET).
+ *	Implement futex(FUTEX_WAKE) and futex(FUTEX_WAKE_BITSET).
  */
 static int
-linux_do_futex_wake(bool shared, int *uaddr, int val, int val3,
-    register_t *retval)
+futex_func_wake(bool shared, int *uaddr, int val, int val3, register_t *retval)
 {
 	struct futex *f;
 	unsigned nwoken = 0;
@@ -1611,12 +1614,12 @@ out:
 }
 
 /*
- * linux_do_futex_requeue(uaddr, val, uaddr2, val2, retval)
+ * futex_func_requeue(uaddr, val, uaddr2, val2, retval)
  *
- *	Implement Linux futex(FUTEX_REQUEUE).
+ *	Implement futex(FUTEX_REQUEUE).
  */
 static int
-linux_do_futex_requeue(bool shared, int *uaddr, int val, int *uaddr2, int val2,
+futex_func_requeue(bool shared, int *uaddr, int val, int *uaddr2, int val2,
     register_t *retval)
 {
 	struct futex *f = NULL, *f2 = NULL;
@@ -1664,12 +1667,12 @@ out:
 }
 
 /*
- * linux_do_futex_cmp_requeue(uaddr, val, uaddr2, val2, val3, retval)
+ * futex_func_cmp_requeue(uaddr, val, uaddr2, val2, val3, retval)
  *
- *	Implement Linux futex(FUTEX_CMP_REQUEUE).
+ *	Implement futex(FUTEX_CMP_REQUEUE).
  */
 static int
-linux_do_futex_cmp_requeue(bool shared, int *uaddr, int val, int *uaddr2,
+futex_func_cmp_requeue(bool shared, int *uaddr, int val, int *uaddr2,
     int val2, int val3, register_t *retval)
 {
 	struct futex *f = NULL, *f2 = NULL;
@@ -1843,12 +1846,12 @@ futex_compute_cmp(int oldval, int val3)
 }
 
 /*
- * linux_do_futex_wake_op(uaddr, val, uaddr2, val2, val3, retval)
+ * futex_func_wake_op(uaddr, val, uaddr2, val2, val3, retval)
  *
- *	Implement Linux futex(FUTEX_WAKE_OP).
+ *	Implement futex(FUTEX_WAKE_OP).
  */
 static int
-linux_do_futex_wake_op(bool shared, int *uaddr, int val, int *uaddr2, int val2,
+futex_func_wake_op(bool shared, int *uaddr, int val, int *uaddr2, int val2,
     int val3, register_t *retval)
 {
 	struct futex *f = NULL, *f2 = NULL;
@@ -1918,51 +1921,51 @@ out:
 }
 
 /*
- * futex_op(uaddr, op, val, timeout, uaddr2, val2, val3)
+ * futex_func(uaddr, op, val, timeout, uaddr2, val2, val3)
  *
  *	Implement the futex system call with all the parameters
  *	parsed out.
  */
 int
-futex_op(int *uaddr, int op, int val, const struct timespec *timeout,
+futex_func(int *uaddr, int op, int val, const struct timespec *timeout,
     int *uaddr2, int val2, int val3, register_t *retval)
 {
 	bool shared;
 	clockid_t clkid;
 
-	if (op & LINUX_FUTEX_PRIVATE_FLAG)
+	if (op & FUTEX_PRIVATE_FLAG)
 		shared = false;
 	else
 		shared = true;
 
-	if (op & LINUX_FUTEX_CLOCK_REALTIME)
+	if (op & FUTEX_CLOCK_REALTIME)
 		clkid = CLOCK_REALTIME;
 	else
 		clkid = CLOCK_MONOTONIC;
 
-	switch (op & LINUX_FUTEX_CMD_MASK) {
-	case LINUX_FUTEX_WAIT:
-		return linux_do_futex_wait(shared, uaddr, val,
+	switch (op & FUTEX_CMD_MASK) {
+	case FUTEX_WAIT:
+		return futex_func_wait(shared, uaddr, val,
 		    FUTEX_BITSET_MATCH_ANY, timeout, clkid, TIMER_RELTIME,
 		    retval);
-	case LINUX_FUTEX_WAKE:
-		return linux_do_futex_wake(shared, uaddr, val,
+	case FUTEX_WAKE:
+		return futex_func_wake(shared, uaddr, val,
 		    FUTEX_BITSET_MATCH_ANY, retval);
-	case LINUX_FUTEX_FD:
+	case FUTEX_FD:
 		return ENOSYS;
-	case LINUX_FUTEX_REQUEUE:
-		return linux_do_futex_requeue(shared, uaddr, val, uaddr2, val2,
+	case FUTEX_REQUEUE:
+		return futex_func_requeue(shared, uaddr, val, uaddr2, val2,
 		    retval);
-	case LINUX_FUTEX_CMP_REQUEUE:
-		return linux_do_futex_cmp_requeue(shared, uaddr, val, uaddr2,
+	case FUTEX_CMP_REQUEUE:
+		return futex_func_cmp_requeue(shared, uaddr, val, uaddr2,
 		    val2, val3, retval);
-	case LINUX_FUTEX_WAIT_BITSET:
-		return linux_do_futex_wait(shared, uaddr, val, val3, timeout,
+	case FUTEX_WAIT_BITSET:
+		return futex_func_wait(shared, uaddr, val, val3, timeout,
 		    clkid, TIMER_ABSTIME, retval);
-	case LINUX_FUTEX_WAKE_BITSET:
-		return linux_do_futex_wake(shared, uaddr, val, val3, retval);
-	case LINUX_FUTEX_WAKE_OP:
-		return linux_do_futex_wake_op(shared, uaddr, val, uaddr2, val2,
+	case FUTEX_WAKE_BITSET:
+		return futex_func_wake(shared, uaddr, val, val3, retval);
+	case FUTEX_WAKE_OP:
+		return futex_func_wake_op(shared, uaddr, val, uaddr2, val2,
 		    val3, retval);
 	default:
 		return ENOSYS;
@@ -1970,106 +1973,92 @@ futex_op(int *uaddr, int op, int val, const struct timespec *timeout,
 }
 
 /*
- * linux_sys_futex(l, uap, retval)
+ * sys__futex(l, uap, retval)
  *
- *	Linux futex system call: generic futex operations.
+ *	_futex(2) system call: generic futex operations.
  */
 int
-linux_sys_futex(struct lwp *l, const struct linux_sys_futex_args *uap,
+sys__futex(struct lwp *l, const struct sys__futex_args *uap,
     register_t *retval)
 {
 	/* {
 		syscallarg(int *) uaddr;
 		syscallarg(int) op;
 		syscallarg(int) val;
-		syscallarg(const struct linux_timespec *) timeout;
+		syscallarg(const struct timespec *) timeout;
 		syscallarg(int *) uaddr2;
+		syscallarg(int) val2;
 		syscallarg(int) val3;
 	} */
-	struct linux_timespec lts;
 	struct timespec ts, *tsp;
-	int op = SCARG(uap, op);
-	int val2;
 	int error;
 
 	/*
-	 * Discriminate between whether
-	 *
-	 * (a) the `timeout' argument is actually a pointer to a Linux
-	 *     struct timespec for a futex wait operation, or whether
-	 *
-	 * (b) it is actually an int shoehorned into a pointer for any
-	 *     other futex operation.
+	 * Copy in the timeout argument, if specified.
 	 */
-	switch (op & LINUX_FUTEX_CMD_MASK) {
-	case LINUX_FUTEX_WAIT:
-	case LINUX_FUTEX_WAIT_BITSET:
-		error = copyin(SCARG(uap, timeout), &lts, sizeof lts);
+	if (SCARG(uap, timeout)) {
+		error = copyin(SCARG(uap, timeout), &ts, sizeof(ts));
 		if (error)
 			return error;
-		linux_to_native_timespec(&ts, &lts);
 		tsp = &ts;
-		val2 = -1;
-		break;
-	default:
+	} else {
 		tsp = NULL;
-		val2 = (int)(intptr_t)SCARG(uap, timeout);
-		break;
 	}
 
-	return linux_do_futex(SCARG(uap, uaddr), op, SCARG(uap, val), tsp,
-	    SCARG(uap, uaddr2), val2, SCARG(uap, val3), retval);
+	return futex_func(SCARG(uap, uaddr), SCARG(uap, op), SCARG(uap, val),
+	    tsp, SCARG(uap, uaddr2), SCARG(uap, val2), SCARG(uap, val3),
+	    retval);
 }
 
 /*
- * linux_sys_set_robust_list(l, uap, retval)
+ * sys__futex_set_robust_list(l, uap, retval)
  *
- *	Linux set_robust_list system call for robust futexes.
+ *	_futex_set_robust_list(2) system call for robust futexes.
  */
 int
-linux_sys_set_robust_list(struct lwp *l,
-    const struct linux_sys_set_robust_list_args *uap, register_t *retval)
+sys__futex_set_robust_list(struct lwp *l,
+    const struct sys__futex_set_robust_list_args *uap, register_t *retval)
 {
 	/* {
-		syscallarg(struct linux_robust_list_head *) head;
+		syscallarg(struct futex_robust_list_head *) head;
 		syscallarg(size_t) len;
 	} */
-	struct linux_emuldata *led = l->l_emuldata;
-	struct linux_robust_list_head *head = SCARG(uap, head);
+	struct futex_robust_list_head *head = SCARG(uap, head);
 
-	if (SCARG(uap, len) != sizeof(struct linux_robust_list_head))
+	if (SCARG(uap, len) != sizeof(struct futex_robust_list_head))
 		return EINVAL;
 	if ((uintptr_t)head % sizeof(head))
 		return EINVAL;
-	led->led_robust_head = head;
+
+	l->l_robust_head = head;
 
 	*retval = 0;
 	return 0;
 }
 
 /*
- * linux_sys_get_robust_list(l, uap, retval)
+ * sys__futex_get_robust_list(l, uap, retval)
  *
- *	Linux get_robust_list system call for robust futexes.
+ *	_futex_get_robust_list(2) system call for robust futexes.
  */
 int
-linux_sys_get_robust_list(struct lwp *l,
-    const struct linux_sys_get_robust_list_args *uap, register_t *retval)
+sys__futex_get_robust_list(struct lwp *l,
+    const struct sys__futex_get_robust_list_args *uap, register_t *retval)
 {
 	/* {
 		syscallarg(int) pid;
-		syscallarg(struct linux_robust_list_head **) head;
+		syscallarg(struct futex_robust_list_head **) head;
 		syscallarg(size_t *) len;
 	} */
-	struct linux_emuldata *led = l->l_emuldata;
 	struct proc *p = curproc;
-	struct linux_robust_list_head *head;
+	struct futex_robust_list_head *head;
 	const size_t len = sizeof(*head);
 	int error;
 
 	KASSERT(p == l->l_proc);
 
 	/* Find the other lwp, if requested; otherwise use our robust head.  */
+	/* XXXJRT Is this meant to be an LWP ID or a global TID? */
 	if (SCARG(uap, pid)) {
 		mutex_enter(p->p_lock);
 		l = lwp_find(p, SCARG(uap, pid));
@@ -2077,10 +2066,10 @@ linux_sys_get_robust_list(struct lwp *l,
 			mutex_exit(p->p_lock);
 			return ESRCH;
 		}
-		head = led->led_robust_head;
+		head = l->l_robust_head;
 		mutex_exit(p->p_lock);
 	} else {
-		head = led->led_robust_head;
+		head = l->l_robust_head;
 	}
 
 	/* Copy out the head pointer and the head structure length.  */
@@ -2096,14 +2085,14 @@ linux_sys_get_robust_list(struct lwp *l,
 }
 
 /*
- * linux_lwp_tid(l)
+ * lwp_tid(l)
  *
- *	Return the Linux tid for the lwp l.
+ *	Return the global thread ID for the lwp l.
  *
  *	XXX THIS IS CURRENTLY BROKEN AND SHOULD LIVE ELSEWHERE
  */
-static int
-linux_lwp_tid(struct lwp *l)
+static tid_t
+lwp_tid(struct lwp *l)
 {
 
 	/*
@@ -2136,7 +2125,7 @@ release_futex(uintptr_t uptr)
 	/* Optimistically test whether we need to do anything at all.  */
 	error = futex_load(uaddr, &oldval);
 	if (error == 0 &&
-	    (oldval & FUTEX_TID_MASK) != linux_lwp_tid(curlwp))
+	    (oldval & FUTEX_TID_MASK) != lwp_tid(curlwp))
 		return;
 
 	/*
@@ -2162,7 +2151,7 @@ release_futex(uintptr_t uptr)
 		error = futex_load(uaddr, &oldval);
 		if (error)
 			goto out;
-		if ((oldval & FUTEX_TID_MASK) != linux_lwp_tid(curlwp))
+		if ((oldval & FUTEX_TID_MASK) != lwp_tid(curlwp))
 			goto out;
 		newval = oldval | FUTEX_OWNER_DIED;
 		error = ucas_int(uaddr, oldval, newval, &actual);
@@ -2192,23 +2181,25 @@ out:	futex_queue_unlock(f);
 void
 futex_release_all_lwp(struct lwp *l)
 {
-	struct linux_emuldata *led = l->l_emuldata;
-	struct linux_robust_list_head head;
-	struct linux_robust_list entry, *next;
+	struct futex_robust_list_head head;
+	struct futex_robust_list entry, *next;
 	unsigned limit = 1000000;
 	int error;
 
-	/* If there's no robust list, nothing to do.  */
-	if (led->led_robust_head == NULL)
+	/*
+	 * If there's no robust list, or the thread never allocated a TID
+	 * to stash into a robust futex, there's nothing to do.
+	 */
+	if (l->l_robust_head == NULL || l->l___tid == 0)
 		return;
 
 	/* Read the final snapshot of the robust list head.  */
-	error = copyin(led->led_robust_head, &head, sizeof head);
+	error = copyin(l->l_robust_head, &head, sizeof head);
 	if (error) {
-		printf("WARNING: pid %jd (%s) lwp %jd:"
+		printf("WARNING: pid %jd (%s) lwp %jd tid %jd:"
 		    " unmapped robust futex list head\n",
 		    (uintmax_t)l->l_proc->p_pid, l->l_proc->p_comm,
-		    (uintmax_t)l->l_lid);
+		    (uintmax_t)l->l_lid, (uintmax_t)l->l___tid);
 		return;
 	}
 
@@ -2217,7 +2208,7 @@ futex_release_all_lwp(struct lwp *l)
 	 * to one million of them before we give up.
 	 */
 	for (next = head.list.next;
-	     limit --> 0 && next != &led->led_robust_head->list;
+	     limit-- > 0 && next != &l->l_robust_head->list;
 	     next = entry.next) {
 		release_futex((uintptr_t)next + head.futex_offset);
 		error = copyin(next, &entry, sizeof entry);
