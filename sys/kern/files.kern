@@ -154,6 +154,7 @@ file	kern/subr_workqueue.c		kern
 file	kern/subr_xcall.c		kern
 file	kern/sys_aio.c			aio
 file	kern/sys_descrip.c		kern
+file	kern/sys_futex.c		kern
 file	kern/sys_generic.c		kern
 file	kern/sys_module.c		kern
 file	kern/sys_mqueue.c		mqueue
