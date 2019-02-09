@@ -1,4 +1,4 @@
-/* $NetBSD: systrace_args.c,v 1.34 2020/01/21 02:38:25 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call argument to DTrace register array converstion.
@@ -3699,6 +3699,36 @@ systrace_args(register_t sysnum, const void *params, uintptr_t *uarg, size_t *n_
 		uarg[2] = (intptr_t) SCARG(p, buf); /* struct statvfs * */
 		iarg[3] = SCARG(p, flags); /* int */
 		*n_args = 4;
+		break;
+	}
+	/* sys__futex */
+	case 487: {
+		const struct sys__futex_args *p = params;
+		uarg[0] = (intptr_t) SCARG(p, uaddr); /* int * */
+		iarg[1] = SCARG(p, op); /* int */
+		iarg[2] = SCARG(p, val); /* int */
+		uarg[3] = (intptr_t) SCARG(p, timeout); /* const struct timespec * */
+		uarg[4] = (intptr_t) SCARG(p, uaddr2); /* int * */
+		iarg[5] = SCARG(p, val2); /* int */
+		iarg[6] = SCARG(p, val3); /* int */
+		*n_args = 7;
+		break;
+	}
+	/* sys__futex_set_robust_list */
+	case 488: {
+		const struct sys__futex_set_robust_list_args *p = params;
+		uarg[0] = (intptr_t) SCARG(p, head); /* struct futex_robust_list_head * */
+		uarg[1] = SCARG(p, len); /* size_t */
+		*n_args = 2;
+		break;
+	}
+	/* sys__futex_get_robust_list */
+	case 489: {
+		const struct sys__futex_get_robust_list_args *p = params;
+		iarg[0] = SCARG(p, pid); /* int */
+		uarg[1] = (intptr_t) SCARG(p, head); /* struct futex_robust_list_head ** */
+		uarg[2] = (intptr_t) SCARG(p, len); /* size_t * */
+		*n_args = 3;
 		break;
 	}
 	default:
@@ -9979,6 +10009,63 @@ systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 			break;
 		};
 		break;
+	/* sys__futex */
+	case 487:
+		switch(ndx) {
+		case 0:
+			p = "int *";
+			break;
+		case 1:
+			p = "int";
+			break;
+		case 2:
+			p = "int";
+			break;
+		case 3:
+			p = "const struct timespec *";
+			break;
+		case 4:
+			p = "int *";
+			break;
+		case 5:
+			p = "int";
+			break;
+		case 6:
+			p = "int";
+			break;
+		default:
+			break;
+		};
+		break;
+	/* sys__futex_set_robust_list */
+	case 488:
+		switch(ndx) {
+		case 0:
+			p = "struct futex_robust_list_head *";
+			break;
+		case 1:
+			p = "size_t";
+			break;
+		default:
+			break;
+		};
+		break;
+	/* sys__futex_get_robust_list */
+	case 489:
+		switch(ndx) {
+		case 0:
+			p = "int";
+			break;
+		case 1:
+			p = "struct futex_robust_list_head **";
+			break;
+		case 2:
+			p = "size_t *";
+			break;
+		default:
+			break;
+		};
+		break;
 	default:
 		break;
 	};
@@ -12073,6 +12160,21 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 		break;
 	/* sys___fhstatvfs190 */
 	case 486:
+		if (ndx == 0 || ndx == 1)
+			p = "int";
+		break;
+	/* sys__futex */
+	case 487:
+		if (ndx == 0 || ndx == 1)
+			p = "int";
+		break;
+	/* sys__futex_set_robust_list */
+	case 488:
+		if (ndx == 0 || ndx == 1)
+			p = "int";
+		break;
+	/* sys__futex_get_robust_list */
+	case 489:
 		if (ndx == 0 || ndx == 1)
 			p = "int";
 		break;

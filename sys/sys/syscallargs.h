@@ -1,4 +1,4 @@
-/* $NetBSD: syscallargs.h,v 1.293 2020/01/21 02:38:26 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call argument lists.
@@ -3175,6 +3175,36 @@ struct sys___fhstatvfs190_args {
 };
 check_syscall_args(sys___fhstatvfs190)
 
+#ifndef RUMP_CLIENT
+struct sys__futex_args {
+	syscallarg(int *) uaddr;
+	syscallarg(int) op;
+	syscallarg(int) val;
+	syscallarg(const struct timespec *) timeout;
+	syscallarg(int *) uaddr2;
+	syscallarg(int) val2;
+	syscallarg(int) val3;
+};
+check_syscall_args(sys__futex)
+#endif /* !RUMP_CLIENT */
+
+#ifndef RUMP_CLIENT
+struct sys__futex_set_robust_list_args {
+	syscallarg(struct futex_robust_list_head *) head;
+	syscallarg(size_t) len;
+};
+check_syscall_args(sys__futex_set_robust_list)
+#endif /* !RUMP_CLIENT */
+
+#ifndef RUMP_CLIENT
+struct sys__futex_get_robust_list_args {
+	syscallarg(int) pid;
+	syscallarg(struct futex_robust_list_head **) head;
+	syscallarg(size_t *) len;
+};
+check_syscall_args(sys__futex_get_robust_list)
+#endif /* !RUMP_CLIENT */
+
 /*
  * System call prototypes.
  */
@@ -4056,6 +4086,12 @@ int	sys___statvfs190(struct lwp *, const struct sys___statvfs190_args *, registe
 int	sys___fstatvfs190(struct lwp *, const struct sys___fstatvfs190_args *, register_t *);
 
 int	sys___fhstatvfs190(struct lwp *, const struct sys___fhstatvfs190_args *, register_t *);
+
+int	sys__futex(struct lwp *, const struct sys__futex_args *, register_t *);
+
+int	sys__futex_set_robust_list(struct lwp *, const struct sys__futex_set_robust_list_args *, register_t *);
+
+int	sys__futex_get_robust_list(struct lwp *, const struct sys__futex_get_robust_list_args *, register_t *);
 
 #endif /* !RUMP_CLIENT */
 #endif /* _SYS_SYSCALLARGS_H_ */

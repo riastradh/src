@@ -1,4 +1,4 @@
-/* $NetBSD: syscalls.c,v 1.315 2020/01/21 02:38:25 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call names.
@@ -8,7 +8,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: syscalls.c,v 1.315 2020/01/21 02:38:25 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #if defined(_KERNEL_OPT)
 #ifdef _KERNEL_OPT
@@ -536,9 +536,9 @@ const char *const syscallnames[] = {
 	/* 484 */	"__statvfs190",
 	/* 485 */	"__fstatvfs190",
 	/* 486 */	"__fhstatvfs190",
-	/* 487 */	"# filler",
-	/* 488 */	"# filler",
-	/* 489 */	"# filler",
+	/* 487 */	"_futex",
+	/* 488 */	"_futex_set_robust_list",
+	/* 489 */	"_futex_get_robust_list",
 	/* 490 */	"# filler",
 	/* 491 */	"# filler",
 	/* 492 */	"# filler",
@@ -1073,9 +1073,9 @@ const char *const altsyscallnames[] = {
 	/* 484 */	"statvfs1",
 	/* 485 */	"fstatvfs1",
 	/* 486 */	"fhstatvfs1",
-	/* 487 */	NULL, /* filler */
-	/* 488 */	NULL, /* filler */
-	/* 489 */	NULL, /* filler */
+	/* 487 */	NULL, /* _futex */
+	/* 488 */	NULL, /* _futex_set_robust_list */
+	/* 489 */	NULL, /* _futex_get_robust_list */
 	/* 490 */	NULL, /* filler */
 	/* 491 */	NULL, /* filler */
 	/* 492 */	NULL, /* filler */

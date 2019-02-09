@@ -1,4 +1,4 @@
-/* $NetBSD: syscall.h,v 1.309 2020/01/21 02:38:26 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call numbers.
@@ -1341,6 +1341,15 @@
 /* syscall: "__fhstatvfs190" ret: "int" args: "const void *" "size_t" "struct statvfs *" "int" */
 #define	SYS___fhstatvfs190	486
 
-#define	SYS_MAXSYSCALL	487
+/* syscall: "_futex" ret: "int" args: "int *" "int" "int" "const struct timespec *" "int *" "int" "int" */
+#define	SYS__futex	487
+
+/* syscall: "_futex_set_robust_list" ret: "int" args: "struct futex_robust_list_head *" "size_t" */
+#define	SYS__futex_set_robust_list	488
+
+/* syscall: "_futex_get_robust_list" ret: "int" args: "int" "struct futex_robust_list_head **" "size_t *" */
+#define	SYS__futex_get_robust_list	489
+
+#define	SYS_MAXSYSCALL	490
 #define	SYS_NSYSENT	512
 #endif /* _SYS_SYSCALL_H_ */
