@@ -603,6 +603,36 @@ extern struct vm_map *kernel_map;
 extern struct vm_map *phys_map;
 
 /*
+ *	uvm_pageid:
+ *
+ *	This structure encapsulates UVM's unique identity for a
+ *	given pageable page.  There are two different flavors:
+ *
+ *	UVM_PAGEID_TYPE_OBJECT:
+ *	The uvm_object the page is associated with combined with it's
+ *	offset into that object.
+ *
+ *	UVM_PAGEID_TYPE_ANON:
+ *	The vm_anon the page is associated with.
+ *
+ *	When someone wants the page ID for a page, an extra reference
+ *	is taken on the owning entity while the caller uses the ID.
+ *	This ensures that the identity is stable for the duration of its
+ *	use.
+ */
+struct uvm_pageid {
+	enum {
+		UVM_PAGEID_TYPE_OBJECT = 1,
+		UVM_PAGEID_TYPE_ANON = 2,
+	} type;
+	union {
+		struct uvm_object *uobj;
+		struct vm_anon *anon;
+	};
+	voff_t offset;
+};
+
+/*
  * macros
  */
 
@@ -755,6 +785,12 @@ void			uvm_pagereplace(struct vm_page *,
 void			uvm_pagerealloc(struct vm_page *,
 			    struct uvm_object *, voff_t);
 void			uvm_setpagesize(void);
+
+bool			uvm_pageid_acquire(struct vm_map * const, const vaddr_t,
+			    struct uvm_pageid * const);
+void			uvm_pageid_release(struct uvm_pageid * const);
+int			uvm_pageid_compare(const struct uvm_pageid * const,
+			    const struct uvm_pageid * const);
 
 /* uvm_pager.c */
 void			uvm_aio_aiodone(struct buf *);
