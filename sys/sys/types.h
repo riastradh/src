@@ -183,6 +183,7 @@ typedef	__pid_t		pid_t;		/* process id */
 #define	pid_t		__pid_t
 #endif
 typedef int32_t		lwpid_t;	/* LWP id */
+typedef int32_t		tid_t;		/* global thread id */
 typedef uint64_t	rlim_t;		/* resource limit */
 typedef	int32_t		segsz_t;	/* segment size */
 typedef	int32_t		swblk_t;	/* swap offset */
