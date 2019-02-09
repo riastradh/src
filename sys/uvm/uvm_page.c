@@ -2226,7 +2226,7 @@ uvm_pageid_release(struct uvm_pageid * const pageid)
 
 	switch (pageid->type) {
 	case UVM_PAGEID_TYPE_OBJECT: {
-		struct uvm_object *uobj = pageid->object.uobj;
+		struct uvm_object *uobj = pageid->uobj;
 
 		KASSERT(uobj != NULL);
 		KASSERT(uobj->pgops->pgo_detach != NULL);
