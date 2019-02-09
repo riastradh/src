@@ -134,6 +134,20 @@ struct lwp {
 	u_int		l_slptime;	/* l: time since last blocked */
 	bool		l_vforkwaiting;	/* a: vfork() waiting */
 
+	/* User-space synchronization. */
+	struct futex_robust_list_head
+			*l_robust_head;	/* !: list of robust futexes */
+		/*
+		 * The global thread ID has special locking and access
+		 * considerations.  Because many LWPs may not need one,
+		 * they are allocated lazily in lwp_gettid().  l___tid
+		 * is not meant to be accessed directly unless the
+		 * accessor has specific knowledge that doing so is
+		 * safe.  l___tid is only assigned by the LWP itself.
+		 * Once assigned, it is stable.
+		 */
+	tid_t		l___tid;	/* !: global thread id */
+
 #if PCU_UNIT_COUNT > 0
 	struct cpu_info	* volatile l_pcu_cpu[PCU_UNIT_COUNT];
 	uint32_t	l_pcu_valid;
