@@ -1597,8 +1597,8 @@ struct sysent sysent[] = {
 		.sy_call = (sy_call_t *)sys__lwp_ctl
 	},		/* 325 = _lwp_ctl */
 	{
-		.sy_call = sys_nosys,
-	},		/* 326 = filler */
+		.sy_call = (sy_call_t *)sys__lwp_gettid
+	},		/* 326 = _lwp_gettid */
 	{
 		.sy_call = sys_nosys,
 	},		/* 327 = filler */

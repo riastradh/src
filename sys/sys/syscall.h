@@ -900,6 +900,9 @@
 /* syscall: "_lwp_ctl" ret: "int" args: "int" "struct lwpctl **" */
 #define	SYS__lwp_ctl	325
 
+/* syscall: "_lwp_gettid" ret: "tid_t" args: */
+#define	SYS__lwp_gettid	326
+
 /* syscall: "compat_60_sa_register" ret: "int" args: "void *" "void **" "int" "ssize_t" */
 #define	SYS_compat_60_sa_register	330
 

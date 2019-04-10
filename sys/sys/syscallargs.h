@@ -3796,6 +3796,8 @@ int	sys__lwp_getname(struct lwp *, const struct sys__lwp_getname_args *, registe
 
 int	sys__lwp_ctl(struct lwp *, const struct sys__lwp_ctl_args *, register_t *);
 
+int	sys__lwp_gettid(struct lwp *, const void *, register_t *);
+
 int	compat_60_sys_sa_register(struct lwp *, const struct compat_60_sys_sa_register_args *, register_t *);
 
 int	compat_60_sys_sa_stacks(struct lwp *, const struct compat_60_sys_sa_stacks_args *, register_t *);

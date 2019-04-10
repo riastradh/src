@@ -175,6 +175,14 @@ sys__lwp_self(struct lwp *l, const void *v, register_t *retval)
 }
 
 int
+sys__lwp_gettid(struct lwp *l, const void *v, register_t *retval)
+{
+
+	*retval = lwp_tid();
+	return 0;
+}
+
+int
 sys__lwp_getprivate(struct lwp *l, const void *v, register_t *retval)
 {
 
