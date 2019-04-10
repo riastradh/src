@@ -379,6 +379,7 @@ uint64_t lwp_pctr(void);
 int	lwp_setprivate(lwp_t *, void *);
 int	do_lwp_create(lwp_t *, void *, u_long, lwp_t **, const sigset_t *,
     const stack_t *);
+int	lwp_tid(void);
 
 void	lwpinit_specificdata(void);
 int	lwp_specific_key_create(specificdata_key_t *, specificdata_dtor_t);

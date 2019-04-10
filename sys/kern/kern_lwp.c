@@ -244,6 +244,8 @@ __KERNEL_RCSID(0, "$NetBSD: kern_lwp.c,v 1.229 2020/03/08 17:04:45 ad Exp $");
 #include <sys/sysctl.h>
 #include <sys/psref.h>
 #include <sys/msan.h>
+#include <sys/cprng.h>
+#include <sys/futex.h>
 
 #include <uvm/uvm_extern.h>
 #include <uvm/uvm_object.h>
@@ -283,6 +285,9 @@ struct lwp lwp0 __aligned(MIN_LWP_ALIGNMENT) = {
 	.l_name = __UNCONST("swapper"),
 	.l_fd = &filedesc0,
 };
+
+static void	lwp_threadid_init(void);
+static void	lwp_threadid_free(tid_t);
 
 static int sysctl_kern_maxlwp(SYSCTLFN_PROTO);
 
@@ -333,6 +338,8 @@ lwpinit(void)
 	lwpinit_specificdata();
 	lwp_cache = pool_cache_init(sizeof(lwp_t), MIN_LWP_ALIGNMENT, 0, 0,
 	    "lwppl", NULL, IPL_NONE, NULL, lwp_dtor, NULL);
+
+	lwp_threadid_init();
 
 	maxlwp = cpu_maxlwp();
 	sysctl_kern_lwp_setup();
@@ -1106,6 +1113,9 @@ lwp_exit(struct lwp *l)
 	/* Verify that we hold no locks; for DIAGNOSTIC check kernel_lock. */
 	LOCKDEBUG_BARRIER(NULL, 0);
 	KASSERTMSG(curcpu()->ci_biglock_count == 0, "kernel_lock leaked");
+
+	/* Drop our thread ID. */
+	lwp_threadid_free(l->l___tid);
 
 	/*
 	 * If we are the last live LWP in a process, we need to exit the
@@ -2013,6 +2023,118 @@ lwp_pctr(void)
 {
 
 	return curlwp->l_ncsw;
+}
+
+/* We don't care who has it, just that someone does. */
+struct lwp_threadid {
+	LIST_ENTRY(lwp_threadid)	t_link;
+	tid_t				t_tid;
+};
+
+static kmutex_t		lwp_threadid_table_lock	__cacheline_aligned;
+static LIST_HEAD(, lwp_threadid)
+			*lwp_threadid_table	__cacheline_aligned;
+static u_long		lwp_threadid_hashmask	__read_mostly;
+
+#define	LWP_THREADID_HASHSIZE	64	/* XXXJRT tune */
+#define	LWP_THREADID_HASH(tid)	((tid) & lwp_threadid_hashmask)
+
+static void
+lwp_threadid_init(void)
+{
+	mutex_init(&lwp_threadid_table_lock, MUTEX_DEFAULT, IPL_NONE);
+	lwp_threadid_table = hashinit(LWP_THREADID_HASHSIZE, HASH_LIST,
+	    true, &lwp_threadid_hashmask);
+	KASSERT(lwp_threadid_table != NULL);
+}
+
+static struct lwp_threadid *
+lwp_threadid_lookup_locked(tid_t tid)
+{
+	u_long bucket = LWP_THREADID_HASH(tid);
+	struct lwp_threadid *ltid = NULL;
+
+	LIST_FOREACH(ltid, &lwp_threadid_table[bucket], t_link) {
+		if (ltid->t_tid == tid) {
+			return ltid;
+		}
+	}
+
+	return NULL;
+}
+
+static void
+lwp_threadid_insert_locked(struct lwp_threadid *ltid)
+{
+	u_long bucket = LWP_THREADID_HASH(ltid->t_tid);
+
+	LIST_INSERT_HEAD(&lwp_threadid_table[bucket], ltid, t_link);
+}
+
+static void
+lwp_threadid_remove_locked(struct lwp_threadid *ltid)
+{
+
+	LIST_REMOVE(ltid, t_link);
+}
+
+static tid_t
+lwp_threadid_alloc(void)
+{
+	struct lwp_threadid *oltid, *ltid = kmem_alloc(sizeof(*ltid), KM_SLEEP);
+
+	for (;;) {
+		ltid->t_tid = cprng_fast32() & FUTEX_TID_MASK;
+		if (__predict_false(ltid->t_tid == 0)) {
+			continue;
+		}
+		mutex_enter(&lwp_threadid_table_lock);
+		oltid = lwp_threadid_lookup_locked(ltid->t_tid);
+		if (__predict_true(oltid == NULL)) {
+			lwp_threadid_insert_locked(ltid);
+		}
+		mutex_exit(&lwp_threadid_table_lock);
+		if (__predict_true(oltid == NULL)) {
+			break;
+		}
+	}
+	return ltid->t_tid;
+}
+
+static void
+lwp_threadid_free(tid_t tid)
+{
+	struct lwp_threadid *ltid;
+
+	if (tid == 0)
+		return;
+
+	mutex_enter(&lwp_threadid_table_lock);
+	ltid = lwp_threadid_lookup_locked(tid);
+	KASSERT(ltid != NULL);
+	lwp_threadid_remove_locked(ltid);
+	mutex_exit(&lwp_threadid_table_lock);
+
+	kmem_free(ltid, sizeof(*ltid));
+}
+
+/*
+ * Return the current LWP's global "thread ID".  Only the current
+ * LWP should ever use this value, unless it is guaranteed that
+ * the LWP is paused (and then it should be accessed directly, rather
+ * than by this accessor).
+ */
+tid_t
+lwp_tid(void)
+{
+	struct lwp * const l = curlwp;
+
+	if (l->l___tid) {
+		return l->l___tid;
+	}
+
+	l->l___tid = lwp_threadid_alloc();
+	return l->l___tid;
 }
 
 /*

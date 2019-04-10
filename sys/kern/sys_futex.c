@@ -2065,24 +2065,6 @@ sys__futex_get_robust_list(struct lwp *l,
 }
 
 /*
- * lwp_tid(l)
- *
- *	Return the global thread ID for the lwp l.
- *
- *	XXX THIS IS CURRENTLY BROKEN AND SHOULD LIVE ELSEWHERE
- */
-static tid_t
-lwp_tid(struct lwp *l)
-{
-
-	/*
-	 * XXX This is wrong...  There's a global namespace of Linux
-	 * tids, not a per-process namespace.
-	 */
-	return l->l_lid;
-}
-
-/*
  * release_futex(uva)
  *
  *	Try to release the robust futex at uva in the current process
@@ -2097,6 +2079,8 @@ release_futex(uintptr_t uptr)
 	int oldval, newval, actual;
 	int error;
 
+	const tid_t current_tid = lwp_tid();
+
 	/* If it's misaligned, tough.  */
 	if (uptr & 3)
 		return;
@@ -2105,7 +2089,7 @@ release_futex(uintptr_t uptr)
 	/* Optimistically test whether we need to do anything at all.  */
 	error = futex_load(uaddr, &oldval);
 	if (error == 0 &&
-	    (oldval & FUTEX_TID_MASK) != lwp_tid(curlwp))
+	    (oldval & FUTEX_TID_MASK) != current_tid)
 		return;
 
 	/*
@@ -2131,7 +2115,7 @@ release_futex(uintptr_t uptr)
 		error = futex_load(uaddr, &oldval);
 		if (error)
 			goto out;
-		if ((oldval & FUTEX_TID_MASK) != lwp_tid(curlwp))
+		if ((oldval & FUTEX_TID_MASK) != current_tid)
 			goto out;
 		newval = oldval | FUTEX_OWNER_DIED;
 		error = ucas_int(uaddr, oldval, newval, &actual);
