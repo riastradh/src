@@ -287,7 +287,6 @@ struct lwp lwp0 __aligned(MIN_LWP_ALIGNMENT) = {
 };
 
 static void	lwp_threadid_init(void);
-static void	lwp_threadid_free(tid_t);
 
 static int sysctl_kern_maxlwp(SYSCTLFN_PROTO);
 
@@ -1115,7 +1114,7 @@ lwp_exit(struct lwp *l)
 	KASSERTMSG(curcpu()->ci_biglock_count == 0, "kernel_lock leaked");
 
 	/* Drop our thread ID. */
-	lwp_threadid_free(l->l___tid);
+	lwp_threadid_free(l);
 
 	/*
 	 * If we are the last live LWP in a process, we need to exit the
@@ -2063,7 +2062,7 @@ lwp_threadid_lookup_locked(tid_t tid)
 	return NULL;
 }
 
-static void
+static inline void
 lwp_threadid_insert_locked(struct lwp_threadid *ltid)
 {
 	u_long bucket = LWP_THREADID_HASH(ltid->t_tid);
@@ -2071,14 +2070,14 @@ lwp_threadid_insert_locked(struct lwp_threadid *ltid)
 	LIST_INSERT_HEAD(&lwp_threadid_table[bucket], ltid, t_link);
 }
 
-static void
+static inline void
 lwp_threadid_remove_locked(struct lwp_threadid *ltid)
 {
 
 	LIST_REMOVE(ltid, t_link);
 }
 
-static tid_t
+static void
 lwp_threadid_alloc(void)
 {
 	struct lwp_threadid *oltid, *ltid = kmem_alloc(sizeof(*ltid), KM_SLEEP);
@@ -2098,20 +2097,22 @@ lwp_threadid_alloc(void)
 			break;
 		}
 	}
-	return ltid->t_tid;
+	KASSERT(curlwp->l___ltid == NULL);
+	curlwp->l___ltid = ltid;
 }
 
-static void
-lwp_threadid_free(tid_t tid)
+void
+lwp_threadid_free(struct lwp *l)
 {
 	struct lwp_threadid *ltid;
 
-	if (tid == 0)
+	if ((ltid = l->l___ltid) == NULL)
 		return;
 
+	l->l___ltid = NULL;
+
 	mutex_enter(&lwp_threadid_table_lock);
-	ltid = lwp_threadid_lookup_locked(tid);
-	KASSERT(ltid != NULL);
+	KDASSERT(lwp_threadid_lookup_locked(ltid->t_tid) == ltid);
 	lwp_threadid_remove_locked(ltid);
 	mutex_exit(&lwp_threadid_table_lock);
 
@@ -2119,22 +2120,41 @@ lwp_threadid_free(tid_t tid)
 }
 
 /*
- * Return the current LWP's global "thread ID".  Only the current
+ * Check if an LWP has allocated a thread ID, returning it if so.
+ * Only call this when you know it's safe to do so.
+ */
+bool
+lwp_threadid_present(struct lwp *l, tid_t *tidp)
+{
+	struct lwp_threadid * const ltid = l->l___ltid;
+
+	if (ltid == NULL) {
+		return false;
+	}
+
+	*tidp = ltid->t_tid;
+	return true;
+}
+
+/*
+ * Return the current LWP's global thread ID.  Only the current
  * LWP should ever use this value, unless it is guaranteed that
  * the LWP is paused (and then it should be accessed directly, rather
  * than by this accessor).
  */
 tid_t
-lwp_tid(void)
+lwp_gettid(void)
 {
 	struct lwp * const l = curlwp;
+	struct lwp_threadid * const ltid = l->l___ltid;
 
-	if (l->l___tid) {
-		return l->l___tid;
+	if (ltid != NULL) {
+		return ltid->t_tid;
 	}
 
-	l->l___tid = lwp_threadid_alloc();
-	return l->l___tid;
+	lwp_threadid_alloc();
+	KASSERT(l->l___ltid != NULL);
+	return l->l___ltid->t_tid;
 }
 
 /*

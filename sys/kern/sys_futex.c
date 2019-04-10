@@ -2065,21 +2065,19 @@ sys__futex_get_robust_list(struct lwp *l,
 }
 
 /*
- * release_futex(uva)
+ * release_futex(uva, tid)
  *
  *	Try to release the robust futex at uva in the current process
  *	on lwp exit.  If anything goes wrong, silently fail.  It is the
  *	userland program's obligation to arrange correct behaviour.
  */
 static void
-release_futex(uintptr_t uptr)
+release_futex(uintptr_t uptr, const tid_t tid)
 {
 	int *uaddr;
 	struct futex *f;
 	int oldval, newval, actual;
 	int error;
-
-	const tid_t current_tid = lwp_tid();
 
 	/* If it's misaligned, tough.  */
 	if (uptr & 3)
@@ -2089,7 +2087,7 @@ release_futex(uintptr_t uptr)
 	/* Optimistically test whether we need to do anything at all.  */
 	error = futex_load(uaddr, &oldval);
 	if (error == 0 &&
-	    (oldval & FUTEX_TID_MASK) != current_tid)
+	    (oldval & FUTEX_TID_MASK) != tid)
 		return;
 
 	/*
@@ -2115,7 +2113,7 @@ release_futex(uintptr_t uptr)
 		error = futex_load(uaddr, &oldval);
 		if (error)
 			goto out;
-		if ((oldval & FUTEX_TID_MASK) != current_tid)
+		if ((oldval & FUTEX_TID_MASK) != tid)
 			goto out;
 		newval = oldval | FUTEX_OWNER_DIED;
 		error = ucas_int(uaddr, oldval, newval, &actual);
@@ -2148,13 +2146,14 @@ futex_release_all_lwp(struct lwp *l)
 	struct futex_robust_list_head head;
 	struct futex_robust_list entry, *next;
 	unsigned limit = 1000000;
+	tid_t tid;
 	int error;
 
 	/*
 	 * If there's no robust list, or the thread never allocated a TID
 	 * to stash into a robust futex, there's nothing to do.
 	 */
-	if (l->l_robust_head == NULL || l->l___tid == 0)
+	if (l->l_robust_head == NULL || lwp_threadid_present(l, &tid) == false)
 		return;
 
 	/* Read the final snapshot of the robust list head.  */
@@ -2163,7 +2162,7 @@ futex_release_all_lwp(struct lwp *l)
 		printf("WARNING: pid %jd (%s) lwp %jd tid %jd:"
 		    " unmapped robust futex list head\n",
 		    (uintmax_t)l->l_proc->p_pid, l->l_proc->p_comm,
-		    (uintmax_t)l->l_lid, (uintmax_t)l->l___tid);
+		    (uintmax_t)l->l_lid, (uintmax_t)tid);
 		return;
 	}
 
@@ -2174,7 +2173,7 @@ futex_release_all_lwp(struct lwp *l)
 	for (next = head.list.next;
 	     limit-- > 0 && next != &l->l_robust_head->list;
 	     next = entry.next) {
-		release_futex((uintptr_t)next + head.futex_offset);
+		release_futex((uintptr_t)next + head.futex_offset, tid);
 		error = copyin(next, &entry, sizeof entry);
 		if (error)
 			break;
@@ -2183,6 +2182,6 @@ futex_release_all_lwp(struct lwp *l)
 	/* If there's a pending futex, it may need to be released too.  */
 	if (head.pending_list != NULL) {
 		release_futex((uintptr_t)head.pending_list +
-		    head.futex_offset);
+		    head.futex_offset, tid);
 	}
 }

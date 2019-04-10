@@ -178,7 +178,7 @@ int
 sys__lwp_gettid(struct lwp *l, const void *v, register_t *retval)
 {
 
-	*retval = lwp_tid();
+	*retval = lwp_gettid();
 	return 0;
 }
 

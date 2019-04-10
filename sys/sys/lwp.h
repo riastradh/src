@@ -80,6 +80,7 @@ static __inline struct cpu_info *lwp_getcpu(struct lwp *);
 
 struct lockdebug;
 struct sysent;
+struct lwp_threadid;
 
 struct lwp {
 	/* Scheduling and overall state. */
@@ -140,13 +141,13 @@ struct lwp {
 		/*
 		 * The global thread ID has special locking and access
 		 * considerations.  Because many LWPs may not need one,
-		 * they are allocated lazily in lwp_gettid().  l___tid
+		 * they are allocated lazily in lwp_tid().  l___ltid
 		 * is not meant to be accessed directly unless the
 		 * accessor has specific knowledge that doing so is
-		 * safe.  l___tid is only assigned by the LWP itself.
+		 * safe.  l___ltid is only assigned by the LWP itself.
 		 * Once assigned, it is stable.
 		 */
-	tid_t		l___tid;	/* !: global thread id */
+	struct lwp_threadid *l___ltid;	/* !: global thread id */
 
 #if PCU_UNIT_COUNT > 0
 	struct cpu_info	* volatile l_pcu_cpu[PCU_UNIT_COUNT];
@@ -379,7 +380,10 @@ uint64_t lwp_pctr(void);
 int	lwp_setprivate(lwp_t *, void *);
 int	do_lwp_create(lwp_t *, void *, u_long, lwp_t **, const sigset_t *,
     const stack_t *);
-int	lwp_tid(void);
+tid_t	lwp_gettid(void);
+
+bool	lwp_threadid_present(struct lwp *, tid_t *);
+void	lwp_threadid_free(struct lwp *);
 
 void	lwpinit_specificdata(void);
 int	lwp_specific_key_create(specificdata_key_t *, specificdata_dtor_t);
