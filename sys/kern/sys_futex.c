@@ -324,28 +324,11 @@ static void	futex_wait_dequeue(struct futex_wait *, struct futex_queue *);
  *	Perform a single atomic load to read *uaddr, and return the
  *	result in *kaddr.  Return 0 on success, EFAULT if uaddr is not
  *	mapped.
- *
- *	XXX This may confuse unmapped uaddr with *uaddr == -1 on LP32
- *	machines because fuword is stupid.
  */
-static int
+static inline int
 futex_load(int *uaddr, int *kaddr)
 {
-#ifdef _LP64
-	long val;
-
-	val = fuword(uaddr);
-	if (val == -1)
-		return EFAULT;
-	*kaddr = val;
-
-	return 0;
-#else
-	/* XXX Gakkkk...  */
-	*kaddr = fuword(uaddr);
-
-	return 0;
-#endif
+	return ufetch_int((u_int *)uaddr, (u_int *)kaddr);
 }
 
 /*
@@ -353,9 +336,6 @@ futex_load(int *uaddr, int *kaddr)
  *
  *	True if *uaddr == expected.  False if *uaddr != expected, or if
  *	uaddr is not mapped.
- *
- *	XXX This may confuse unmapped uaddr with *uaddr == -1 on LP32
- *	machines because fuword is stupid.
  */
 static bool
 futex_test(int *uaddr, int expected)
