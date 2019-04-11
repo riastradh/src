@@ -119,9 +119,9 @@ ASM=	access.S acct.S \
 		_ksem_wait.S _ksem_open.S \
 	lchflags.S lchmod.S lchown.S lfs_bmapv.S lfs_markv.S lfs_segclean.S \
 		__lfs_segwait50.S link.S linkat.S listen.S __lstat50.S \
-		__lutimes50.S _lwp_create.S _lwp_exit.S _lwp_kill.S \
-		___lwp_park60.S _lwp_self.S _lwp_wait.S _lwp_unpark.S \
-		_lwp_unpark_all.S _lwp_suspend.S _lwp_continue.S \
+		__lutimes50.S _lwp_create.S _lwp_exit.S _lwp_gettid.S \
+		_lwp_kill.S ___lwp_park60.S _lwp_self.S _lwp_wait.S \
+		_lwp_unpark.S _lwp_unpark_all.S _lwp_suspend.S _lwp_continue.S \
 		_lwp_wakeup.S _lwp_detach.S _lwp_setprivate.S \
 		_lwp_setname.S _lwp_getname.S _lwp_ctl.S \
 	madvise.S mincore.S minherit.S mkdir.S mkdirat.S mkfifo.S mkfifoat.S \
