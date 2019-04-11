@@ -338,10 +338,9 @@ lwpinit(void)
 	lwp_cache = pool_cache_init(sizeof(lwp_t), MIN_LWP_ALIGNMENT, 0, 0,
 	    "lwppl", NULL, IPL_NONE, NULL, lwp_dtor, NULL);
 
-	lwp_threadid_init();
-
 	maxlwp = cpu_maxlwp();
 	sysctl_kern_lwp_setup();
+	lwp_threadid_init();
 }
 
 void
@@ -1113,9 +1112,6 @@ lwp_exit(struct lwp *l)
 	LOCKDEBUG_BARRIER(NULL, 0);
 	KASSERTMSG(curcpu()->ci_biglock_count == 0, "kernel_lock leaked");
 
-	/* Drop our thread ID. */
-	lwp_threadid_free(l);
-
 	/*
 	 * If we are the last live LWP in a process, we need to exit the
 	 * entire process.  We do so with an exit status of zero, because
@@ -1135,6 +1131,9 @@ lwp_exit(struct lwp *l)
 	}
 	p->p_nzlwps++;
 	mutex_exit(p->p_lock);
+
+	/* Perform any required thread cleanup. */
+	lwp_thread_cleanup(l);
 
 	if (p->p_emul->e_lwp_exit)
 		(*p->p_emul->e_lwp_exit)(l);
@@ -2033,16 +2032,37 @@ struct lwp_threadid {
 static kmutex_t		lwp_threadid_table_lock	__cacheline_aligned;
 static LIST_HEAD(, lwp_threadid)
 			*lwp_threadid_table	__cacheline_aligned;
+static size_t		lwp_threadid_tablesize	__read_mostly;
 static u_long		lwp_threadid_hashmask	__read_mostly;
 
-#define	LWP_THREADID_HASHSIZE	64	/* XXXJRT tune */
+#define	LWP_THREADID_TABLESIZE_MAX	4096
+
 #define	LWP_THREADID_HASH(tid)	((tid) & lwp_threadid_hashmask)
 
 static void
 lwp_threadid_init(void)
 {
 	mutex_init(&lwp_threadid_table_lock, MUTEX_DEFAULT, IPL_NONE);
-	lwp_threadid_table = hashinit(LWP_THREADID_HASHSIZE, HASH_LIST,
+
+	/*
+	 * Size the threadid hash table.  We're trading off hash
+	 * collisions vs. memory.  We will cap the table size at
+	 * 4K entries, as that's 64K of wired memory consumption
+	 * just for the empty table on a 64-bit platform (and even
+	 * that might be considered too much by some).
+	 *
+	 * We only pay the cost of any collisions when threads are
+	 * created; releasing a threadid doesn't require a table
+	 * lookup.
+	 */
+	if (maxlwp > (1u << 29)/NPROC) {
+		lwp_threadid_tablesize = LWP_THREADID_TABLESIZE_MAX;
+	} else if ((lwp_threadid_tablesize = NPROC*maxlwp/256)
+						> LWP_THREADID_TABLESIZE_MAX) {
+		lwp_threadid_tablesize = LWP_THREADID_TABLESIZE_MAX;
+	}
+
+	lwp_threadid_table = hashinit(lwp_threadid_tablesize, HASH_LIST,
 	    true, &lwp_threadid_hashmask);
 	KASSERT(lwp_threadid_table != NULL);
 }
@@ -2101,7 +2121,7 @@ lwp_threadid_alloc(void)
 	curlwp->l___ltid = ltid;
 }
 
-void
+static void
 lwp_threadid_free(struct lwp *l)
 {
 	struct lwp_threadid *ltid;
@@ -2132,7 +2152,9 @@ lwp_threadid_present(struct lwp *l, tid_t *tidp)
 		return false;
 	}
 
-	*tidp = ltid->t_tid;
+	if (tidp != NULL) {
+		*tidp = ltid->t_tid;
+	}
 	return true;
 }
 
@@ -2155,6 +2177,20 @@ lwp_gettid(void)
 	lwp_threadid_alloc();
 	KASSERT(l->l___ltid != NULL);
 	return l->l___ltid->t_tid;
+}
+
+/*
+ * Perform any thread-related cleanup on LWP exit.
+ */
+void
+lwp_thread_cleanup(struct lwp *l)
+{
+
+	/* Release any robust futexes this LWP may be holding. */
+	futex_release_all_lwp(l);
+
+	/* Drop our thread ID. */
+	lwp_threadid_free(l);
 }
 
 /*

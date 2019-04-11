@@ -229,6 +229,9 @@ exit1(struct lwp *l, int exitcode, int signo)
 		exit_lwps(l);
 	}
 
+	/* Perform any required thread cleanup. */
+	lwp_thread_cleanup(l);
+
 	ksiginfo_queue_init(&kq);
 
 	/*

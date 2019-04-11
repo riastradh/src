@@ -383,7 +383,7 @@ int	do_lwp_create(lwp_t *, void *, u_long, lwp_t **, const sigset_t *,
 tid_t	lwp_gettid(void);
 
 bool	lwp_threadid_present(struct lwp *, tid_t *);
-void	lwp_threadid_free(struct lwp *);
+void	lwp_thread_cleanup(struct lwp *);
 
 void	lwpinit_specificdata(void);
 int	lwp_specific_key_create(specificdata_key_t *, specificdata_dtor_t);
