@@ -41,6 +41,7 @@ struct lwpctl;
 
 __BEGIN_DECLS
 lwpid_t	_lwp_self(void);
+tid_t	_lwp_gettid(void);
 int	_lwp_create(const ucontext_t *, unsigned  long, lwpid_t *);
 int	_lwp_exit(void);
 int	_lwp_wait(lwpid_t, lwpid_t *);
