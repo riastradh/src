@@ -34,6 +34,7 @@ TESTS_C+=		t_link
 TESTS_C+=		t_listen
 TESTS_C+=		t_lwp_ctl
 TESTS_C+=		t_lwp_create
+TESTS_C+=		t_lwp_tid
 TESTS_C+=		t_minherit
 TESTS_C+=		t_mincore
 TESTS_C+=		t_mkdir
