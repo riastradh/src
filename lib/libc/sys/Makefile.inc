@@ -107,7 +107,7 @@ ASM=	access.S acct.S \
 	faccessat.S fchdir.S fchflags.S fchmod.S fchmodat.S fchown.S \
 		fchownat.S fchroot.S fexecve.S __fhopen40.S __fhstat50.S \
 		__fhstatvfs190.S fktrace.S flock.S fpathconf.S __fstat50.S \
-		__fstatvfs190.S fstatat.S  __futimes50.S futimens.S \
+		__fstatvfs190.S fstatat.S __futex.S __futimes50.S futimens.S \
 	__getcwd.S __getdents30.S __getfh30.S __getvfsstat90.S getgroups.S\
 		__getitimer50.S __getlogin.S getpeername.S getpgid.S getpgrp.S \
 		getpriority.S getrlimit.S __getrusage50.S getsid.S \

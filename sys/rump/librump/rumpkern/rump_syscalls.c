@@ -8448,13 +8448,13 @@ struct sysent rump_sysent[] = {
 	},		/* 486 = __fhstatvfs190 */
 	{
 		.sy_call = (sy_call_t *)(void *)rumpns_enosys,
-},		/* 487 = _futex */
+},		/* 487 = __futex */
 	{
 		.sy_call = (sy_call_t *)(void *)rumpns_enosys,
-},		/* 488 = _futex_set_robust_list */
+},		/* 488 = __futex_set_robust_list */
 	{
 		.sy_call = (sy_call_t *)(void *)rumpns_enosys,
-},		/* 489 = _futex_get_robust_list */
+},		/* 489 = __futex_get_robust_list */
 	{
 		.sy_flags = SYCALL_NOSYS,
 		.sy_call = (sy_call_t *)(void *)rumpns_enosys,

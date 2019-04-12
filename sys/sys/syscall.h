@@ -1344,14 +1344,14 @@
 /* syscall: "__fhstatvfs190" ret: "int" args: "const void *" "size_t" "struct statvfs *" "int" */
 #define	SYS___fhstatvfs190	486
 
-/* syscall: "_futex" ret: "int" args: "int *" "int" "int" "const struct timespec *" "int *" "int" "int" */
-#define	SYS__futex	487
+/* syscall: "__futex" ret: "int" args: "int *" "int" "int" "const struct timespec *" "int *" "int" "int" */
+#define	SYS___futex	487
 
-/* syscall: "_futex_set_robust_list" ret: "int" args: "struct futex_robust_list_head *" "size_t" */
-#define	SYS__futex_set_robust_list	488
+/* syscall: "__futex_set_robust_list" ret: "int" args: "struct futex_robust_list_head *" "size_t" */
+#define	SYS___futex_set_robust_list	488
 
-/* syscall: "_futex_get_robust_list" ret: "int" args: "int" "struct futex_robust_list_head **" "size_t *" */
-#define	SYS__futex_get_robust_list	489
+/* syscall: "__futex_get_robust_list" ret: "int" args: "lwpid_t" "struct futex_robust_list_head **" "size_t *" */
+#define	SYS___futex_get_robust_list	489
 
 #define	SYS_MAXSYSCALL	490
 #define	SYS_NSYSENT	512

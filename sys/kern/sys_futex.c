@@ -1953,12 +1953,12 @@ futex_func(int *uaddr, int op, int val, const struct timespec *timeout,
 }
 
 /*
- * sys__futex(l, uap, retval)
+ * sys___futex(l, uap, retval)
  *
- *	_futex(2) system call: generic futex operations.
+ *	__futex(2) system call: generic futex operations.
  */
 int
-sys__futex(struct lwp *l, const struct sys__futex_args *uap,
+sys___futex(struct lwp *l, const struct sys___futex_args *uap,
     register_t *retval)
 {
 	/* {
@@ -1991,13 +1991,13 @@ sys__futex(struct lwp *l, const struct sys__futex_args *uap,
 }
 
 /*
- * sys__futex_set_robust_list(l, uap, retval)
+ * sys___futex_set_robust_list(l, uap, retval)
  *
- *	_futex_set_robust_list(2) system call for robust futexes.
+ *	__futex_set_robust_list(2) system call for robust futexes.
  */
 int
-sys__futex_set_robust_list(struct lwp *l,
-    const struct sys__futex_set_robust_list_args *uap, register_t *retval)
+sys___futex_set_robust_list(struct lwp *l,
+    const struct sys___futex_set_robust_list_args *uap, register_t *retval)
 {
 	/* {
 		syscallarg(struct futex_robust_list_head *) head;
@@ -2012,21 +2012,20 @@ sys__futex_set_robust_list(struct lwp *l,
 
 	l->l_robust_head = head;
 
-	*retval = 0;
 	return 0;
 }
 
 /*
- * sys__futex_get_robust_list(l, uap, retval)
+ * sys___futex_get_robust_list(l, uap, retval)
  *
- *	_futex_get_robust_list(2) system call for robust futexes.
+ *	__futex_get_robust_list(2) system call for robust futexes.
  */
 int
-sys__futex_get_robust_list(struct lwp *l,
-    const struct sys__futex_get_robust_list_args *uap, register_t *retval)
+sys___futex_get_robust_list(struct lwp *l,
+    const struct sys___futex_get_robust_list_args *uap, register_t *retval)
 {
 	/* {
-		syscallarg(int) pid;
+		syscallarg(lwpid_t) lwpid;
 		syscallarg(struct futex_robust_list_head **) head;
 		syscallarg(size_t *) len;
 	} */
@@ -2038,10 +2037,9 @@ sys__futex_get_robust_list(struct lwp *l,
 	KASSERT(p == l->l_proc);
 
 	/* Find the other lwp, if requested; otherwise use our robust head.  */
-	/* XXXJRT Is this meant to be an LWP ID or a global TID? */
-	if (SCARG(uap, pid)) {
+	if (SCARG(uap, lwpid)) {
 		mutex_enter(p->p_lock);
-		l = lwp_find(p, SCARG(uap, pid));
+		l = lwp_find(p, SCARG(uap, lwpid));
 		if (l == NULL) {
 			mutex_exit(p->p_lock);
 			return ESRCH;

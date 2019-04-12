@@ -536,9 +536,9 @@ const char *const syscallnames[] = {
 	/* 484 */	"__statvfs190",
 	/* 485 */	"__fstatvfs190",
 	/* 486 */	"__fhstatvfs190",
-	/* 487 */	"_futex",
-	/* 488 */	"_futex_set_robust_list",
-	/* 489 */	"_futex_get_robust_list",
+	/* 487 */	"__futex",
+	/* 488 */	"__futex_set_robust_list",
+	/* 489 */	"__futex_get_robust_list",
 	/* 490 */	"# filler",
 	/* 491 */	"# filler",
 	/* 492 */	"# filler",
@@ -1073,9 +1073,9 @@ const char *const altsyscallnames[] = {
 	/* 484 */	"statvfs1",
 	/* 485 */	"fstatvfs1",
 	/* 486 */	"fhstatvfs1",
-	/* 487 */	NULL, /* _futex */
-	/* 488 */	NULL, /* _futex_set_robust_list */
-	/* 489 */	NULL, /* _futex_get_robust_list */
+	/* 487 */	NULL, /* __futex */
+	/* 488 */	NULL, /* __futex_set_robust_list */
+	/* 489 */	NULL, /* __futex_get_robust_list */
 	/* 490 */	NULL, /* filler */
 	/* 491 */	NULL, /* filler */
 	/* 492 */	NULL, /* filler */

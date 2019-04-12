@@ -2359,20 +2359,20 @@ struct sysent sysent[] = {
 		.sy_call = (sy_call_t *)sys___fhstatvfs190
 	},		/* 486 = __fhstatvfs190 */
 	{
-		ns(struct sys__futex_args),
+		ns(struct sys___futex_args),
 		.sy_flags = SYCALL_ARG_PTR,
-		.sy_call = (sy_call_t *)sys__futex
-	},		/* 487 = _futex */
+		.sy_call = (sy_call_t *)sys___futex
+	},		/* 487 = __futex */
 	{
-		ns(struct sys__futex_set_robust_list_args),
+		ns(struct sys___futex_set_robust_list_args),
 		.sy_flags = SYCALL_ARG_PTR,
-		.sy_call = (sy_call_t *)sys__futex_set_robust_list
-	},		/* 488 = _futex_set_robust_list */
+		.sy_call = (sy_call_t *)sys___futex_set_robust_list
+	},		/* 488 = __futex_set_robust_list */
 	{
-		ns(struct sys__futex_get_robust_list_args),
+		ns(struct sys___futex_get_robust_list_args),
 		.sy_flags = SYCALL_ARG_PTR,
-		.sy_call = (sy_call_t *)sys__futex_get_robust_list
-	},		/* 489 = _futex_get_robust_list */
+		.sy_call = (sy_call_t *)sys___futex_get_robust_list
+	},		/* 489 = __futex_get_robust_list */
 	{
 		.sy_call = sys_nosys,
 	},		/* 490 = filler */
