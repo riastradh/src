@@ -31,12 +31,14 @@ __COPYRIGHT("@(#) Copyright (c) 2019\
  The NetBSD Foundation, inc. All rights reserved.");
 __RCSID("$NetBSD$");
 
-#include <atf-c.h>
+#include <sys/futex.h>
+#include <sys/mman.h>
+#include <errno.h>
 #include <lwp.h>
 #include <stdio.h>
 #include <time.h>
 
-#include <sys/futex.h>
+#include <atf-c.h>
 
 #define	MAX_LWPS	8
 #define	STACK_SIZE	65536
@@ -72,7 +74,7 @@ gettid_test(void *arg)
 {
 	struct lwp_data *d = arg;
 
-	arg->threaded = _lwp_gettid();
+	d->threadid = _lwp_gettid();
 	_lwp_exit();
 }
 
