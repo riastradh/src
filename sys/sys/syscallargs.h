@@ -3190,7 +3190,7 @@ check_syscall_args(sys___futex)
 
 #ifndef RUMP_CLIENT
 struct sys___futex_set_robust_list_args {
-	syscallarg(struct futex_robust_list_head *) head;
+	syscallarg(void *) head;
 	syscallarg(size_t) len;
 };
 check_syscall_args(sys___futex_set_robust_list)
@@ -3199,8 +3199,8 @@ check_syscall_args(sys___futex_set_robust_list)
 #ifndef RUMP_CLIENT
 struct sys___futex_get_robust_list_args {
 	syscallarg(lwpid_t) lwpid;
-	syscallarg(struct futex_robust_list_head **) head;
-	syscallarg(size_t *) len;
+	syscallarg(void **) headp;
+	syscallarg(size_t *) lenp;
 };
 check_syscall_args(sys___futex_get_robust_list)
 #endif /* !RUMP_CLIENT */

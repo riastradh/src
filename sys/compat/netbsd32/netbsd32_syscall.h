@@ -1,4 +1,4 @@
-/* $NetBSD: netbsd32_syscall.h,v 1.150 2020/03/12 15:03:15 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call numbers.
@@ -875,6 +875,9 @@
 /* syscall: "netbsd32__lwp_ctl" ret: "int" args: "int" "netbsd32_pointer_t" */
 #define	NETBSD32_SYS_netbsd32__lwp_ctl	325
 
+/* syscall: "_lwp_gettid" ret: "int" args: */
+#define	NETBSD32_SYS__lwp_gettid	326
+
 				/* 330 is obsolete netbsd32_sa_register */
 				/* 331 is obsolete netbsd32_sa_stacks */
 				/* 332 is obsolete sa_enable */
@@ -1275,6 +1278,15 @@
 /* syscall: "netbsd32___fhstatvfs190" ret: "int" args: "netbsd32_voidp" "netbsd32_size_t" "netbsd32_statvfsp_t" "int" */
 #define	NETBSD32_SYS_netbsd32___fhstatvfs190	486
 
-#define	NETBSD32_SYS_MAXSYSCALL	487
+/* syscall: "netbsd32___futex" ret: "int" args: "netbsd32_intp" "int" "int" "const netbsd32_timespecp_t" "netbsd32_intp" "int" "int" */
+#define	NETBSD32_SYS_netbsd32___futex	487
+
+/* syscall: "netbsd32___futex_set_robust_list" ret: "int" args: "netbsd32_voidp" "netbsd32_size_t" */
+#define	NETBSD32_SYS_netbsd32___futex_set_robust_list	488
+
+/* syscall: "netbsd32___futex_get_robust_list" ret: "int" args: "lwpid_t" "netbsd32_voidp" "netbsd32_size_tp" */
+#define	NETBSD32_SYS_netbsd32___futex_get_robust_list	489
+
+#define	NETBSD32_SYS_MAXSYSCALL	490
 #define	NETBSD32_SYS_NSYSENT	512
 #endif /* _NETBSD32_SYS_SYSCALL_H_ */

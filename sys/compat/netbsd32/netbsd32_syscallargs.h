@@ -1,4 +1,4 @@
-/* $NetBSD: netbsd32_syscallargs.h,v 1.149 2020/03/12 15:03:15 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call argument lists.
@@ -2645,6 +2645,30 @@ struct netbsd32___fhstatvfs190_args {
 };
 check_syscall_args(netbsd32___fhstatvfs190)
 
+struct netbsd32___futex_args {
+	syscallarg(netbsd32_intp) uaddr;
+	syscallarg(int) op;
+	syscallarg(int) val;
+	syscallarg(const netbsd32_timespecp_t) timeout;
+	syscallarg(netbsd32_intp) uaddr2;
+	syscallarg(int) val2;
+	syscallarg(int) val3;
+};
+check_syscall_args(netbsd32___futex)
+
+struct netbsd32___futex_set_robust_list_args {
+	syscallarg(netbsd32_voidp) head;
+	syscallarg(netbsd32_size_t) len;
+};
+check_syscall_args(netbsd32___futex_set_robust_list)
+
+struct netbsd32___futex_get_robust_list_args {
+	syscallarg(lwpid_t) lwpid;
+	syscallarg(netbsd32_voidp) headp;
+	syscallarg(netbsd32_size_tp) lenp;
+};
+check_syscall_args(netbsd32___futex_get_robust_list)
+
 /*
  * System call prototypes.
  */
@@ -3214,6 +3238,8 @@ int	netbsd32__lwp_getname(struct lwp *, const struct netbsd32__lwp_getname_args 
 
 int	netbsd32__lwp_ctl(struct lwp *, const struct netbsd32__lwp_ctl_args *, register_t *);
 
+int	sys__lwp_gettid(struct lwp *, const void *, register_t *);
+
 int	netbsd32___sigaction_sigtramp(struct lwp *, const struct netbsd32___sigaction_sigtramp_args *, register_t *);
 
 int	netbsd32_rasctl(struct lwp *, const struct netbsd32_rasctl_args *, register_t *);
@@ -3472,5 +3498,11 @@ int	netbsd32___statvfs190(struct lwp *, const struct netbsd32___statvfs190_args 
 int	netbsd32___fstatvfs190(struct lwp *, const struct netbsd32___fstatvfs190_args *, register_t *);
 
 int	netbsd32___fhstatvfs190(struct lwp *, const struct netbsd32___fhstatvfs190_args *, register_t *);
+
+int	netbsd32___futex(struct lwp *, const struct netbsd32___futex_args *, register_t *);
+
+int	netbsd32___futex_set_robust_list(struct lwp *, const struct netbsd32___futex_set_robust_list_args *, register_t *);
+
+int	netbsd32___futex_get_robust_list(struct lwp *, const struct netbsd32___futex_get_robust_list_args *, register_t *);
 
 #endif /* _NETBSD32_SYS_SYSCALLARGS_H_ */

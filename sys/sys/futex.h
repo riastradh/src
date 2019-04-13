@@ -69,6 +69,38 @@
 #define FUTEX_OP_CMP_GT		4
 #define FUTEX_OP_CMP_GE		5
 
+#define FUTEX_WAITERS		0x80000000
+#define FUTEX_OWNER_DIED	0x40000000
+#define __FUTEX_BIT29_RSVD	0x20000000
+#define FUTEX_TID_MASK		0x1fffffff
+
+#define FUTEX_BITSET_MATCH_ANY  0xffffffff
+
+/*
+ * The robust futex ABI consists of an array of 3 longwords, the address
+ * of which is registered with the kernel on a per-thread basis:
+ *
+ *	0: A pointer to a singly-linked list of "lock entries".  If the
+ *	   list is empty, this points back to the list itself.
+ *
+ *	1: An offset from address of the "lock entry" to the 32-bit futex
+ *	   word associated with that lock entry.
+ *
+ *	2: A "pending" pointer, for locks are are in the process of being
+ *	   acquired or released.
+ */
+#define _FUTEX_ROBUST_HEAD_LIST		0
+#define _FUTEX_ROBUST_HEAD_OFFSET	1
+#define _FUTEX_ROBUST_HEAD_PENDING	2
+#define _FUTEX_ROBUST_HEAD_NWORDS	3
+#define _FUTEX_ROBUST_HEAD_SIZE		(_FUTEX_ROBUST_HEAD_NWORDS * \
+					 sizeof(u_long))
+#ifdef _LP64
+#define _FUTEX_ROBUST_HEAD_SIZE32	(_FUTEX_ROBUST_HEAD_NWORDS * \
+					 sizeof(uint32_t))
+#endif /* _LP64 */
+
+#ifndef _KERNEL
 struct futex_robust_list {
 	struct futex_robust_list	*next;
 };
@@ -78,16 +110,12 @@ struct futex_robust_list_head {
 	unsigned long			futex_offset;
 	struct futex_robust_list	*pending_list;
 };
-
-#define FUTEX_WAITERS		0x80000000
-#define FUTEX_OWNER_DIED	0x40000000
-#define FUTEX_TID_MASK		0x3fffffff
-
-#define FUTEX_BITSET_MATCH_ANY  0xffffffff
+#endif /* ! _KERNEL */
 
 #ifdef _KERNEL
 struct lwp;
 
+int	futex_robust_head_lookup(struct lwp *, lwpid_t, void **);
 void	futex_release_all_lwp(struct lwp *);
 int	futex_func(int *, int, int, const struct timespec *, int *, int,
 	    int, register_t *);

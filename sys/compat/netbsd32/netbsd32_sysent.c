@@ -1,4 +1,4 @@
-/* $NetBSD: netbsd32_sysent.c,v 1.148 2020/03/12 15:03:15 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call switch table.
@@ -8,7 +8,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: netbsd32_sysent.c,v 1.148 2020/03/12 15:03:15 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #if defined(_KERNEL_OPT)
 #include "opt_compat_netbsd.h"
@@ -1385,8 +1385,8 @@ struct sysent netbsd32_sysent[] = {
 		.sy_call = (sy_call_t *)netbsd32__lwp_ctl
 	},		/* 325 = netbsd32__lwp_ctl */
 	{
-		.sy_call = sys_nosys,
-	},		/* 326 = filler */
+		.sy_call = (sy_call_t *)sys__lwp_gettid
+	},		/* 326 = _lwp_gettid */
 	{
 		.sy_call = sys_nosys,
 	},		/* 327 = filler */
@@ -2006,14 +2006,17 @@ struct sysent netbsd32_sysent[] = {
 		.sy_call = (sy_call_t *)netbsd32___fhstatvfs190
 	},		/* 486 = netbsd32___fhstatvfs190 */
 	{
-		.sy_call = sys_nosys,
-	},		/* 487 = filler */
+		ns(struct netbsd32___futex_args),
+		.sy_call = (sy_call_t *)netbsd32___futex
+	},		/* 487 = netbsd32___futex */
 	{
-		.sy_call = sys_nosys,
-	},		/* 488 = filler */
+		ns(struct netbsd32___futex_set_robust_list_args),
+		.sy_call = (sy_call_t *)netbsd32___futex_set_robust_list
+	},		/* 488 = netbsd32___futex_set_robust_list */
 	{
-		.sy_call = sys_nosys,
-	},		/* 489 = filler */
+		ns(struct netbsd32___futex_get_robust_list_args),
+		.sy_call = (sy_call_t *)netbsd32___futex_get_robust_list
+	},		/* 489 = netbsd32___futex_get_robust_list */
 	{
 		.sy_call = sys_nosys,
 	},		/* 490 = filler */

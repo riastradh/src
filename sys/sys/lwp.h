@@ -136,8 +136,7 @@ struct lwp {
 	bool		l_vforkwaiting;	/* a: vfork() waiting */
 
 	/* User-space synchronization. */
-	struct futex_robust_list_head
-			*l_robust_head;	/* !: list of robust futexes */
+	uintptr_t	l_robust_head;	/* !: list of robust futexes */
 		/*
 		 * The global thread ID has special locking and access
 		 * considerations.  Because many LWPs may not need one,

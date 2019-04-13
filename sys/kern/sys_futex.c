@@ -5,7 +5,7 @@
  * All rights reserved.
  *
  * This code is derived from software contributed to The NetBSD Foundation
- * by Taylor R. Campbell.
+ * by Taylor R. Campbell and Jason R. Thorpe.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -2000,17 +2000,17 @@ sys___futex_set_robust_list(struct lwp *l,
     const struct sys___futex_set_robust_list_args *uap, register_t *retval)
 {
 	/* {
-		syscallarg(struct futex_robust_list_head *) head;
+		syscallarg(void *) head;
 		syscallarg(size_t) len;
 	} */
-	struct futex_robust_list_head *head = SCARG(uap, head);
+	void *head = SCARG(uap, head);
 
-	if (SCARG(uap, len) != sizeof(struct futex_robust_list_head))
+	if (SCARG(uap, len) != _FUTEX_ROBUST_HEAD_SIZE)
 		return EINVAL;
-	if ((uintptr_t)head % sizeof(head))
+	if ((uintptr_t)head % sizeof(u_long))
 		return EINVAL;
 
-	l->l_robust_head = head;
+	l->l_robust_head = (uintptr_t)head;
 
 	return 0;
 }
@@ -2026,40 +2026,24 @@ sys___futex_get_robust_list(struct lwp *l,
 {
 	/* {
 		syscallarg(lwpid_t) lwpid;
-		syscallarg(struct futex_robust_list_head **) head;
-		syscallarg(size_t *) len;
+		syscallarg(void **) headp;
+		syscallarg(size_t *) lenp;
 	} */
-	struct proc *p = curproc;
-	struct futex_robust_list_head *head;
-	const size_t len = sizeof(*head);
+	void *head;
+	const size_t len = _FUTEX_ROBUST_HEAD_SIZE;
 	int error;
 
-	KASSERT(p == l->l_proc);
+	error = futex_robust_head_lookup(l, SCARG(uap, lwpid), &head);
+	if (error)
+		return error;
 
-	/* Find the other lwp, if requested; otherwise use our robust head.  */
-	if (SCARG(uap, lwpid)) {
-		mutex_enter(p->p_lock);
-		l = lwp_find(p, SCARG(uap, lwpid));
-		if (l == NULL) {
-			mutex_exit(p->p_lock);
-			return ESRCH;
-		}
-		head = l->l_robust_head;
-		mutex_exit(p->p_lock);
-	} else {
-		head = l->l_robust_head;
+	/* Copy out the head pointer and the head structure length. */
+	error = copyout(&head, SCARG(uap, headp), sizeof(head));
+	if (__predict_true(error == 0)) {
+		error = copyout(&len, SCARG(uap, lenp), sizeof(len));
 	}
 
-	/* Copy out the head pointer and the head structure length.  */
-	error = copyout(&head, SCARG(uap, head), sizeof(head));
-	if (error)
-		return error;
-	error = copyout(&len, SCARG(uap, len), sizeof(len));
-	if (error)
-		return error;
-
-	/* Success!  */
-	return 0;
+	return error;
 }
 
 /*
@@ -2132,6 +2116,84 @@ out:	futex_queue_unlock(f);
 }
 
 /*
+ * futex_robust_head_lookup(l, lwpid)
+ *
+ *	Helper function to look up a robust head by LWP ID.
+ */
+int
+futex_robust_head_lookup(struct lwp *l, lwpid_t lwpid, void **headp)
+{
+	struct proc *p = l->l_proc;
+
+	/* Find the other lwp, if requested; otherwise use our robust head.  */
+	if (lwpid) {
+		mutex_enter(p->p_lock);
+		l = lwp_find(p, lwpid);
+		if (l == NULL) {
+			mutex_exit(p->p_lock);
+			return ESRCH;
+		}
+		*headp = (void *)l->l_robust_head;
+		mutex_exit(p->p_lock);
+	} else {
+		*headp = (void *)l->l_robust_head;
+	}
+	return 0;
+}
+
+/*
+ * futex_fetch_robust_head(uaddr)
+ *
+ *	Helper routine to fetch the futex robust list head that
+ *	handles 32-bit binaries running on 64-bit kernels.
+ */
+static int
+futex_fetch_robust_head(uintptr_t uaddr, u_long *rhead)
+{
+#ifdef _LP64
+	if (curproc->p_flag & PK_32) {
+		uint32_t rhead32[_FUTEX_ROBUST_HEAD_NWORDS];
+		int error;
+
+		error = copyin((void *)uaddr, rhead32, sizeof(rhead32));
+		if (__predict_true(error == 0)) {
+			for (int i = 0; i < _FUTEX_ROBUST_HEAD_NWORDS; i++) {
+				rhead[i] = rhead32[i];
+			}
+		}
+		return error;
+	}
+#endif /* _L64 */
+
+	return copyin((void *)uaddr, rhead,
+	    sizeof(*rhead) * _FUTEX_ROBUST_HEAD_NWORDS);
+}
+
+/*
+ * futex_fetch_robust_word(uaddr)
+ *
+ *	Helper routine to fetch a robust futex word (pointer or size_t)
+ *	that handles 32-bit binaries running on 64-bit kernels.
+ */
+static int
+futex_fetch_robust_word(uintptr_t uaddr, uintptr_t *valp)
+{
+#ifdef _LP64
+	if (curproc->p_flag & PK_32) {
+		uint32_t val32;
+		int error;
+
+		error = ufetch_32((uint32_t *)uaddr, &val32);
+		if (__predict_true(error == 0))
+			*valp = val32;
+		return error;
+	}
+#endif /* _LP64 */
+
+	return ufetch_long((u_long *)uaddr, (u_long *)valp);
+}
+
+/*
  * futex_release_all_lwp(l)
  *
  *	Release all l's robust futexes.  If anything looks funny in
@@ -2141,8 +2203,8 @@ out:	futex_queue_unlock(f);
 void
 futex_release_all_lwp(struct lwp *l)
 {
-	struct futex_robust_list_head head;
-	struct futex_robust_list entry, *next;
+	u_long rhead[_FUTEX_ROBUST_HEAD_NWORDS];
+	uintptr_t next;
 	unsigned limit = 1000000;
 	tid_t tid;
 	int error;
@@ -2151,11 +2213,11 @@ futex_release_all_lwp(struct lwp *l)
 	 * If there's no robust list, or the thread never allocated a TID
 	 * to stash into a robust futex, there's nothing to do.
 	 */
-	if (l->l_robust_head == NULL || lwp_threadid_present(l, &tid) == false)
+	if (l->l_robust_head == 0 || lwp_threadid_present(l, &tid) == false)
 		return;
 
-	/* Read the final snapshot of the robust list head.  */
-	error = copyin(l->l_robust_head, &head, sizeof head);
+	/* Read the final snapshot of the robust list head. */
+	error = futex_fetch_robust_head(l->l_robust_head, rhead);
 	if (error) {
 		printf("WARNING: pid %jd (%s) lwp %jd tid %jd:"
 		    " unmapped robust futex list head\n",
@@ -2168,18 +2230,18 @@ futex_release_all_lwp(struct lwp *l)
 	 * Walk down the list of locked futexes and release them, up
 	 * to one million of them before we give up.
 	 */
-	for (next = head.list.next;
-	     limit-- > 0 && next != &l->l_robust_head->list;
-	     next = entry.next) {
-		release_futex((uintptr_t)next + head.futex_offset, tid);
-		error = copyin(next, &entry, sizeof entry);
+	for (next = rhead[_FUTEX_ROBUST_HEAD_LIST];
+	     next != l->l_robust_head && limit-- > 0;
+	     /* next advanced inside loop */) {
+		release_futex(next + rhead[_FUTEX_ROBUST_HEAD_OFFSET], tid);
+		error = futex_fetch_robust_word(next, &next);
 		if (error)
 			break;
 	}
 
-	/* If there's a pending futex, it may need to be released too.  */
-	if (head.pending_list != NULL) {
-		release_futex((uintptr_t)head.pending_list +
-		    head.futex_offset, tid);
+	/* If there's a pending futex, it may need to be released too. */
+	if (rhead[_FUTEX_ROBUST_HEAD_PENDING] != 0) {
+		release_futex(rhead[_FUTEX_ROBUST_HEAD_PENDING] +
+		    rhead[_FUTEX_ROBUST_HEAD_OFFSET], tid);
 	}
 }

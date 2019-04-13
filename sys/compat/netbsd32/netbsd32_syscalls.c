@@ -1,4 +1,4 @@
-/* $NetBSD: netbsd32_syscalls.c,v 1.149 2020/03/12 15:03:15 pgoyette Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call names.
@@ -8,7 +8,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: netbsd32_syscalls.c,v 1.149 2020/03/12 15:03:15 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #if defined(_KERNEL_OPT)
 #if defined(_KERNEL_OPT)
@@ -360,7 +360,7 @@ const char *const netbsd32_syscallnames[] = {
 	/* 323 */	"netbsd32__lwp_setname",
 	/* 324 */	"netbsd32__lwp_getname",
 	/* 325 */	"netbsd32__lwp_ctl",
-	/* 326 */	"#326 (unimplemented)",
+	/* 326 */	"_lwp_gettid",
 	/* 327 */	"#327 (unimplemented)",
 	/* 328 */	"#328 (unimplemented)",
 	/* 329 */	"#329 (unimplemented)",
@@ -525,9 +525,9 @@ const char *const netbsd32_syscallnames[] = {
 	/* 484 */	"netbsd32___statvfs190",
 	/* 485 */	"netbsd32___fstatvfs190",
 	/* 486 */	"netbsd32___fhstatvfs190",
-	/* 487 */	"# filler",
-	/* 488 */	"# filler",
-	/* 489 */	"# filler",
+	/* 487 */	"netbsd32___futex",
+	/* 488 */	"netbsd32___futex_set_robust_list",
+	/* 489 */	"netbsd32___futex_get_robust_list",
 	/* 490 */	"# filler",
 	/* 491 */	"# filler",
 	/* 492 */	"# filler",
@@ -885,7 +885,7 @@ const char *const altnetbsd32_syscallnames[] = {
 	/* 323 */	"_lwp_setname",
 	/* 324 */	"_lwp_getname",
 	/* 325 */	"_lwp_ctl",
-	/* 326 */	NULL, /* unimplemented */
+	/* 326 */	NULL, /* _lwp_gettid */
 	/* 327 */	NULL, /* unimplemented */
 	/* 328 */	NULL, /* unimplemented */
 	/* 329 */	NULL, /* unimplemented */
@@ -1050,9 +1050,9 @@ const char *const altnetbsd32_syscallnames[] = {
 	/* 484 */	"statvfs1",
 	/* 485 */	"fstatvfs1",
 	/* 486 */	"fhstatvfs1",
-	/* 487 */	NULL, /* filler */
-	/* 488 */	NULL, /* filler */
-	/* 489 */	NULL, /* filler */
+	/* 487 */	"__futex",
+	/* 488 */	"__futex_set_robust_list",
+	/* 489 */	"__futex_get_robust_list",
 	/* 490 */	NULL, /* filler */
 	/* 491 */	NULL, /* filler */
 	/* 492 */	NULL, /* filler */
