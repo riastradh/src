@@ -2158,7 +2158,15 @@ futex_fetch_robust_head(uintptr_t uaddr, u_long *rhead)
 		error = copyin((void *)uaddr, rhead32, sizeof(rhead32));
 		if (__predict_true(error == 0)) {
 			for (int i = 0; i < _FUTEX_ROBUST_HEAD_NWORDS; i++) {
-				rhead[i] = rhead32[i];
+				if (i == _FUTEX_ROBUST_HEAD_OFFSET) {
+					/*
+					 * Make sure the offset is sign-
+					 * extended.
+					 */
+					rhead[i] = (int32_t)rhead32[i];
+				} else {
+					rhead[i] = rhead32[i];
+				}
 			}
 		}
 		return error;
@@ -2226,6 +2234,8 @@ futex_release_all_lwp(struct lwp *l)
 		return;
 	}
 
+	const long offset = (long)rhead[_FUTEX_ROBUST_HEAD_OFFSET];
+
 	/*
 	 * Walk down the list of locked futexes and release them, up
 	 * to one million of them before we give up.
@@ -2233,7 +2243,7 @@ futex_release_all_lwp(struct lwp *l)
 	for (next = rhead[_FUTEX_ROBUST_HEAD_LIST];
 	     next != l->l_robust_head && limit-- > 0;
 	     /* next advanced inside loop */) {
-		release_futex(next + rhead[_FUTEX_ROBUST_HEAD_OFFSET], tid);
+		release_futex(next + offset, tid);
 		error = futex_fetch_robust_word(next, &next);
 		if (error)
 			break;
@@ -2241,7 +2251,6 @@ futex_release_all_lwp(struct lwp *l)
 
 	/* If there's a pending futex, it may need to be released too. */
 	if (rhead[_FUTEX_ROBUST_HEAD_PENDING] != 0) {
-		release_futex(rhead[_FUTEX_ROBUST_HEAD_PENDING] +
-		    rhead[_FUTEX_ROBUST_HEAD_OFFSET], tid);
+		release_futex(rhead[_FUTEX_ROBUST_HEAD_PENDING] + offset, tid);
 	}
 }

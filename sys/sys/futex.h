@@ -71,8 +71,7 @@
 
 #define FUTEX_WAITERS		0x80000000
 #define FUTEX_OWNER_DIED	0x40000000
-#define __FUTEX_BIT29_RSVD	0x20000000
-#define FUTEX_TID_MASK		0x1fffffff
+#define FUTEX_TID_MASK		0x3fffffff
 
 #define FUTEX_BITSET_MATCH_ANY  0xffffffff
 
@@ -84,7 +83,7 @@
  *	   list is empty, this points back to the list itself.
  *
  *	1: An offset from address of the "lock entry" to the 32-bit futex
- *	   word associated with that lock entry.
+ *	   word associated with that lock entry (may be negative).
  *
  *	2: A "pending" pointer, for locks are are in the process of being
  *	   acquired or released.
@@ -100,17 +99,17 @@
 					 sizeof(uint32_t))
 #endif /* _LP64 */
 
-#ifndef _KERNEL
+#ifdef __LIBC_FUTEX_PRIVATE
 struct futex_robust_list {
 	struct futex_robust_list	*next;
 };
 
 struct futex_robust_list_head {
 	struct futex_robust_list	list;
-	unsigned long			futex_offset;
+	long				futex_offset;
 	struct futex_robust_list	*pending_list;
 };
-#endif /* ! _KERNEL */
+#endif /* __LIBC_FUTEX_PRIVATE */
 
 #ifdef _KERNEL
 struct lwp;
