@@ -18,6 +18,7 @@ TESTS_C+=		t_connect
 TESTS_C+=		t_dup
 TESTS_C+=		t_fork
 TESTS_C+=		t_fsync
+TESTS_C+=		t_futex_robust
 TESTS_C+=		t_getcontext
 TESTS_C+=		t_getgroups
 TESTS_C+=		t_getitimer
@@ -104,6 +105,8 @@ CPPFLAGS.t_posix_fadvise.c += -D_KERNTYPES
 TESTS_C+=		t_posix_fadvise
 LDADD.t_posix_fadvise+= ${LIBRUMPBASE}
 .endif
+
+CPPFLAGS.t_futex_robust.c	+= -I${.CURDIR}/../../../../lib
 
 CPPFLAGS.t_lwp_create.c		+= -D_KERNTYPES
 CPPFLAGS.t_ptrace_wait.c	+= -D_KERNTYPES -D__TEST_FENV
