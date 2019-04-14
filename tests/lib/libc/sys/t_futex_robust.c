@@ -70,6 +70,19 @@ struct lwp_data {
 struct lwp_data lwp_data;
 
 static void
+setup_lwp_context(void (*func)(void *))
+{
+
+	lwp_data.stack_base = mmap(NULL, STACK_SIZE,
+	    PROT_READ | PROT_WRITE,
+	    MAP_ANON | MAP_STACK | MAP_PRIVATE, -1, 0);
+	ATF_REQUIRE(lwp_data.stack_base != MAP_FAILED);
+	_lwp_makecontext(&lwp_data.context, func,
+	    &lwp_data, NULL, lwp_data.stack_base, STACK_SIZE);
+	lwp_data.threadid = 0;
+}
+
+static void
 do_cleanup(void)
 {
 	if (lwp_data.stack_base != NULL &&
@@ -158,13 +171,7 @@ ATF_TC_BODY(futex_robust_positive, tc)
 
 	memset(&lwp_data, 0, sizeof(lwp_data));
 
-	lwp_data.stack_base = mmap(NULL, STACK_SIZE,
-	    PROT_READ | PROT_WRITE,
-	    MAP_ANON | MAP_STACK | MAP_PRIVATE, -1, 0);
-	ATF_REQUIRE(lwp_data.stack_base != MAP_FAILED);
-	_lwp_makecontext(&lwp_data.context, test_pos_robust_list,
-	    &lwp_data, NULL, lwp_data.stack_base, STACK_SIZE);
-	lwp_data.threadid = 0;
+	setup_lwp_context(test_pos_robust_list);
 
 	ATF_REQUIRE(_lwp_create(&lwp_data.context, 0, &lwp_data.lwpid) == 0);
 	ATF_REQUIRE(_lwp_wait(lwp_data.lwpid, NULL) == 0);
@@ -196,13 +203,7 @@ ATF_TC_BODY(futex_robust_negative, tc)
 
 	memset(&lwp_data, 0, sizeof(lwp_data));
 
-	lwp_data.stack_base = mmap(NULL, STACK_SIZE,
-	    PROT_READ | PROT_WRITE,
-	    MAP_ANON | MAP_STACK | MAP_PRIVATE, -1, 0);
-	ATF_REQUIRE(lwp_data.stack_base != MAP_FAILED);
-	_lwp_makecontext(&lwp_data.context, test_neg_robust_list,
-	    &lwp_data, NULL, lwp_data.stack_base, STACK_SIZE);
-	lwp_data.threadid = 0;
+	setup_lwp_context(test_neg_robust_list);
 
 	ATF_REQUIRE(_lwp_create(&lwp_data.context, 0, &lwp_data.lwpid) == 0);
 	ATF_REQUIRE(_lwp_wait(lwp_data.lwpid, NULL) == 0);
@@ -220,7 +221,6 @@ ATF_TC_CLEANUP(futex_robust_negative, tc)
 {
 	do_cleanup();
 }
-
 
 ATF_TP_ADD_TCS(tp)
 {
