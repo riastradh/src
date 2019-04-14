@@ -73,6 +73,7 @@ static void
 setup_lwp_context(void (*func)(void *))
 {
 
+	memset(&lwp_data, 0, sizeof(lwp_data));
 	lwp_data.stack_base = mmap(NULL, STACK_SIZE,
 	    PROT_READ | PROT_WRITE,
 	    MAP_ANON | MAP_STACK | MAP_PRIVATE, -1, 0);
@@ -158,6 +159,27 @@ test_neg_robust_list(void *arg)
 	_lwp_exit();
 }
 
+static void
+test_unmapped_robust_list(void *arg)
+{
+	struct lwp_data *d = arg;
+
+	d->rhead.list.next = &d->rhead.list;
+	d->rhead.futex_offset = offsetof(struct futex_lock_pos, fword) -
+	    offsetof(struct futex_lock_pos, list);
+	d->rhead.pending_list = NULL;
+
+	if (__futex_set_robust_list((void *)sizeof(d->rhead),
+				    sizeof(d->rhead)) != 0) {
+		d->set_robust_list_failed = true;
+		_lwp_exit();
+	}
+
+	d->threadid = _lwp_gettid();
+
+	_lwp_exit();
+}
+
 ATF_TC_WITH_CLEANUP(futex_robust_positive);
 ATF_TC_HEAD(futex_robust_positive, tc)
 {
@@ -168,8 +190,6 @@ ATF_TC_HEAD(futex_robust_positive, tc)
 ATF_TC_BODY(futex_robust_positive, tc)
 {
 	int i;
-
-	memset(&lwp_data, 0, sizeof(lwp_data));
 
 	setup_lwp_context(test_pos_robust_list);
 
@@ -201,8 +221,6 @@ ATF_TC_BODY(futex_robust_negative, tc)
 {
 	int i;
 
-	memset(&lwp_data, 0, sizeof(lwp_data));
-
 	setup_lwp_context(test_neg_robust_list);
 
 	ATF_REQUIRE(_lwp_create(&lwp_data.context, 0, &lwp_data.lwpid) == 0);
@@ -222,10 +240,39 @@ ATF_TC_CLEANUP(futex_robust_negative, tc)
 	do_cleanup();
 }
 
+ATF_TC_WITH_CLEANUP(futex_robust_unmapped);
+ATF_TC_HEAD(futex_robust_unmapped, tc)
+{
+	atf_tc_set_md_var(tc, "descr",
+	    "checks futex robust list with unmapped robust list pointer");
+}
+
+ATF_TC_BODY(futex_robust_unmapped, tc)
+{
+
+	setup_lwp_context(test_unmapped_robust_list);
+
+	ATF_REQUIRE(_lwp_create(&lwp_data.context, 0, &lwp_data.lwpid) == 0);
+	ATF_REQUIRE(_lwp_wait(lwp_data.lwpid, NULL) == 0);
+
+	ATF_REQUIRE(lwp_data.set_robust_list_failed == false);
+
+	/*
+	 * No additional validation; just exercises a code path
+	 * in the kernel.
+	 */
+}
+
+ATF_TC_CLEANUP(futex_robust_unmapped, tc)
+{
+	do_cleanup();
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, futex_robust_positive);
 	ATF_TP_ADD_TC(tp, futex_robust_negative);
+	ATF_TP_ADD_TC(tp, futex_robust_unmapped);
 
 	return atf_no_error();
 }
