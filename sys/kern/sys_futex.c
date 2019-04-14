@@ -2073,6 +2073,41 @@ release_futex(uintptr_t uptr, const tid_t tid)
 		return;
 
 	/*
+	 * We need to handle the case where this thread owned the futex,
+	 * but it was uncontended.  In this case, there won't be any
+	 * kernel state to look up.  All we can do is mark the futex
+	 * as a zombie to be mopped up the next time another thread
+	 * attempts to acquire it.
+	 *
+	 * N.B. It's important to ensure to set FUTEX_OWNER_DIED in
+	 * this loop, even if waiters appear while we're are doing
+	 * so.  This is beause FUTEX_WAITERS is set by user space
+	 * before calling __futex() to wait, and the futex needs
+	 * to be marked as a zombie when the new waiter gets into
+	 * the kernel.
+	 */
+	if ((oldval & FUTEX_WAITERS) == 0) {
+		do {
+			error = futex_load(uaddr, &oldval);
+			if (error)
+				return;
+			if ((oldval & FUTEX_TID_MASK) != tid)
+				return;
+			newval = oldval | FUTEX_OWNER_DIED;
+			error = ucas_int(uaddr, oldval, newval, &actual);
+			if (error)
+				return;
+		} while (actual != oldval);
+
+		/*
+		 * If where is still no indication of waiters, then there is
+		 * no more work for us to do.
+		 */
+		if ((oldval & FUTEX_WAITERS) == 0)
+			return;
+	}
+
+	/*
 	 * Look for a shared futex since we have no positive indication
 	 * it is private.  If we can't, tough.
 	 */
@@ -2080,7 +2115,10 @@ release_futex(uintptr_t uptr, const tid_t tid)
 	if (error)
 		return;
 
-	/* If there's no futex, there's nothing to release.  */
+	/*
+	 * If there's no kernel state for this futex, there's nothing to
+	 * release.
+	 */
 	if (f == NULL)
 		return;
 
