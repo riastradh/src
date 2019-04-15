@@ -34,8 +34,9 @@
 
 #include <sys/futex.h>
 
-int	__futex(int *uaddr, int op, int val, const struct timespec *timeout,
-		int *uaddr2, int val2, int val3);
+int	__futex(volatile int *uaddr, int op, int val,
+		const struct timespec *timeout, volatile int *uaddr2,
+		int val2, int val3);
 int	__futex_set_robust_list(void *head, size_t len);
 int	__futex_get_robust_list(lwpid_t lwpid, void **headp, size_t *lenp);
 
