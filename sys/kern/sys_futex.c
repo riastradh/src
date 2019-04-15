@@ -390,6 +390,7 @@ futex_queue_init(struct futex_queue *fq)
 {
 
 	mutex_init(&fq->fq_lock, MUTEX_DEFAULT, IPL_NONE);
+	mutex_init(&fq->fq_abortlock, MUTEX_DEFAULT, IPL_NONE);
 	TAILQ_INIT(&fq->fq_queue);
 }
 
@@ -435,6 +436,7 @@ futex_queue_fini(struct futex_queue *fq)
 
 	KASSERT(TAILQ_EMPTY(&fq->fq_queue));
 	mutex_destroy(&fq->fq_lock);
+	mutex_destroy(&fq->fq_abortlock);
 }
 
 /*
@@ -1524,7 +1526,9 @@ futex_func_wait(bool shared, int *uaddr, int val, int val3,
 		error = EAGAIN;
 		goto out;
 	}
+	mutex_enter(&fw->fw_lock);
 	futex_wait_enqueue(fw, futex_queue(f));
+	mutex_exit(&fw->fw_lock);
 	futex_queue_unlock(f);
 
 	/* We are now done with the futex.  We only need the waiter.  */
