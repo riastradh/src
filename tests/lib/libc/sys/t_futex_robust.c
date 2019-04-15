@@ -214,6 +214,37 @@ test_evil_circular_robust_list(void *arg)
 	_lwp_exit();
 }
 
+static void
+test_bad_pending_robust_list(void *arg)
+{
+	struct lwp_data *d = arg;
+	int i;
+
+	d->rhead.list.next = &d->rhead.list;
+	d->rhead.futex_offset = offsetof(struct futex_lock_pos, fword) -
+	    offsetof(struct futex_lock_pos, list);
+	d->rhead.pending_list = NULL;
+
+	if (__futex_set_robust_list(&d->rhead, sizeof(d->rhead)) != 0) {
+		d->set_robust_list_failed = true;
+		_lwp_exit();
+	}
+
+	memset(pos_locks, 0, sizeof(pos_locks));
+
+	d->threadid = _lwp_gettid();
+
+	for (i = 0; i < NLOCKS; i++) {
+		pos_locks[i].fword = _lwp_gettid();
+		pos_locks[i].list.next = d->rhead.list.next;
+		d->rhead.list.next = &pos_locks[i].list;
+	}
+
+	d->rhead.pending_list = (void *)sizeof(d->rhead);
+
+	_lwp_exit();
+}
+
 ATF_TC_WITH_CLEANUP(futex_robust_positive);
 ATF_TC_HEAD(futex_robust_positive, tc)
 {
@@ -333,12 +364,43 @@ ATF_TC_CLEANUP(futex_robust_evil_circular, tc)
 	do_cleanup();
 }
 
+ATF_TC_WITH_CLEANUP(futex_robust_bad_pending);
+ATF_TC_HEAD(futex_robust_bad_pending, tc)
+{
+	atf_tc_set_md_var(tc, "descr",
+	    "checks futex robust list processing with a bad pending pointer");
+}
+
+ATF_TC_BODY(futex_robust_bad_pending, tc)
+{
+	int i;
+
+	setup_lwp_context(test_bad_pending_robust_list);
+
+	ATF_REQUIRE(_lwp_create(&lwp_data.context, 0, &lwp_data.lwpid) == 0);
+	ATF_REQUIRE(_lwp_wait(lwp_data.lwpid, NULL) == 0);
+
+	ATF_REQUIRE(lwp_data.set_robust_list_failed == false);
+
+	for (i = 0; i < NLOCKS; i++) {
+		ATF_REQUIRE((pos_locks[i].fword & FUTEX_TID_MASK) ==
+		    lwp_data.threadid);
+		ATF_REQUIRE((pos_locks[i].fword & FUTEX_OWNER_DIED) != 0);
+	}
+}
+
+ATF_TC_CLEANUP(futex_robust_bad_pending, tc)
+{
+	do_cleanup();
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, futex_robust_positive);
 	ATF_TP_ADD_TC(tp, futex_robust_negative);
 	ATF_TP_ADD_TC(tp, futex_robust_unmapped);
 	ATF_TP_ADD_TC(tp, futex_robust_evil_circular);
+	ATF_TP_ADD_TC(tp, futex_robust_bad_pending);
 
 	return atf_no_error();
 }
