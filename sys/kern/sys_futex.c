@@ -2068,8 +2068,7 @@ release_futex(uintptr_t uptr, const tid_t tid)
 
 	/* Optimistically test whether we need to do anything at all.  */
 	error = futex_load(uaddr, &oldval);
-	if (error == 0 &&
-	    (oldval & FUTEX_TID_MASK) != tid)
+	if (error != 0 || (oldval & FUTEX_TID_MASK) != tid)
 		return;
 
 	/*
