@@ -218,7 +218,7 @@ ATF_TC_WITH_CLEANUP(futex_robust_positive);
 ATF_TC_HEAD(futex_robust_positive, tc)
 {
 	atf_tc_set_md_var(tc, "descr",
-	    "checks futex robust list with positive futex word offset()");
+	    "checks futex robust list with positive futex word offset");
 }
 
 ATF_TC_BODY(futex_robust_positive, tc)
@@ -248,7 +248,7 @@ ATF_TC_WITH_CLEANUP(futex_robust_negative);
 ATF_TC_HEAD(futex_robust_negative, tc)
 {
 	atf_tc_set_md_var(tc, "descr",
-	    "checks futex robust list with negative futex word offset()");
+	    "checks futex robust list with negative futex word offset");
 }
 
 ATF_TC_BODY(futex_robust_negative, tc)
