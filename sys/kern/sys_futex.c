@@ -2251,7 +2251,7 @@ futex_release_all_lwp(struct lwp *l)
 {
 	u_long rhead[_FUTEX_ROBUST_HEAD_NWORDS];
 	uintptr_t next;
-	unsigned limit = 1000000;
+	int limit = 1000000;
 	tid_t tid;
 	int error;
 
@@ -2285,6 +2285,18 @@ futex_release_all_lwp(struct lwp *l)
 		error = futex_fetch_robust_word(next, &next);
 		if (error)
 			break;
+		/*
+		 * Be kind to platforms that don't yet support involuntary
+		 * preemption.
+		 */
+		if (curcpu()->ci_schedstate.spc_flags & SPCF_SHOULDYIELD)
+			preempt();
+	}
+	if (limit <= 0) {
+		printf("WARNING: pid %jd (%s) lwp %jd tid %jd:"
+		    " exhausted robust futex limit\n",
+		    (uintmax_t)l->l_proc->p_pid, l->l_proc->p_comm,
+		    (uintmax_t)l->l_lid, (uintmax_t)tid);
 	}
 
 	/* If there's a pending futex, it may need to be released too. */
