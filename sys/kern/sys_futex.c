@@ -391,6 +391,7 @@ futex_queue_init(struct futex_queue *fq)
 
 	mutex_init(&fq->fq_lock, MUTEX_DEFAULT, IPL_NONE);
 	mutex_init(&fq->fq_abortlock, MUTEX_DEFAULT, IPL_NONE);
+	cv_init(&fq->fq_abortcv, "fqabort");
 	TAILQ_INIT(&fq->fq_queue);
 }
 
