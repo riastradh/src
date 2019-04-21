@@ -392,6 +392,7 @@ futex_queue_init(struct futex_queue *fq)
 	mutex_init(&fq->fq_lock, MUTEX_DEFAULT, IPL_NONE);
 	mutex_init(&fq->fq_abortlock, MUTEX_DEFAULT, IPL_NONE);
 	cv_init(&fq->fq_abortcv, "fqabort");
+	LIST_INIT(&fq->fq_abortlist);
 	TAILQ_INIT(&fq->fq_queue);
 }
 
@@ -409,6 +410,7 @@ futex_queue_drain(struct futex_queue *fq)
 {
 	struct futex_wait *fw, *fw_next;
 
+	LIST_INIT(&fq->fq_abortlist);
 	mutex_enter(&fq->fq_abortlock);
 	while (!LIST_EMPTY(&fq->fq_abortlist))
 		cv_wait(&fq->fq_abortcv, &fq->fq_abortlock);
@@ -436,8 +438,10 @@ futex_queue_fini(struct futex_queue *fq)
 {
 
 	KASSERT(TAILQ_EMPTY(&fq->fq_queue));
+	KASSERT(LIST_EMPTY(&fq->fq_abortlist));
 	mutex_destroy(&fq->fq_lock);
 	mutex_destroy(&fq->fq_abortlock);
+	cv_destroy(&fq->fq_abortcv);
 }
 
 /*
@@ -1562,7 +1566,7 @@ futex_func_wake(bool shared, int *uaddr, int val, int val3, register_t *retval)
 {
 	struct futex *f;
 	unsigned nwoken = 0;
-	int error;
+	int error = 0;
 
 	/* Reject negative number of wakeups.  */
 	if (val < 0) {
@@ -1595,7 +1599,7 @@ out:
 	*retval = nwoken;
 
 	/* Success!  */
-	return 0;
+	return error;
 }
 
 /*
