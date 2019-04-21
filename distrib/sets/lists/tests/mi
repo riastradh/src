@@ -3118,6 +3118,8 @@
 ./usr/tests/lib/libc/sys/t_dup			tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_fork			tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_fsync		tests-lib-tests		compattestfile,atf
+./usr/tests/lib/libc/sys/t_futex_ops		tests-lib-tests		compattestfile,atf
+./usr/tests/lib/libc/sys/t_futex_robust		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_getcontext		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_getgroups		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_getitimer		tests-lib-tests		compattestfile,atf
@@ -3134,6 +3136,7 @@
 ./usr/tests/lib/libc/sys/t_listen		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_lwp_create		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_lwp_ctl		tests-lib-tests		compattestfile,atf
+./usr/tests/lib/libc/sys/t_lwp_tid		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_mincore		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_minherit		tests-lib-tests		compattestfile,atf
 ./usr/tests/lib/libc/sys/t_mkdir		tests-lib-tests		compattestfile,atf
