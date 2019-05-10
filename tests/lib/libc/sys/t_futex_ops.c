@@ -45,7 +45,7 @@ __RCSID("$NetBSD$");
 
 #define	STACK_SIZE	65536
 
-static int futex_word;
+static volatile int futex_word;
 
 struct lwp_data {
 	ucontext_t	context;
@@ -101,11 +101,18 @@ waiter_lwp(void *arg)
 	if (__futex(&futex_word, FUTEX_WAIT | FUTEX_PRIVATE_FLAG,
 		    1, NULL, NULL, 0, 0) == -1) {
 		d->futex_error = errno;
+		_lwp_exit();
 	}
+
+	do {
+		membar_sync();
+		sleep(1);
+	} while (futex_word != 0);
 
 	if (__futex(&futex_word, FUTEX_WAIT | FUTEX_PRIVATE_FLAG,
 		    0, NULL, NULL, 0, 0) == -1) {
 		d->futex_error = errno;
+		_lwp_exit();
 	}
 
 	futex_word = 2;
@@ -127,23 +134,37 @@ ATF_TC_BODY(futex_basic_wait_wake, tc)
 
 	setup_lwp_context(wlwp, waiter_lwp);
 
+	printf("futex_basic_wait_wake: creating watier LWP\n");
+
 	ATF_REQUIRE(_lwp_create(&wlwp->context, 0, &wlwp->lwpid) == 0);
+
+	printf("futex_basic_wait_wake: waiting for LWP %d to enter futex\n",
+	    wlwp->lwpid);
 
 	do {
 		membar_sync();
 		sleep(1);
+		if (wlwp->futex_error) {
+			printf("futex_basic_wait_wake: futex error = %d\n",
+			    wlwp->futex_error);
+			ATF_REQUIRE(wlwp->futex_error == 0);
+		}
 	} while (futex_word != 1);
+
+	printf("futex_basic_wait_wake: waking 1 waiter\n");
 
 	futex_word = 0;
 	membar_sync();
 
 	ATF_REQUIRE(__futex(&futex_word, FUTEX_WAKE | FUTEX_PRIVATE_FLAG,
-			    1, NULL, NULL, 0, 0) == 0);
+			    1, NULL, NULL, 0, 0) == 1);
 
 	do {
 		membar_sync();
 		sleep(1);
 	} while (futex_word != 2);
+
+	printf("futex_basic_wait_wake: reaping LWP %d\n", wlwp->lwpid);
 
 	ATF_REQUIRE(_lwp_wait(wlwp->lwpid, NULL) == 0);
 }
