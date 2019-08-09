@@ -1707,7 +1707,14 @@ usbd_xfer_cancel_timeout_async(struct usbd_xfer *xfer)
 
 	KASSERT(bus->ub_usepolling || mutex_owned(bus->ub_lock));
 
-	KASSERT(xfer->ux_timeout_set);
+	/*
+	 * If the timer wasn't running anyway, forget about it.  This
+	 * can happen if we are completing an isochronous transfer
+	 * which doesn't use the same timeout logic.
+	 */
+	if (!xfer->ux_timeout_set)
+		return;
+
 	xfer->ux_timeout_reset = false;
 	if (!callout_stop(&xfer->ux_callout)) {
 		/*
