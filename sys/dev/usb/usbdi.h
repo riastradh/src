@@ -188,6 +188,11 @@ int usbd_ratecheck(struct timeval *);
 usbd_status usbd_get_string(struct usbd_device *, int, char *);
 usbd_status usbd_get_string0(struct usbd_device *, int, char *, int);
 
+/* For use by HCI drivers, not USB device drivers */
+void usbd_xfer_schedule_timeout(struct usbd_xfer *);
+bool usbd_xfer_trycomplete(struct usbd_xfer *);
+void usbd_xfer_abort(struct usbd_xfer *);
+
 /* An iterator for descriptors. */
 typedef struct {
 	const uByte *cur;

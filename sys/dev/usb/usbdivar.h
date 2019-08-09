@@ -96,6 +96,8 @@ struct usbd_bus_methods {
 	void		      (*ubm_dopoll)(struct usbd_bus *);
 	struct usbd_xfer     *(*ubm_allocx)(struct usbd_bus *, unsigned int);
 	void		      (*ubm_freex)(struct usbd_bus *, struct usbd_xfer *);
+	void		      (*ubm_abortx)(struct usbd_xfer *);
+	bool		      (*ubm_dying)(struct usbd_bus *);
 	void		      (*ubm_getlock)(struct usbd_bus *, kmutex_t **);
 	usbd_status	      (*ubm_newdev)(device_t, struct usbd_bus *, int,
 					    int, int, struct usbd_port *);
