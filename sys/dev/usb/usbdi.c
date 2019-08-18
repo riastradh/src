@@ -479,6 +479,7 @@ usbd_alloc_xfer(struct usbd_device *dev, unsigned int nframes)
 		goto out;
 	xfer->ux_bus = dev->ud_bus;
 	callout_init(&xfer->ux_callout, CALLOUT_MPSAFE);
+	callout_setfunc(&xfer->ux_callout, usbd_xfer_timeout, xfer);
 	cv_init(&xfer->ux_cv, "usbxfer");
 	usb_init_task(&xfer->ux_aborttask, usbd_xfer_timeout_task, xfer,
 	    USB_TASKQ_MPSAFE);
@@ -1676,8 +1677,7 @@ usbd_xfer_schedule_timeout(struct usbd_xfer *xfer)
 	} else if (xfer->ux_timeout && !bus->ub_usepolling) {
 		/* Callout is not scheduled.  Schedule it.  */
 		KASSERT(!callout_pending(&xfer->ux_callout));
-		callout_reset(&xfer->ux_callout, mstohz(xfer->ux_timeout),
-		    usbd_xfer_timeout, xfer);
+		callout_schedule(&xfer->ux_callout, mstohz(xfer->ux_timeout));
 		xfer->ux_timeout_set = true;
 	}
 
