@@ -574,6 +574,7 @@ uhci_init(uhci_softc_t *sc)
 	    "uhcixfer", NULL, IPL_USB, NULL, NULL, NULL);
 
 	callout_init(&sc->sc_poll_handle, CALLOUT_MPSAFE);
+	callout_setfunc(&sc->sc_poll_handle, uhci_poll_hub, sc);
 
 	/* Set up the bus struct. */
 	sc->sc_bus.ub_methods = &uhci_bus_methods;
@@ -739,8 +740,7 @@ uhci_resume(device_t dv, const pmf_qual_t *qual)
 	usb_delay_ms_locked(&sc->sc_bus, USB_RESUME_RECOVERY, &sc->sc_intr_lock);
 	sc->sc_bus.ub_usepolling--;
 	if (sc->sc_intr_xfer != NULL)
-		callout_reset(&sc->sc_poll_handle, sc->sc_ival, uhci_poll_hub,
-		    sc->sc_intr_xfer);
+		callout_schedule(&sc->sc_poll_handle, sc->sc_ival);
 #ifdef UHCI_DEBUG
 	if (uhcidebug >= 2)
 		uhci_dumpregs(sc);
@@ -766,9 +766,9 @@ uhci_suspend(device_t dv, const pmf_qual_t *qual)
 	if (uhcidebug >= 2)
 		uhci_dumpregs(sc);
 #endif
-	if (sc->sc_intr_xfer != NULL)
-		callout_stop(&sc->sc_poll_handle);
 	sc->sc_suspend = PWR_SUSPEND;
+	if (sc->sc_intr_xfer != NULL)
+		callout_halt(&sc->sc_poll_handle, &sc->sc_intr_lock);
 	sc->sc_bus.ub_usepolling++;
 
 	uhci_run(sc, 0, 1); /* stop the controller */
@@ -998,17 +998,21 @@ void iidump(void) { uhci_dump_iis(thesc); }
 void
 uhci_poll_hub(void *addr)
 {
-	struct usbd_xfer *xfer = addr;
-	struct usbd_pipe *pipe = xfer->ux_pipe;
-	uhci_softc_t *sc;
+	struct uhci_softc *sc = addr;
+	struct usbd_xfer *xfer;
+	struct usbd_pipe *pipe;
 	u_char *p;
 
 	UHCIHIST_FUNC(); UHCIHIST_CALLED();
 
-	if (__predict_false(pipe->up_dev == NULL || pipe->up_dev->ud_bus == NULL))
-		return;	/* device has detached */
-	sc = UHCI_PIPE2SC(pipe);
-	callout_reset(&sc->sc_poll_handle, sc->sc_ival, uhci_poll_hub, xfer);
+	mutex_enter(&sc->sc_lock);
+	xfer = sc->sc_intr_xfer;
+	if (xfer == NULL)
+		goto out;	/* no more intr xfer */
+
+	pipe = xfer->ux_pipe;
+	KASSERT(pipe->up_dev != NULL);
+	KASSERT(UHCI_PIPE2SC(pipe) == sc);
 
 	p = xfer->ux_buf;
 	p[0] = 0;
@@ -1016,15 +1020,17 @@ uhci_poll_hub(void *addr)
 		p[0] |= 1<<1;
 	if (UREAD2(sc, UHCI_PORTSC2) & (UHCI_PORTSC_CSC|UHCI_PORTSC_OCIC))
 		p[0] |= 1<<2;
-	if (p[0] == 0)
-		/* No change, try again in a while */
-		return;
+	if (p[0] == 0) {
+		/* No change, try again in a while unless we're suspending */
+		if (sc->sc_suspend != PWR_SUSPEND)
+			callout_schedule(&sc->sc_poll_handle, sc->sc_ival);
+		goto out;
+	}
 
 	xfer->ux_actlen = 1;
 	xfer->ux_status = USBD_NORMAL_COMPLETION;
-	mutex_enter(&sc->sc_lock);
 	usb_transfer_complete(xfer);
-	mutex_exit(&sc->sc_lock);
+out:	mutex_exit(&sc->sc_lock);
 }
 
 void
@@ -3793,7 +3799,7 @@ uhci_root_intr_abort(struct usbd_xfer *xfer)
 	KASSERT(mutex_owned(&sc->sc_lock));
 	KASSERT(xfer->ux_pipe->up_intrxfer == xfer);
 
-	callout_stop(&sc->sc_poll_handle);
+	callout_halt(&sc->sc_poll_handle, &sc->sc_lock);
 	sc->sc_intr_xfer = NULL;
 
 	xfer->ux_status = USBD_CANCELLED;
@@ -3830,6 +3836,7 @@ uhci_root_intr_start(struct usbd_xfer *xfer)
 	struct usbd_pipe *pipe = xfer->ux_pipe;
 	uhci_softc_t *sc = UHCI_PIPE2SC(pipe);
 	unsigned int ival;
+	const bool polling = sc->sc_bus.ub_usepolling;
 
 	UHCIHIST_FUNC(); UHCIHIST_CALLED();
 	DPRINTF("xfer=%#jx len=%jd flags=%jd", (uintptr_t)xfer, xfer->ux_length,
@@ -3838,11 +3845,20 @@ uhci_root_intr_start(struct usbd_xfer *xfer)
 	if (sc->sc_dying)
 		return USBD_IOERROR;
 
+	if (!polling)
+		mutex_enter(&sc->sc_lock);
+
+	KASSERT(sc->sc_intr_xfer == NULL);
+
 	/* XXX temporary variable needed to avoid gcc3 warning */
 	ival = xfer->ux_pipe->up_endpoint->ue_edesc->bInterval;
 	sc->sc_ival = mstohz(ival);
-	callout_reset(&sc->sc_poll_handle, sc->sc_ival, uhci_poll_hub, xfer);
+	callout_schedule(&sc->sc_poll_handle, sc->sc_ival);
 	sc->sc_intr_xfer = xfer;
+
+	if (!polling)
+		mutex_exit(&sc->sc_lock);
+
 	return USBD_IN_PROGRESS;
 }
 
@@ -3855,6 +3871,6 @@ uhci_root_intr_close(struct usbd_pipe *pipe)
 
 	KASSERT(mutex_owned(&sc->sc_lock));
 
-	callout_stop(&sc->sc_poll_handle);
+	callout_halt(&sc->sc_poll_handle, &sc->sc_lock);
 	sc->sc_intr_xfer = NULL;
 }
