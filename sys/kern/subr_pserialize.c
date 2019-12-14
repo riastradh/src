@@ -46,10 +46,23 @@ struct pserialize {
 	lwp_t *			psz_owner;
 };
 
-static kmutex_t			psz_lock	__cacheline_aligned;
-static struct evcnt		psz_ev_excl	__cacheline_aligned =
-    EVCNT_INITIALIZER(EVCNT_TYPE_MISC, NULL, "pserialize", "exclusive access");
-EVCNT_ATTACH_STATIC(psz_ev_excl);
+static struct {
+	kmutex_t		lock;
+	kcondvar_t		cv;
+	struct lwp *		active;
+	uint64_t		gen;
+	struct evcnt		perform_evcnt;
+	struct evcnt		xc_evcnt;
+	struct evcnt		shared_evcnt;
+} pserialize __cacheline_aligned = {
+	.gen = 0,
+	.perform_evcnt = EVCNT_INITIALIZER(EVCNT_TYPE_MISC, NULL, "pserialize",
+	    "perform"),
+	.xc_evcnt = EVCNT_INITIALIZER(EVCNT_TYPE_MISC, NULL, "pserialize",
+	    "xcall"),
+	.shared_evcnt = EVCNT_INITIALIZER(EVCNT_TYPE_MISC, NULL, "pserialize",
+	    "shared"),
+};
 
 /*
  * pserialize_init:
@@ -60,7 +73,11 @@ void
 pserialize_init(void)
 {
 
-	mutex_init(&psz_lock, MUTEX_DEFAULT, IPL_NONE);
+	mutex_init(&pserialize.lock, MUTEX_DEFAULT, IPL_NONE);
+	cv_init(&pserialize.cv, "pserial");
+	evcnt_attach_static(&pserialize.perform_evcnt);
+	evcnt_attach_static(&pserialize.xc_evcnt);
+	evcnt_attach_static(&pserialize.shared_evcnt);
 }
 
 /*
@@ -110,22 +127,56 @@ pserialize_perform(pserialize_t psz)
 	KASSERT(psz->psz_owner == NULL);
 
 	if (__predict_false(mp_online == false)) {
-		psz_ev_excl.ev_count++;
+		pserialize.perform_evcnt.ev_count++;
 		return;
 	}
 
 	psz->psz_owner = curlwp;
 
+	mutex_enter(&pserialize.lock);
+	pserialize.perform_evcnt.ev_count++;
+
+	/* Check whether there's any xcall going on already.  */
+	if (pserialize.active) {
+		/* Someone else is issuing an xcall.  Wait our turn.  */
+		uint64_t gen = pserialize.gen;
+		do {
+			cv_wait(&pserialize.cv, &pserialize.lock);
+			/* Check how many generations have passed.  */
+			if (pserialize.gen - gen >= 2) {
+				/*
+				 * At least two generations have
+				 * passed, meaning someone else issued
+				 * an xcall since we started, and it
+				 * has completed, so our job is done.
+				 */
+				pserialize.shared_evcnt.ev_count++;
+				goto out;
+			}
+		} while (pserialize.active);
+	}
+
 	/*
-	 * Broadcast a NOP to all CPUs and wait until all of them complete.
+	 * There are no xcalls pending, and while waiting, we did not
+	 * see two generations pass.  Claim the throne and broadcast a
+	 * NOP to all CPUs; then wait until all CPUs complete.
 	 */
+	pserialize.active = curlwp;
 	xc_barrier(XC_HIGHPRI);
+
+	/*
+	 * Relinquish the throne and advance the generation.  Use
+	 * cv_signal so only one thread is woken to perform the next
+	 * xcall.
+	 */
+	pserialize.active = NULL;
+	cv_signal(&pserialize.cv);
+	pserialize.gen++;
+
+out:	mutex_exit(&pserialize.lock);
 
 	KASSERT(psz->psz_owner == curlwp);
 	psz->psz_owner = NULL;
-	mutex_enter(&psz_lock);
-	psz_ev_excl.ev_count++;
-	mutex_exit(&psz_lock);
 }
 
 int
