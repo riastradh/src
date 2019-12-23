@@ -404,7 +404,7 @@ again:
 
 #ifdef USE_META
     if (useMeta) {
-	meta_compat_parent();
+	meta_compat_parent(cpid);
     }
 #endif
 
