@@ -36,6 +36,9 @@
 
 struct filemon;
 
+const char *
+	filemon_path(void);
+
 struct filemon *
 	filemon_open(void);
 int	filemon_close(struct filemon *);

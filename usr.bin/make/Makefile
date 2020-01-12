@@ -17,9 +17,10 @@ USE_META ?= yes
 .if ${USE_META:tl} != "no"
 SRCS+=	meta.c
 CPPFLAGS+= -DUSE_META
-USE_FILEMON ?= yes
+USE_FILEMON ?= ktrace
 .if ${USE_FILEMON:tl} != "no"
-SRCS+=	filemon.c
+.PATH:	${.CURDIR}/filemon
+SRCS+=	filemon_${USE_FILEMON}.c
 CPPFLAGS+= -DUSE_FILEMON
 .endif
 .endif
