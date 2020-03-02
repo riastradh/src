@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_ioctl.c,v 1.12 2020/02/14 04:36:56 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Created: Fri Jan  8 09:01:26 1999 by faith@valinux.com
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_ioctl.c,v 1.12 2020/02/14 04:36:56 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_core.h>

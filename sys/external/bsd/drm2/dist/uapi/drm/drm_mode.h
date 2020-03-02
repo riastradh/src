@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_mode.h,v 1.4 2018/08/27 04:58:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2007 Dave Airlie <airlied@linux.ie>

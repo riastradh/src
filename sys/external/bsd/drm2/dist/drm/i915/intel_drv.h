@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_drv.h,v 1.13 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2006 Dave Airlie <airlied@linux.ie>

@@ -1,4 +1,4 @@
-/*	$NetBSD: sid.h,v 1.4 2019/08/18 02:42:40 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2011 Advanced Micro Devices, Inc.

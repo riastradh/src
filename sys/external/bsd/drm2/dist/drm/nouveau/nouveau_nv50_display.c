@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nv50_display.c,v 1.11 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2011 Red Hat Inc.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nv50_display.c,v 1.11 2020/02/14 14:34:58 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/dma-mapping.h>
 

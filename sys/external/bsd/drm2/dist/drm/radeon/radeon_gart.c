@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_gart.c,v 1.11 2020/01/20 23:22:09 jmcneill Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -28,7 +28,7 @@
  *          Jerome Glisse
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_gart.c,v 1.11 2020/01/20 23:22:09 jmcneill Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/radeon_drm.h>

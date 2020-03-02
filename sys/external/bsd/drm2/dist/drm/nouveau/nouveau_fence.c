@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_fence.c,v 1.15 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2007 Ben Skeggs.
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_fence.c,v 1.15 2020/02/14 14:34:58 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 

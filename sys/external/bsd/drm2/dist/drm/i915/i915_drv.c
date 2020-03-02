@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_drv.c,v 1.19 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /* i915_drv.c -- i830,i845,i855,i865,i915 driver -*- linux-c -*-
  */
@@ -30,7 +30,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_drv.c,v 1.19 2020/02/14 14:34:58 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/device.h>
 #include <linux/acpi.h>

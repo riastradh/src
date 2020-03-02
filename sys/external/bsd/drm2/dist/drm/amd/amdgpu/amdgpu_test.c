@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_test.c,v 1.4 2020/02/14 04:30:04 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2009 VMware, Inc.
@@ -24,7 +24,7 @@
  * Authors: Michel Dänzer
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_test.c,v 1.4 2020/02/14 04:30:04 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/amdgpu_drm.h>

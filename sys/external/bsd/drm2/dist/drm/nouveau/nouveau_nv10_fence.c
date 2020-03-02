@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nv10_fence.c,v 1.5 2019/01/27 02:08:42 pgoyette Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nv10_fence.c,v 1.5 2019/01/27 02:08:42 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "nouveau_drm.h"
 #include "nouveau_dma.h"

@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_mocs.c,v 1.3 2018/09/13 08:25:55 mrg Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2015 Intel Corporation
@@ -23,7 +23,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_mocs.c,v 1.3 2018/09/13 08:25:55 mrg Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "intel_mocs.h"
 #include "intel_lrc.h"

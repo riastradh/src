@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvif.c,v 1.5 2018/09/09 03:10:03 pgoyette Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2014 Red Hat Inc.
@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvif.c,v 1.5 2018/09/09 03:10:03 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <core/client.h>
 #include <core/notify.h>

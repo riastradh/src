@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_pci_base.c,v 1.7 2020/02/12 22:34:51 jdolecek Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2015 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs <bskeggs@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_pci_base.c,v 1.7 2020/02/12 22:34:51 jdolecek Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "priv.h"
 #include "agp.h"

@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_acpi.c,v 1.6 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Intel ACPI functions
@@ -6,7 +6,7 @@
  * _DSM related code stolen from nouveau_acpi.c.
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_acpi.c,v 1.6 2018/08/27 04:58:24 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/pci.h>
 #include <linux/acpi.h>

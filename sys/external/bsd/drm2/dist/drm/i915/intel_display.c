@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_display.c,v 1.32 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2006-2007 Intel Corporation
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_display.c,v 1.32 2020/02/14 14:34:58 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/dmi.h>
 #include <linux/module.h>

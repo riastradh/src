@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_cmd_parser.c,v 1.22 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2013 Intel Corporation
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_cmd_parser.c,v 1.22 2020/02/14 14:34:58 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "i915_drv.h"
 #include <linux/bitmap.h>

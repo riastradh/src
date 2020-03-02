@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_vce.c,v 1.4 2020/01/19 11:07:00 jmcneill Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Advanced Micro Devices, Inc.
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_vce.c,v 1.4 2020/01/19 11:07:00 jmcneill Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
 #include <linux/module.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_debugfs.c,v 1.4 2018/08/27 04:58:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**
  * \file drm_debugfs.c
@@ -33,7 +33,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_debugfs.c,v 1.4 2018/08/27 04:58:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>

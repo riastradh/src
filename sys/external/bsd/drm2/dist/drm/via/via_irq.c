@@ -1,4 +1,4 @@
-/*	$NetBSD: via_irq.c,v 1.7 2020/02/14 04:37:43 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* via_irq.c
  *
@@ -38,7 +38,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: via_irq.c,v 1.7 2020/02/14 04:37:43 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/via_drm.h>

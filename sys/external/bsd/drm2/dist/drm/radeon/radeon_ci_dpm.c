@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_ci_dpm.c,v 1.3 2020/02/14 04:29:42 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Advanced Micro Devices, Inc.
@@ -24,7 +24,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_ci_dpm.c,v 1.3 2020/02/14 04:29:42 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
 #include "drmP.h"

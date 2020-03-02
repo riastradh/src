@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_dp_helper.h,v 1.3 2018/08/27 06:44:53 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008 Keith Packard

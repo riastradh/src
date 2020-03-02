@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_disp_nv50.c,v 1.3 2020/02/14 14:34:59 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_disp_nv50.c,v 1.3 2020/02/14 14:34:59 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "nv50.h"
 #include "rootnv50.h"

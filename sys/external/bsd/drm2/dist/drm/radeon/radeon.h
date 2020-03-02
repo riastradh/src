@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon.h,v 1.9 2020/02/14 14:34:59 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.

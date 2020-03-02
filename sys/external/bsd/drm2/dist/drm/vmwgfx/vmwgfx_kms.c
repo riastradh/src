@@ -1,4 +1,4 @@
-/*	$NetBSD: vmwgfx_kms.c,v 1.6 2020/02/14 04:37:28 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  *
@@ -28,7 +28,7 @@
  **************************************************************************/
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: vmwgfx_kms.c,v 1.6 2020/02/14 04:37:28 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "vmwgfx_kms.h"
 

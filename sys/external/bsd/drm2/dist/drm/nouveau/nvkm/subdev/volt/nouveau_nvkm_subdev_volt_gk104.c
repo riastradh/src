@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_volt_gk104.c,v 1.3 2018/08/27 07:38:57 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2015 Martin Peres
@@ -24,7 +24,7 @@
  * Authors: Martin Peres
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_volt_gk104.c,v 1.3 2018/08/27 07:38:57 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "priv.h"
 

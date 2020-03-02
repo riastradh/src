@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_subdev_fb_gf100.c,v 1.3 2018/08/27 07:40:22 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_subdev_fb_gf100.c,v 1.3 2018/08/27 07:40:22 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "gf100.h"
 #include "ram.h"

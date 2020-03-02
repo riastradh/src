@@ -1,8 +1,8 @@
-/*	$NetBSD: radeon_dp_mst.c,v 1.3 2018/08/27 07:49:04 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_dp_mst.c,v 1.3 2018/08/27 07:49:04 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_dp_mst_helper.h>

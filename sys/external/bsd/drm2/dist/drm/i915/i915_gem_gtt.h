@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_gtt.h,v 1.8 2019/12/05 20:03:09 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2014 Intel Corporation

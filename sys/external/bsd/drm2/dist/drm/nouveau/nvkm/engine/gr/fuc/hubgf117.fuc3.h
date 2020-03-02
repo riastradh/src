@@ -1,4 +1,4 @@
-/*	$NetBSD: hubgf117.fuc3.h,v 1.2 2018/08/27 04:58:32 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 uint32_t gf117_grhub_data[] = {
 /* 0x0000: hub_mmio_list_head */

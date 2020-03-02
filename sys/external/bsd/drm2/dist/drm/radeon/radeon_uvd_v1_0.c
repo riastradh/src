@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_uvd_v1_0.c,v 1.3 2019/08/17 15:50:05 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Advanced Micro Devices, Inc.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_uvd_v1_0.c,v 1.3 2019/08/17 15:50:05 msaitoh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
 #include <drm/drmP.h>

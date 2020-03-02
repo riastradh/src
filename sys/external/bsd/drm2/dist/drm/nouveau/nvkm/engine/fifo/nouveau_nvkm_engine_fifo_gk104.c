@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_fifo_gk104.c,v 1.4 2020/01/22 11:38:54 jmcneill Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_fifo_gk104.c,v 1.4 2020/01/22 11:38:54 jmcneill Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "gk104.h"
 #include "changk104.h"

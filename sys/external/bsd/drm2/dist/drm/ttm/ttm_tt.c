@@ -1,4 +1,4 @@
-/*	$NetBSD: ttm_tt.c,v 1.12 2020/02/14 14:34:59 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  *
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: ttm_tt.c,v 1.12 2020/02/14 14:34:59 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define pr_fmt(fmt) "[TTM] " fmt
 

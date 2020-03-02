@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_nvkm_engine_gr_gf100.c,v 1.4 2020/02/14 14:34:59 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  * Authors: Ben Skeggs
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_nvkm_engine_gr_gf100.c,v 1.4 2020/02/14 14:34:59 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "gf100.h"
 #include "ctxgf100.h"

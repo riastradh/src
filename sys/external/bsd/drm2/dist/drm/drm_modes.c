@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_modes.c,v 1.8 2020/02/14 04:38:36 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 1997-2003 by The XFree86 Project, Inc.
@@ -33,7 +33,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_modes.c,v 1.8 2020/02/14 04:38:36 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/list.h>
 #include <linux/list_sort.h>

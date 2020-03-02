@@ -1,4 +1,4 @@
-/*	$NetBSD: ast_drv.c,v 1.3 2018/08/28 03:41:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -28,7 +28,7 @@
  * Authors: Dave Airlie <airlied@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: ast_drv.c,v 1.3 2018/08/28 03:41:38 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/module.h>
 #include <linux/console.h>

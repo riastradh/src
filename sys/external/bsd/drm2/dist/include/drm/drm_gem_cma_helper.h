@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_gem_cma_helper.h,v 1.6 2019/11/05 23:29:28 jmcneill Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __DRM_GEM_CMA_HELPER_H__
 #define __DRM_GEM_CMA_HELPER_H__

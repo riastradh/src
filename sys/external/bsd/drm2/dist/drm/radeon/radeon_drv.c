@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_drv.c,v 1.10 2020/02/14 14:34:59 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /**
  * \file radeon_drv.c
@@ -32,7 +32,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_drv.c,v 1.10 2020/02/14 14:34:59 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/radeon_drm.h>

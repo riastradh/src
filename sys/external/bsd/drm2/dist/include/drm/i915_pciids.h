@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_pciids.h,v 1.3 2018/09/13 08:25:55 mrg Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Intel Corporation

@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_object.h,v 1.4 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.

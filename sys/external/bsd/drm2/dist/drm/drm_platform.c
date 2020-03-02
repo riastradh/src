@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_platform.c,v 1.4 2018/08/27 04:58:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Derived from drm_pci.c
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_platform.c,v 1.4 2018/08/27 04:58:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/export.h>
 #include <drm/drmP.h>

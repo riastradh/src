@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_combios.c,v 1.3 2018/08/27 04:58:36 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2004 ATI Technologies Inc., Markham, Ontario
@@ -27,7 +27,7 @@
  *          Alex Deucher
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_combios.c,v 1.3 2018/08/27 04:58:36 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/radeon_drm.h>

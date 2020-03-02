@@ -1,4 +1,4 @@
-/*	$NetBSD: driver.h,v 1.5 2018/08/27 14:47:53 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVIF_DRIVER_H__
 #define __NVIF_DRIVER_H__

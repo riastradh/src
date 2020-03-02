@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_mode.h,v 1.5 2019/08/09 06:27:21 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2000 ATI Technologies Inc., Markham, Ontario, and

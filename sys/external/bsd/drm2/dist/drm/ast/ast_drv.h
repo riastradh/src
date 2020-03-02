@@ -1,4 +1,4 @@
-/*	$NetBSD: ast_drv.h,v 1.2 2018/08/27 04:58:23 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.

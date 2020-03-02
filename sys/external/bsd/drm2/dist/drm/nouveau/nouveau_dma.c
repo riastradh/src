@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_dma.c,v 1.4 2019/01/27 02:08:42 pgoyette Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2007 Ben Skeggs.
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_dma.c,v 1.4 2019/01/27 02:08:42 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "nouveau_drm.h"
 #include "nouveau_dma.h"

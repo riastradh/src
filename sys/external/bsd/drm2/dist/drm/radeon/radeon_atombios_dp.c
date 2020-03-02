@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_atombios_dp.c,v 1.2 2020/01/07 13:51:38 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2007-8 Advanced Micro Devices, Inc.
@@ -27,7 +27,7 @@
  *          Jerome Glisse
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_atombios_dp.c,v 1.2 2020/01/07 13:51:38 msaitoh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/radeon_drm.h>

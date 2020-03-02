@@ -1,4 +1,4 @@
-/*	$NetBSD: via_video.c,v 1.7 2020/02/14 04:37:43 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2005 Thomas Hellstrom. All Rights Reserved.
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: via_video.c,v 1.7 2020/02/14 04:37:43 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/via_drm.h>

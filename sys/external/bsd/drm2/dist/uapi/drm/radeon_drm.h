@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_drm.h,v 1.2 2018/08/27 04:58:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /* radeon_drm.h -- Public header for the radeon driver -*- linux-c -*-
  *

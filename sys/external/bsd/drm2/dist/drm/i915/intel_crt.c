@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_crt.c,v 1.8 2020/02/14 09:39:37 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2006-2007 Intel Corporation
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_crt.c,v 1.8 2020/02/14 09:39:37 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/dmi.h>
 #include <linux/i2c.h>

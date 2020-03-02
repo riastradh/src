@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_auth.c,v 1.4 2018/08/27 14:14:29 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Created: Tue Feb  2 08:37:54 1999 by faith@valinux.com
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_auth.c,v 1.4 2018/08/27 14:14:29 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include "drm_internal.h"

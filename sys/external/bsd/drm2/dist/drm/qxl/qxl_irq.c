@@ -1,4 +1,4 @@
-/*	$NetBSD: qxl_irq.c,v 1.3 2018/08/27 07:03:26 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2013 Red Hat Inc.
@@ -26,7 +26,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: qxl_irq.c,v 1.3 2018/08/27 07:03:26 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include "qxl_drv.h"
 

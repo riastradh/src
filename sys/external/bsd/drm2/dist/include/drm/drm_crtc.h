@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_crtc.h,v 1.8 2020/01/03 21:01:16 jmcneill Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2006 Keith Packard

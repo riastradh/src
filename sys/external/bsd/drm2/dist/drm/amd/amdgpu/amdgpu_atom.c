@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_atom.c,v 1.3 2020/02/14 14:34:57 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_atom.c,v 1.3 2020/02/14 14:34:57 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/module.h>
 #include <linux/sched.h>

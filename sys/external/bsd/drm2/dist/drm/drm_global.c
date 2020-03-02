@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_global.c,v 1.6 2020/02/14 14:34:57 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  *
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_global.c,v 1.6 2020/02/14 14:34:57 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/mutex.h>
 #include <linux/slab.h>

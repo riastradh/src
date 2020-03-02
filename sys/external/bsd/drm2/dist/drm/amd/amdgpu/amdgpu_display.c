@@ -1,4 +1,4 @@
-/*	$NetBSD: amdgpu_display.c,v 1.6 2020/02/14 04:38:13 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2007-8 Advanced Micro Devices, Inc.
@@ -26,7 +26,7 @@
  *          Alex Deucher
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: amdgpu_display.c,v 1.6 2020/02/14 04:38:13 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/amdgpu_drm.h>

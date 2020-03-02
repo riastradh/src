@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_panel.c,v 1.4 2020/01/03 21:01:16 jmcneill Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2013, NVIDIA Corporation.  All rights reserved.
@@ -24,7 +24,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_panel.c,v 1.4 2020/01/03 21:01:16 jmcneill Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/err.h>
 #include <linux/module.h>

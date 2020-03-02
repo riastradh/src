@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_rv770_smc.c,v 1.2 2019/08/17 17:03:32 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2011 Advanced Micro Devices, Inc.
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_rv770_smc.c,v 1.2 2019/08/17 17:03:32 msaitoh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
 #include "drmP.h"

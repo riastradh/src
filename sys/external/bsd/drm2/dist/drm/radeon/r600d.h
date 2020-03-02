@@ -1,4 +1,4 @@
-/*	$NetBSD: r600d.h,v 1.4 2019/10/16 01:44:48 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2009 Advanced Micro Devices, Inc.

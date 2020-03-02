@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_asic.c,v 1.4 2018/08/27 06:44:29 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -29,7 +29,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_asic.c,v 1.4 2018/08/27 06:44:29 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/console.h>
 #include <drm/drmP.h>

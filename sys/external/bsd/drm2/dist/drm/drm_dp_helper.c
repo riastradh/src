@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_dp_helper.c,v 1.12 2020/02/14 14:34:57 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2009 Keith Packard
@@ -23,7 +23,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_dp_helper.c,v 1.12 2020/02/14 14:34:57 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/kernel.h>
 #include <linux/module.h>

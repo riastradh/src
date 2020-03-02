@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_bios.h,v 1.4 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2007-2008 Nouveau Project

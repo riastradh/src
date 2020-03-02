@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_agpsupport.h,v 1.8 2018/08/28 03:41:39 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef _DRM_AGPSUPPORT_H_
 #define _DRM_AGPSUPPORT_H_

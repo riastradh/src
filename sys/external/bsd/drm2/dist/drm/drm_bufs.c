@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_bufs.c,v 1.12 2020/02/14 14:34:57 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Legacy: Generic DRM Buffer Management
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_bufs.c,v 1.12 2020/02/14 14:34:57 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/vmalloc.h>
 #include <linux/slab.h>

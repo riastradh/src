@@ -1,4 +1,4 @@
-/*	$NetBSD: ramseq.h,v 1.2 2018/08/27 04:58:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVKM_FBRAM_SEQ_H__
 #define __NVKM_FBRAM_SEQ_H__

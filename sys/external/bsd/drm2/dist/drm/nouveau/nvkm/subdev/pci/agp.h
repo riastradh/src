@@ -1,4 +1,4 @@
-/*	$NetBSD: agp.h,v 1.3 2018/08/28 03:41:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #include "priv.h"
 #if 0 && (defined(CONFIG_AGP) || (defined(CONFIG_AGP_MODULE) && defined(MODULE))) /* XXX nouveau agp */

@@ -1,4 +1,4 @@
-/*	$NetBSD: device.h,v 1.8 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVKM_DEVICE_H__
 #define __NVKM_DEVICE_H__

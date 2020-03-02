@@ -1,4 +1,4 @@
-/*	$NetBSD: ttm_bo.c,v 1.20 2020/02/23 15:46:40 ad Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  *
@@ -31,7 +31,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: ttm_bo.c,v 1.20 2020/02/23 15:46:40 ad Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #define pr_fmt(fmt) "[TTM] " fmt
 

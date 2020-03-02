@@ -1,4 +1,4 @@
-/*	$NetBSD: cikd.h,v 1.3 2019/08/09 06:27:21 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Advanced Micro Devices, Inc.

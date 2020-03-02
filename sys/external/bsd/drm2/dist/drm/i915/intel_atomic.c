@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_atomic.c,v 1.3 2019/07/24 15:55:07 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2015 Intel Corporation
@@ -32,7 +32,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_atomic.c,v 1.3 2019/07/24 15:55:07 msaitoh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_atomic.h>

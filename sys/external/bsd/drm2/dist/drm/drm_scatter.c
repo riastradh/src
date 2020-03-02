@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_scatter.c,v 1.2 2018/08/27 04:58:19 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**
  * \file drm_scatter.c
@@ -34,7 +34,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_scatter.c,v 1.2 2018/08/27 04:58:19 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/vmalloc.h>
 #include <linux/slab.h>

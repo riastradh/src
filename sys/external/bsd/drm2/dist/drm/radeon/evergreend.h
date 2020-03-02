@@ -1,4 +1,4 @@
-/*	$NetBSD: evergreend.h,v 1.4 2019/08/17 17:03:32 msaitoh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2010 Advanced Micro Devices, Inc.

@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_r420.c,v 1.2 2019/02/08 04:11:53 mrg Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Advanced Micro Devices, Inc.
@@ -28,7 +28,7 @@
  *          Jerome Glisse
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_r420.c,v 1.2 2019/02/08 04:11:53 mrg Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/seq_file.h>
 #include <linux/slab.h>

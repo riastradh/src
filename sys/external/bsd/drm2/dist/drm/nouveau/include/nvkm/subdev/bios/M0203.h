@@ -1,4 +1,4 @@
-/*	$NetBSD: M0203.h,v 1.2 2018/08/27 04:58:30 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVBIOS_M0203_H__
 #define __NVBIOS_M0203_H__

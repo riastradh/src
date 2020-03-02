@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_rect.h,v 1.2 2018/08/27 04:58:38 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2011-2013 Intel Corporation

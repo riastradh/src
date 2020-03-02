@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_sprite.c,v 1.10 2020/02/14 04:36:12 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2011 Intel Corporation
@@ -32,7 +32,7 @@
  * support.
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: intel_sprite.c,v 1.10 2020/02/14 04:36:12 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/drm_crtc.h>

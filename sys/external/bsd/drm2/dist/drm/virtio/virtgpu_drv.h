@@ -1,4 +1,4 @@
-/*	$NetBSD: virtgpu_drv.h,v 1.2 2018/08/27 04:58:37 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2015 Red Hat, Inc.

@@ -1,4 +1,4 @@
-/*	$NetBSD: gk208.fuc5.h,v 1.2 2018/08/27 04:58:35 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 uint32_t gk208_pmu_data[] = {
 /* 0x0000: proc_kern */

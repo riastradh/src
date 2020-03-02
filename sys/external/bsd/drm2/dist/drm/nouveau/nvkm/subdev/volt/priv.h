@@ -1,4 +1,4 @@
-/*	$NetBSD: priv.h,v 1.2 2018/08/27 04:58:35 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVKM_VOLT_PRIV_H__
 #define __NVKM_VOLT_PRIV_H__

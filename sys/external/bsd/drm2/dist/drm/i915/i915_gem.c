@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem.c,v 1.61 2020/02/23 15:46:40 ad Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008-2015 Intel Corporation
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem.c,v 1.61 2020/02/23 15:46:40 ad Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #ifdef __NetBSD__
 #if 0				/* XXX uvmhist option?  */

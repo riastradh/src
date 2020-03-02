@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_ttm.c,v 1.7 2018/08/27 07:51:06 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2007-2008 Tungsten Graphics, Inc., Cedar Park, TX., USA,
@@ -27,7 +27,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_ttm.c,v 1.7 2018/08/27 07:51:06 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <sys/param.h>
 #include <uvm/uvm_extern.h>	/* pmap_pv_track/untrack */

@@ -1,4 +1,4 @@
-/*	$NetBSD: drmP.h,v 1.37 2020/02/14 14:34:59 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Internal Header for the Direct Rendering Manager

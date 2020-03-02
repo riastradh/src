@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_buffer.c,v 1.3 2020/02/14 04:30:05 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /**************************************************************************
  *
@@ -35,7 +35,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_buffer.c,v 1.3 2020/02/14 04:30:05 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/export.h>
 #include "drm_buffer.h"

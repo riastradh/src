@@ -1,4 +1,4 @@
-/*	$NetBSD: radeon_cs.c,v 1.5 2020/02/14 04:38:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2008 Jerome Glisse.
@@ -27,7 +27,7 @@
  *    Jerome Glisse <glisse@freedesktop.org>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: radeon_cs.c,v 1.5 2020/02/14 04:38:24 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/list_sort.h>
 #include <drm/drmP.h>

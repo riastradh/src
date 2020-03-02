@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_fence.h,v 1.6 2018/08/27 04:58:24 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NOUVEAU_FENCE_H__
 #define __NOUVEAU_FENCE_H__

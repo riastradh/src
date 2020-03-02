@@ -1,4 +1,4 @@
-/*	$NetBSD: bmp.h,v 1.2 2018/08/27 04:58:30 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NVBIOS_BMP_H__
 #define __NVBIOS_BMP_H__

@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_bios.c,v 1.4 2019/01/27 02:08:42 pgoyette Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2005-2006 Erik Waling
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_bios.c,v 1.4 2019/01/27 02:08:42 pgoyette Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 

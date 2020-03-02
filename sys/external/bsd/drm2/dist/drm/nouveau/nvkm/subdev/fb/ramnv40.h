@@ -1,4 +1,4 @@
-/*	$NetBSD: ramnv40.h,v 1.2 2018/08/27 04:58:33 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef __NV40_FB_RAM_H__
 #define __NV40_FB_RAM_H__

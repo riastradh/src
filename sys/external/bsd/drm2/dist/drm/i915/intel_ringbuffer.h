@@ -1,4 +1,4 @@
-/*	$NetBSD: intel_ringbuffer.h,v 1.8 2020/02/14 14:34:58 maya Exp $	*/
+/*	$NetBSD$	*/
 
 #ifndef _INTEL_RINGBUFFER_H_
 #define _INTEL_RINGBUFFER_H_

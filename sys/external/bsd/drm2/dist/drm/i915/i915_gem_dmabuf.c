@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_dmabuf.c,v 1.3 2018/08/27 15:22:54 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc
@@ -26,7 +26,7 @@
  *	Dave Airlie <airlied@redhat.com>
  */
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem_dmabuf.c,v 1.3 2018/08/27 15:22:54 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include "i915_drv.h"

@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_gem_userptr.c,v 1.3 2018/08/27 07:06:11 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2012-2014 Intel Corporation
@@ -25,7 +25,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: i915_gem_userptr.c,v 1.3 2018/08/27 07:06:11 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <drm/drmP.h>
 #include <drm/i915_drm.h>

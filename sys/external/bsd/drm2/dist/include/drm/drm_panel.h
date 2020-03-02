@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_panel.h,v 1.3 2020/01/03 21:01:16 jmcneill Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2013, NVIDIA Corporation.  All rights reserved.

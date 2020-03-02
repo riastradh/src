@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_plane_helper.c,v 1.4 2020/02/14 14:34:57 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (C) 2014 Intel Corporation
@@ -26,7 +26,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_plane_helper.c,v 1.4 2020/02/14 14:34:57 maya Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/list.h>
 #include <drm/drmP.h>

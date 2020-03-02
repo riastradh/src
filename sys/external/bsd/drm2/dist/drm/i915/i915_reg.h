@@ -1,4 +1,4 @@
-/*	$NetBSD: i915_reg.h,v 1.14 2019/12/05 20:03:09 maya Exp $	*/
+/*	$NetBSD$	*/
 
 /* Copyright 2003 Tungsten Graphics, Inc., Cedar Park, Texas.
  * All Rights Reserved.

@@ -1,4 +1,4 @@
-/*	$NetBSD: drm_gem.c,v 1.15 2020/02/23 15:46:40 ad Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright © 2008 Intel Corporation
@@ -28,7 +28,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: drm_gem.c,v 1.15 2020/02/23 15:46:40 ad Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/types.h>
 #include <linux/slab.h>

@@ -1,4 +1,4 @@
-/*	$NetBSD: ast_tables.h,v 1.2 2018/08/27 04:58:23 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright (c) 2005 ASPEED Technology Inc.

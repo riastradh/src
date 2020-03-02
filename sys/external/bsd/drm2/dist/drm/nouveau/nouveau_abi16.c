@@ -1,4 +1,4 @@
-/*	$NetBSD: nouveau_abi16.c,v 1.5 2020/02/14 04:37:28 riastradh Exp $	*/
+/*	$NetBSD$	*/
 
 /*
  * Copyright 2012 Red Hat Inc.
@@ -24,7 +24,7 @@
  */
 
 #include <sys/cdefs.h>
-__KERNEL_RCSID(0, "$NetBSD: nouveau_abi16.c,v 1.5 2020/02/14 04:37:28 riastradh Exp $");
+__KERNEL_RCSID(0, "$NetBSD$");
 
 #include <nvif/client.h>
 #include <nvif/driver.h>
