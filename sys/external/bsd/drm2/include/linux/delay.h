@@ -38,6 +38,8 @@
 
 #include <machine/param.h>
 
+#include <linux/kernel.h>
+
 #define	MAX_UDELAY_MS	5
 
 static inline void
