@@ -53,8 +53,7 @@ __KERNEL_RCSID(0, "$NetBSD: drm_lock.c,v 1.7 2018/08/27 07:01:30 riastradh Exp $
 #include <sys/file.h>
 #include <sys/systm.h>
 
-#include <drm/drmP.h>
-
+#include <drm/drm_print.h>
 #include "../dist/drm/drm_internal.h"
 #include "../dist/drm/drm_legacy.h"
 
