@@ -379,4 +379,8 @@ struct drm_device {
 #endif
 };
 
+#ifdef __NetBSD__
+extern const struct cdevsw drm_cdevsw;
+#endif
+
 #endif
