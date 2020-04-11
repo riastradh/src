@@ -30,7 +30,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/hdmi.h>
 #include <linux/gcd.h>
-#include <drm/drmP.h>
+
 #include <drm/amdgpu_drm.h>
 #include "amdgpu.h"
 

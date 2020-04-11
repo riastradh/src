@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_LTC_PRIV_H__
 #define __NVKM_LTC_PRIV_H__
 #define nvkm_ltc(p) container_of((p), struct nvkm_ltc, subdev)
@@ -48,4 +48,6 @@ void gm107_ltc_zbc_clear_depth(struct nvkm_ltc *, int, const u32);
 int gp100_ltc_oneinit(struct nvkm_ltc *);
 void gp100_ltc_init(struct nvkm_ltc *);
 void gp100_ltc_intr(struct nvkm_ltc *);
+
+void gp102_ltc_zbc_clear_stencil(struct nvkm_ltc *, int, const u32);
 #endif

@@ -28,6 +28,10 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#include <linux/pci.h>
+
+#include <drm/drm_irq.h>
+
 #include "qxl_drv.h"
 
 irqreturn_t qxl_irq_handler(int irq, void *arg)

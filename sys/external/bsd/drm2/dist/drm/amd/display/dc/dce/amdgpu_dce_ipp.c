@@ -28,6 +28,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#include <linux/slab.h>
+
 #include "dce_ipp.h"
 #include "reg_helper.h"
 #include "dm_services.h"

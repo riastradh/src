@@ -36,11 +36,14 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
+#include <video/sisfb.h>
+
+#include <drm/drm_device.h>
+#include <drm/drm_file.h>
 #include <drm/sis_drm.h>
+
 #include "sis_drv.h"
 
-#include <video/sisfb.h>
 
 #define VIDEO_TYPE 0
 #define AGP_TYPE 1

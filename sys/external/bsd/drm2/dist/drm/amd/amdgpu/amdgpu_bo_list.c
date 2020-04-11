@@ -33,7 +33,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
+#include <linux/uaccess.h>
+
 #include "amdgpu.h"
 #include "amdgpu_trace.h"
 
@@ -54,8 +55,11 @@ static void amdgpu_bo_list_free(struct kref *ref)
 						   refcount);
 	struct amdgpu_bo_list_entry *e;
 
-	amdgpu_bo_list_for_each_entry(e, list)
-		amdgpu_bo_unref(&e->robj);
+	amdgpu_bo_list_for_each_entry(e, list) {
+		struct amdgpu_bo *bo = ttm_to_amdgpu_bo(e->tv.bo);
+
+		amdgpu_bo_unref(&bo);
+	}
 
 	call_rcu(&list->rhead, amdgpu_bo_list_free_rcu);
 }
@@ -72,7 +76,8 @@ int amdgpu_bo_list_create(struct amdgpu_device *adev, struct drm_file *filp,
 	unsigned i;
 	int r;
 
-	if (num_entries > SIZE_MAX / sizeof(struct amdgpu_bo_list_entry))
+	if (num_entries > (SIZE_MAX - sizeof(struct amdgpu_bo_list))
+				/ sizeof(struct amdgpu_bo_list_entry))
 		return -EINVAL;
 
 	size = sizeof(struct amdgpu_bo_list);
@@ -82,9 +87,9 @@ int amdgpu_bo_list_create(struct amdgpu_device *adev, struct drm_file *filp,
 		return -ENOMEM;
 
 	kref_init(&list->refcount);
-	list->gds_obj = adev->gds.gds_gfx_bo;
-	list->gws_obj = adev->gds.gws_gfx_bo;
-	list->oa_obj = adev->gds.oa_gfx_bo;
+	list->gds_obj = NULL;
+	list->gws_obj = NULL;
+	list->oa_obj = NULL;
 
 	array = amdgpu_bo_list_array_entry(list, 0);
 	memset(array, 0, num_entries * sizeof(struct amdgpu_bo_list_entry));
@@ -116,21 +121,19 @@ int amdgpu_bo_list_create(struct amdgpu_device *adev, struct drm_file *filp,
 			entry = &array[last_entry++];
 		}
 
-		entry->robj = bo;
 		entry->priority = min(info[i].bo_priority,
 				      AMDGPU_BO_LIST_MAX_PRIORITY);
-		entry->tv.bo = &entry->robj->tbo;
-		entry->tv.shared = !entry->robj->prime_shared_count;
+		entry->tv.bo = &bo->tbo;
 
-		if (entry->robj->preferred_domains == AMDGPU_GEM_DOMAIN_GDS)
-			list->gds_obj = entry->robj;
-		if (entry->robj->preferred_domains == AMDGPU_GEM_DOMAIN_GWS)
-			list->gws_obj = entry->robj;
-		if (entry->robj->preferred_domains == AMDGPU_GEM_DOMAIN_OA)
-			list->oa_obj = entry->robj;
+		if (bo->preferred_domains == AMDGPU_GEM_DOMAIN_GDS)
+			list->gds_obj = bo;
+		if (bo->preferred_domains == AMDGPU_GEM_DOMAIN_GWS)
+			list->gws_obj = bo;
+		if (bo->preferred_domains == AMDGPU_GEM_DOMAIN_OA)
+			list->oa_obj = bo;
 
-		total_size += amdgpu_bo_size(entry->robj);
-		trace_amdgpu_bo_list_set(list, entry->robj);
+		total_size += amdgpu_bo_size(bo);
+		trace_amdgpu_bo_list_set(list, bo);
 	}
 
 	list->first_userptr = first_userptr;
@@ -142,8 +145,16 @@ int amdgpu_bo_list_create(struct amdgpu_device *adev, struct drm_file *filp,
 	return 0;
 
 error_free:
-	while (i--)
-		amdgpu_bo_unref(&array[i].robj);
+	for (i = 0; i < last_entry; ++i) {
+		struct amdgpu_bo *bo = ttm_to_amdgpu_bo(array[i].tv.bo);
+
+		amdgpu_bo_unref(&bo);
+	}
+	for (i = first_userptr; i < num_entries; ++i) {
+		struct amdgpu_bo *bo = ttm_to_amdgpu_bo(array[i].tv.bo);
+
+		amdgpu_bo_unref(&bo);
+	}
 	kvfree(list);
 	return r;
 
@@ -195,9 +206,10 @@ void amdgpu_bo_list_get_list(struct amdgpu_bo_list *list,
 	 * with the same priority, i.e. it must be stable.
 	 */
 	amdgpu_bo_list_for_each_entry(e, list) {
+		struct amdgpu_bo *bo = ttm_to_amdgpu_bo(e->tv.bo);
 		unsigned priority = e->priority;
 
-		if (!e->robj->parent)
+		if (!bo->parent)
 			list_add_tail(&e->tv.head, &bucket[priority]);
 
 		e->user_pages = NULL;
@@ -268,7 +280,7 @@ int amdgpu_bo_list_ioctl(struct drm_device *dev, void *data,
 
 	r = amdgpu_bo_create_list_entry_array(&args->in, &info);
 	if (r)
-		goto error_free;
+		return r;
 
 	switch (args->in.operation) {
 	case AMDGPU_BO_LIST_OP_CREATE:
@@ -281,8 +293,7 @@ int amdgpu_bo_list_ioctl(struct drm_device *dev, void *data,
 		r = idr_alloc(&fpriv->bo_list_handles, list, 1, 0, GFP_KERNEL);
 		mutex_unlock(&fpriv->bo_list_lock);
 		if (r < 0) {
-			amdgpu_bo_list_put(list);
-			return r;
+			goto error_put_list;
 		}
 
 		handle = r;
@@ -304,9 +315,8 @@ int amdgpu_bo_list_ioctl(struct drm_device *dev, void *data,
 		mutex_unlock(&fpriv->bo_list_lock);
 
 		if (IS_ERR(old)) {
-			amdgpu_bo_list_put(list);
 			r = PTR_ERR(old);
-			goto error_free;
+			goto error_put_list;
 		}
 
 		amdgpu_bo_list_put(old);
@@ -323,8 +333,10 @@ int amdgpu_bo_list_ioctl(struct drm_device *dev, void *data,
 
 	return 0;
 
+error_put_list:
+	amdgpu_bo_list_put(list);
+
 error_free:
-	if (info)
-		kvfree(info);
+	kvfree(info);
 	return r;
 }

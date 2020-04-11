@@ -27,13 +27,14 @@
  *          Alex Deucher
  *          Jerome Glisse
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
 #include "amdgpu.h"
 #include "atom.h"
 
+#include <linux/pci.h>
 #include <linux/slab.h>
 #include <linux/acpi.h>
 /*

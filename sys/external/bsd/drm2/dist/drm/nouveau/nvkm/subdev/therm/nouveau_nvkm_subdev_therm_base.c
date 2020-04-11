@@ -26,8 +26,10 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <nvkm/core/option.h>
 #include "priv.h"
+
+#include <core/option.h>
+#include <subdev/pmu.h>
 
 int
 nvkm_therm_temp_get(struct nvkm_therm *therm)
@@ -137,11 +139,12 @@ nvkm_therm_update(struct nvkm_therm *therm, int mode)
 			duty = nvkm_therm_update_linear(therm);
 			break;
 		case NVBIOS_THERM_FAN_OTHER:
-			if (therm->cstate)
+			if (therm->cstate) {
 				duty = therm->cstate;
-			else
+				poll = false;
+			} else {
 				duty = nvkm_therm_update_linear_fallback(therm);
-			poll = false;
+			}
 			break;
 		}
 		immd = false;
@@ -196,8 +199,7 @@ nvkm_therm_fan_mode(struct nvkm_therm *therm, int mode)
 
 	/* The default PPWR ucode on fermi interferes with fan management */
 	if ((mode >= ARRAY_SIZE(name)) ||
-	    (mode != NVKM_THERM_CTRL_NONE && device->card_type >= NV_C0 &&
-	     !device->pmu))
+	    (mode != NVKM_THERM_CTRL_NONE && nvkm_pmu_fan_controlled(device)))
 		return -EINVAL;
 
 	/* do not allow automatic fan management if the thermal sensor is

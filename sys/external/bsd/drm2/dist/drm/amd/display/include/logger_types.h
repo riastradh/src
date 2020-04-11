@@ -64,8 +64,20 @@
 #define DC_LOG_EVENT_UNDERFLOW(...) DRM_DEBUG_KMS(__VA_ARGS__)
 #define DC_LOG_IF_TRACE(...) pr_debug("[IF_TRACE]:"__VA_ARGS__)
 #define DC_LOG_PERF_TRACE(...) DRM_DEBUG_KMS(__VA_ARGS__)
+#define DC_LOG_RETIMER_REDRIVER(...) DRM_DEBUG_KMS(__VA_ARGS__)
+#define DC_LOG_GAMMA(...) pr_debug("[GAMMA]:"__VA_ARGS__)
+#define DC_LOG_ALL_GAMMA(...) pr_debug("[GAMMA]:"__VA_ARGS__)
+#define DC_LOG_ALL_TF_CHANNELS(...) pr_debug("[GAMMA]:"__VA_ARGS__)
+#define DC_LOG_DSC(...) DRM_DEBUG_KMS(__VA_ARGS__)
+#define DC_LOG_DWB(...) DRM_DEBUG_KMS(__VA_ARGS__)
 
 struct dal_logger;
+
+struct dc_log_buffer_ctx {
+	char *buf;
+	size_t pos;
+	size_t size;
+};
 
 enum dc_log_type {
 	LOG_ERROR = 0,
@@ -101,7 +113,13 @@ enum dc_log_type {
 	LOG_IF_TRACE,
 	LOG_PERF_TRACE,
 	LOG_DISPLAYSTATS,
-
+	LOG_HDMI_RETIMER_REDRIVER,
+	LOG_DSC,
+	LOG_DWB,
+	LOG_GAMMA_DEBUG,
+	LOG_MAX_HW_POINTS,
+	LOG_ALL_TF_CHANNELS,
+	LOG_SAMPLE_1DLUT,
 	LOG_SECTION_TOTAL_COUNT
 };
 

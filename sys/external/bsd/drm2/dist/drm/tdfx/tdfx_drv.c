@@ -36,12 +36,15 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/module.h>
+#include <linux/pci.h>
 
-#include <drm/drmP.h>
-#include "tdfx_drv.h"
-
-#include <drm/drm_pciids.h>
+#include <drm/drm_drv.h>
+#include <drm/drm_file.h>
+#include <drm/drm_ioctl.h>
 #include <drm/drm_legacy.h>
+#include <drm/drm_pciids.h>
+
+#include "tdfx_drv.h"
 
 static struct pci_device_id pciidlist[] = {
 	tdfx_PCI_IDS

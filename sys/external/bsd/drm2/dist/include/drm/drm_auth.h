@@ -1,5 +1,8 @@
 /*	$NetBSD$	*/
 
+#ifndef _DRM_AUTH_H_
+#define _DRM_AUTH_H_
+
 /*
  * Internal Header for the Direct Rendering Manager
  *
@@ -27,8 +30,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _DRM_AUTH_H_
-#define _DRM_AUTH_H_
+#include <linux/idr.h>
+#include <linux/kref.h>
+#include <linux/wait.h>
+
+struct drm_file;
+struct drm_hw_lock;
 
 /*
  * Legacy DRI1 locking data structure. Only here instead of in drm_legacy.h for
@@ -52,7 +59,6 @@ struct drm_lock_data {
  *
  * @refcount: Refcount for this master object.
  * @dev: Link back to the DRM device
- * @lock: DRI1 lock information.
  * @driver_priv: Pointer to driver-private information.
  * @lessor: Lease holder
  * @lessee_id: id for lessees. Owners always have id 0
@@ -82,7 +88,6 @@ struct drm_master {
 	 * &drm_device.master_mutex.
 	 */
 	struct idr magic_map;
-	struct drm_lock_data lock;
 	void *driver_priv;
 
 	/* Tree of display resource leases, each of which is a drm_master struct
@@ -97,6 +102,10 @@ struct drm_master {
 	struct list_head lessees;
 	struct idr leases;
 	struct idr lessee_idr;
+	/* private: */
+#if IS_ENABLED(CONFIG_DRM_LEGACY)
+	struct drm_lock_data lock;
+#endif
 };
 
 struct drm_master *drm_master_get(struct drm_master *master);

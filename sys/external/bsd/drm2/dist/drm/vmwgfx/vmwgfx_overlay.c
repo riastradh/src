@@ -27,17 +27,15 @@
  *
  **************************************************************************/
 
-
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
-
-#include <drm/drmP.h>
-#include "vmwgfx_drv.h"
 
 #include <drm/ttm/ttm_placement.h>
 
 #include "device_include/svga_overlay.h"
 #include "device_include/svga_escape.h"
+
+#include "vmwgfx_drv.h"
 
 #define VMW_MAX_NUM_STREAMS 1
 #define VMW_OVERLAY_CAP_MASK (SVGA_FIFO_CAP_VIDEO | SVGA_FIFO_CAP_ESCAPE)
@@ -129,7 +127,7 @@ static int vmw_overlay_send_put(struct vmw_private *dev_priv,
 
 	fifo_size = sizeof(*cmds) + sizeof(*flush) + sizeof(*items) * num_items;
 
-	cmds = vmw_fifo_reserve(dev_priv, fifo_size);
+	cmds = VMW_FIFO_RESERVE(dev_priv, fifo_size);
 	/* hardware has hung, can't do anything here */
 	if (!cmds)
 		return -ENOMEM;
@@ -199,7 +197,7 @@ static int vmw_overlay_send_stop(struct vmw_private *dev_priv,
 	int ret;
 
 	for (;;) {
-		cmds = vmw_fifo_reserve(dev_priv, sizeof(*cmds));
+		cmds = VMW_FIFO_RESERVE(dev_priv, sizeof(*cmds));
 		if (cmds)
 			break;
 

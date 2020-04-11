@@ -31,8 +31,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <subdev/gpio.h>
 
-#include <subdev/gpio.h>
-
 static void
 nv04_bus_intr(struct nvkm_bus *bus)
 {

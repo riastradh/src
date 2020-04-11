@@ -35,13 +35,20 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
-#include <drm/i810_drm.h>
-#include "i810_drv.h"
-#include <linux/interrupt.h>	/* For task queue support */
 #include <linux/delay.h>
-#include <linux/slab.h>
-#include <linux/pagemap.h>
+#include <linux/mman.h>
+#include <linux/pci.h>
+
+#include <drm/drm_agpsupport.h>
+#include <drm/drm_device.h>
+#include <drm/drm_drv.h>
+#include <drm/drm_file.h>
+#include <drm/drm_ioctl.h>
+#include <drm/drm_irq.h>
+#include <drm/drm_print.h>
+#include <drm/i810_drm.h>
+
+#include "i810_drv.h"
 
 #define I810_BUF_FREE		2
 #define I810_BUF_CLIENT		1
@@ -726,7 +733,7 @@ static void i810_dma_dispatch_vertex(struct drm_device *dev,
 	if (nbox > I810_NR_SAREA_CLIPRECTS)
 		nbox = I810_NR_SAREA_CLIPRECTS;
 
-	if (used > 4 * 1024)
+	if (used < 0 || used > 4 * 1024)
 		used = 0;
 
 	if (sarea_priv->dirty)
@@ -1046,7 +1053,7 @@ static void i810_dma_dispatch_mc(struct drm_device *dev, struct drm_buf *buf, in
 	if (u != I810_BUF_CLIENT)
 		DRM_DEBUG("MC found buffer that isn't mine!\n");
 
-	if (used > 4 * 1024)
+	if (used < 0 || used > 4 * 1024)
 		used = 0;
 
 	sarea_priv->dirty = 0x7f;

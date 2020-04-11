@@ -28,10 +28,13 @@
  *          Jerome Glisse
  *          Christian König
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
+#include <drm/drm_debugfs.h>
+#include <drm/drm_file.h>
+
 #include "radeon.h"
 
 /*

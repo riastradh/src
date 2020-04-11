@@ -28,6 +28,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#include <linux/delay.h>
+
 #include "dce110_transform_v.h"
 #include "dm_services.h"
 #include "dc.h"

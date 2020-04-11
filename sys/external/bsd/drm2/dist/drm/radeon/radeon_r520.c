@@ -27,10 +27,10 @@
  *          Alex Deucher
  *          Jerome Glisse
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
 #include "radeon.h"
 #include "radeon_asic.h"
 #include "atom.h"
@@ -49,7 +49,7 @@ int r520_mc_wait_for_idle(struct radeon_device *rdev)
 		if (tmp & R520_MC_STATUS_IDLE) {
 			return 0;
 		}
-		DRM_UDELAY(1);
+		udelay(1);
 	}
 	return -1;
 }

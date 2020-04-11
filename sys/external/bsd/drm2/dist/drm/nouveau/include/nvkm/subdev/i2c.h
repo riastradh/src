@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_I2C_H__
 #define __NVKM_I2C_H__
 #include <core/subdev.h>
@@ -40,6 +40,7 @@ struct nvkm_i2c_bus {
 	struct mutex mutex;
 	struct list_head head;
 	struct i2c_adapter i2c;
+	u8 enabled;
 };
 
 int nvkm_i2c_bus_acquire(struct nvkm_i2c_bus *);
@@ -59,6 +60,7 @@ struct nvkm_i2c_aux {
 	struct mutex mutex;
 	struct list_head head;
 	struct i2c_adapter i2c;
+	u8 enabled;
 
 	u32 intr;
 };

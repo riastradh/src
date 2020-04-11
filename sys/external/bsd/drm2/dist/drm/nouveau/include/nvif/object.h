@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVIF_OBJECT_H__
 #define __NVIF_OBJECT_H__
 

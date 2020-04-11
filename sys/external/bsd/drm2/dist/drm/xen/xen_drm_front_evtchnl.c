@@ -13,10 +13,10 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
-
 #include <linux/errno.h>
 #include <linux/irq.h>
+
+#include <drm/drm_print.h>
 
 #include <xen/xenbus.h>
 #include <xen/events.h>

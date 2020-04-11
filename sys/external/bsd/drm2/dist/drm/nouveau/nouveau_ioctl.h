@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NOUVEAU_IOCTL_H__
 #define __NOUVEAU_IOCTL_H__
 

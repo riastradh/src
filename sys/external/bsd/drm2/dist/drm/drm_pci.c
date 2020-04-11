@@ -27,12 +27,17 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <linux/pci.h>
-#include <linux/slab.h>
 #include <linux/dma-mapping.h>
 #include <linux/export.h>
+#include <linux/pci.h>
+#include <linux/slab.h>
+
+#include <drm/drm.h>
+#include <drm/drm_agpsupport.h>
+#include <drm/drm_drv.h>
 #include <drm/drm_pci.h>
-#include <drm/drmP.h>
+#include <drm/drm_print.h>
+
 #include "drm_internal.h"
 #include "drm_legacy.h"
 
@@ -66,14 +71,14 @@ drm_dma_handle_t *drm_pci_alloc(struct drm_device * dev, size_t size, size_t ali
 		return NULL;
 
 	dmah->size = size;
-	dmah->vaddr = dma_alloc_coherent(&dev->pdev->dev, size, &dmah->busaddr, GFP_KERNEL | __GFP_COMP);
+	dmah->vaddr = dma_alloc_coherent(&dev->pdev->dev, size,
+					 &dmah->busaddr,
+					 GFP_KERNEL | __GFP_COMP);
 
 	if (dmah->vaddr == NULL) {
 		kfree(dmah);
 		return NULL;
 	}
-
-	memset(dmah->vaddr, 0, size);
 
 	/* XXX - Is virt_to_page() legal for consistent mem? */
 	/* Reserve */
@@ -124,8 +129,6 @@ void drm_pci_free(struct drm_device * dev, drm_dma_handle_t * dmah)
 }
 
 EXPORT_SYMBOL(drm_pci_free);
-
-#ifdef CONFIG_PCI
 
 static int drm_get_pci_domain(struct drm_device *dev)
 {
@@ -187,14 +190,14 @@ int drm_irq_by_busid(struct drm_device *dev, void *data,
 	struct drm_irq_busid *p = data;
 
 	if (!drm_core_check_feature(dev, DRIVER_LEGACY))
-		return -EINVAL;
+		return -EOPNOTSUPP;
 
 	/* UMS was only ever support on PCI devices. */
 	if (WARN_ON(!dev->pdev))
 		return -EINVAL;
 
 	if (!drm_core_check_feature(dev, DRIVER_HAVE_IRQ))
-		return -EINVAL;
+		return -EOPNOTSUPP;
 
 	return drm_pci_irq_by_busid(dev, p);
 }
@@ -284,6 +287,8 @@ err_free:
 }
 EXPORT_SYMBOL(drm_get_pci_dev);
 
+#ifdef CONFIG_DRM_LEGACY
+
 /**
  * drm_legacy_pci_init - shadow-attach a legacy DRM PCI driver
  * @driver: DRM device driver
@@ -331,17 +336,6 @@ int drm_legacy_pci_init(struct drm_driver *driver, struct pci_driver *pdriver)
 }
 EXPORT_SYMBOL(drm_legacy_pci_init);
 
-#else
-
-void drm_pci_agp_destroy(struct drm_device *dev) {}
-
-int drm_irq_by_busid(struct drm_device *dev, void *data,
-		     struct drm_file *file_priv)
-{
-	return -EINVAL;
-}
-#endif
-
 /**
  * drm_legacy_pci_exit - unregister shadow-attach legacy DRM driver
  * @driver: DRM device driver
@@ -367,3 +361,5 @@ void drm_legacy_pci_exit(struct drm_driver *driver, struct pci_driver *pdriver)
 	DRM_INFO("Module unloaded\n");
 }
 EXPORT_SYMBOL(drm_legacy_pci_exit);
+
+#endif

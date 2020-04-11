@@ -31,10 +31,13 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
-#include "ast_drv.h"
+#include <linux/delay.h>
+#include <linux/pci.h>
+
+#include <drm/drm_print.h>
 
 #include "ast_dram_tables.h"
+#include "ast_drv.h"
 
 static void ast_post_chip_2300(struct drm_device *dev);
 static void ast_post_chip_2500(struct drm_device *dev);
@@ -51,7 +54,7 @@ void ast_enable_mmio(struct drm_device *dev)
 {
 	struct ast_private *ast = dev->dev_private;
 
-	ast_set_index_reg_mask(ast, AST_IO_CRTC_PORT, 0xa1, 0xff, 0x04);
+	ast_set_index_reg(ast, AST_IO_CRTC_PORT, 0xa1, 0x06);
 }
 
 

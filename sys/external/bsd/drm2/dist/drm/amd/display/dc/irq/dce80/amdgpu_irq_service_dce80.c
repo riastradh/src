@@ -28,6 +28,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#include <linux/slab.h>
+
 #include "dm_services.h"
 
 #include "include/logger_interface.h"
@@ -89,6 +91,10 @@ static const struct irq_source_info_funcs vblank_irq_info_funcs = {
 	.ack = NULL
 };
 
+static const struct irq_source_info_funcs vupdate_irq_info_funcs = {
+	.set = NULL,
+	.ack = NULL
+};
 
 #define hpd_int_entry(reg_num)\
 	[DC_IRQ_SOURCE_INVALID + reg_num] = {\
@@ -147,7 +153,7 @@ static const struct irq_source_info_funcs vblank_irq_info_funcs = {
 		CRTC_V_UPDATE_INT_STATUS__CRTC_V_UPDATE_INT_CLEAR_MASK,\
 		.ack_value =\
 		CRTC_V_UPDATE_INT_STATUS__CRTC_V_UPDATE_INT_CLEAR_MASK,\
-		.funcs = &vblank_irq_info_funcs\
+		.funcs = &vupdate_irq_info_funcs\
 	}
 
 #define vblank_int_entry(reg_num)\
@@ -282,7 +288,7 @@ static const struct irq_service_funcs irq_service_funcs_dce80 = {
 		.to_dal_irq_source = to_dal_irq_source_dce110
 };
 
-static void construct(
+static void dce80_irq_construct(
 	struct irq_service *irq_service,
 	struct irq_service_init_data *init_data)
 {
@@ -301,7 +307,7 @@ struct irq_service *dal_irq_service_dce80_create(
 	if (!irq_service)
 		return NULL;
 
-	construct(irq_service, init_data);
+	dce80_irq_construct(irq_service, init_data);
 	return irq_service;
 }
 

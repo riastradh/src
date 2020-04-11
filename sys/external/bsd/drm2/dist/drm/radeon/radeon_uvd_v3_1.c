@@ -27,7 +27,6 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
 #include "radeon.h"
 #include "radeon_asic.h"
 #include "nid.h"

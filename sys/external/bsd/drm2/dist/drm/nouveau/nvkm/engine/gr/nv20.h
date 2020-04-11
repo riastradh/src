@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NV20_GR_H__
 #define __NV20_GR_H__
 #define nv20_gr(p) container_of((p), struct nv20_gr, base)

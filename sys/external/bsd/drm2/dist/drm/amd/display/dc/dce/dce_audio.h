@@ -51,6 +51,8 @@
 		SF(DCCG_AUDIO_DTO_SOURCE, DCCG_AUDIO_DTO0_SOURCE_SEL, mask_sh),\
 		SF(DCCG_AUDIO_DTO_SOURCE, DCCG_AUDIO_DTO_SEL, mask_sh),\
 		SF(DCCG_AUDIO_DTO_SOURCE, DCCG_AUDIO_DTO2_USE_512FBR_DTO, mask_sh),\
+		SF(DCCG_AUDIO_DTO_SOURCE, DCCG_AUDIO_DTO0_USE_512FBR_DTO, mask_sh),\
+		SF(DCCG_AUDIO_DTO_SOURCE, DCCG_AUDIO_DTO1_USE_512FBR_DTO, mask_sh),\
 		SF(DCCG_AUDIO_DTO0_MODULE, DCCG_AUDIO_DTO0_MODULE, mask_sh),\
 		SF(DCCG_AUDIO_DTO0_PHASE, DCCG_AUDIO_DTO0_PHASE, mask_sh),\
 		SF(DCCG_AUDIO_DTO1_MODULE, DCCG_AUDIO_DTO1_MODULE, mask_sh),\
@@ -97,9 +99,11 @@ struct dce_audio_shift {
 	uint8_t DCCG_AUDIO_DTO1_MODULE;
 	uint8_t DCCG_AUDIO_DTO1_PHASE;
 	uint8_t DCCG_AUDIO_DTO2_USE_512FBR_DTO;
+	uint32_t DCCG_AUDIO_DTO0_USE_512FBR_DTO;
+	uint32_t DCCG_AUDIO_DTO1_USE_512FBR_DTO;
 };
 
-struct dce_aduio_mask {
+struct dce_audio_mask {
 	uint32_t AZALIA_ENDPOINT_REG_INDEX;
 	uint32_t AZALIA_ENDPOINT_REG_DATA;
 
@@ -114,13 +118,16 @@ struct dce_aduio_mask {
 	uint32_t DCCG_AUDIO_DTO1_MODULE;
 	uint32_t DCCG_AUDIO_DTO1_PHASE;
 	uint32_t DCCG_AUDIO_DTO2_USE_512FBR_DTO;
+	uint32_t DCCG_AUDIO_DTO0_USE_512FBR_DTO;
+	uint32_t DCCG_AUDIO_DTO1_USE_512FBR_DTO;
+
 };
 
 struct dce_audio {
 	struct audio base;
 	const struct dce_audio_registers *regs;
 	const struct dce_audio_shift *shifts;
-	const struct dce_aduio_mask *masks;
+	const struct dce_audio_mask *masks;
 };
 
 struct audio *dce_audio_create(
@@ -128,7 +135,7 @@ struct audio *dce_audio_create(
 		unsigned int inst,
 		const struct dce_audio_registers *reg,
 		const struct dce_audio_shift *shifts,
-		const struct dce_aduio_mask *masks);
+		const struct dce_audio_mask *masks);
 
 void dce_aud_destroy(struct audio **audio);
 

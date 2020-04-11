@@ -31,7 +31,6 @@
 #ifndef _VGEM_DRV_H_
 #define _VGEM_DRV_H_
 
-#include <drm/drmP.h>
 #include <drm/drm_gem.h>
 #include <drm/drm_cache.h>
 

@@ -23,10 +23,10 @@
  *
  * Authors: Dave Airlie
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
 #include <drm/radeon_drm.h>
 #include "radeon.h"
 #include "nid.h"

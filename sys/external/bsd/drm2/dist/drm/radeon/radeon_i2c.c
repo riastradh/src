@@ -25,14 +25,17 @@
  * Authors: Dave Airlie
  *          Alex Deucher
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/export.h>
+#include <linux/pci.h>
 
-#include <drm/drmP.h>
+#include <drm/drm_device.h>
 #include <drm/drm_edid.h>
 #include <drm/radeon_drm.h>
+
 #include "radeon.h"
 #include "atom.h"
 

@@ -34,6 +34,7 @@
 #ifndef _VMWGFX_MSG_H
 #define _VMWGFX_MSG_H
 
+#include <asm/vmware.h>
 
 /**
  * Hypervisor-specific bi-directional communication channel.  Should never
@@ -46,7 +47,7 @@
  * @in_ebx: [IN] Message Len, through EBX
  * @in_si: [IN] Input argument through SI, set to 0 if not used
  * @in_di: [IN] Input argument through DI, set ot 0 if not used
- * @port_num: [IN] port number + [channel id]
+ * @flags: [IN] hypercall flags + [channel id]
  * @magic: [IN] hypervisor magic value
  * @eax: [OUT] value of EAX register
  * @ebx: [OUT] e.g. status from an HB message status command
@@ -56,10 +57,10 @@
  * @di:  [OUT]
  */
 #define VMW_PORT(cmd, in_ebx, in_si, in_di,	\
-		 port_num, magic,		\
+		 flags, magic,		\
 		 eax, ebx, ecx, edx, si, di)	\
 ({						\
-	asm volatile ("inl %%dx, %%eax;" :	\
+	asm volatile (VMWARE_HYPERCALL :	\
 		"=a"(eax),			\
 		"=b"(ebx),			\
 		"=c"(ecx),			\
@@ -69,7 +70,7 @@
 		"a"(magic),			\
 		"b"(in_ebx),			\
 		"c"(cmd),			\
-		"d"(port_num),			\
+		"d"(flags),			\
 		"S"(in_si),			\
 		"D"(in_di) :			\
 		"memory");			\
@@ -87,7 +88,7 @@
  * @in_ecx: [IN] Message Len, through ECX
  * @in_si: [IN] Input argument through SI, set to 0 if not used
  * @in_di: [IN] Input argument through DI, set to 0 if not used
- * @port_num: [IN] port number + [channel id]
+ * @flags: [IN] hypercall flags + [channel id]
  * @magic: [IN] hypervisor magic value
  * @bp:  [IN]
  * @eax: [OUT] value of EAX register
@@ -100,12 +101,12 @@
 #ifdef __x86_64__
 
 #define VMW_PORT_HB_OUT(cmd, in_ecx, in_si, in_di,	\
-			port_num, magic, bp,		\
+			flags, magic, bp,		\
 			eax, ebx, ecx, edx, si, di)	\
 ({							\
 	asm volatile ("push %%rbp;"			\
 		"mov %12, %%rbp;"			\
-		"rep outsb;"				\
+		VMWARE_HYPERCALL_HB_OUT			\
 		"pop %%rbp;" :				\
 		"=a"(eax),				\
 		"=b"(ebx),				\
@@ -116,7 +117,7 @@
 		"a"(magic),				\
 		"b"(cmd),				\
 		"c"(in_ecx),				\
-		"d"(port_num),				\
+		"d"(flags),				\
 		"S"(in_si),				\
 		"D"(in_di),				\
 		"r"(bp) :				\
@@ -125,12 +126,12 @@
 
 
 #define VMW_PORT_HB_IN(cmd, in_ecx, in_si, in_di,	\
-		       port_num, magic, bp,		\
+		       flags, magic, bp,		\
 		       eax, ebx, ecx, edx, si, di)	\
 ({							\
 	asm volatile ("push %%rbp;"			\
 		"mov %12, %%rbp;"			\
-		"rep insb;"				\
+		VMWARE_HYPERCALL_HB_IN			\
 		"pop %%rbp" :				\
 		"=a"(eax),				\
 		"=b"(ebx),				\
@@ -141,7 +142,7 @@
 		"a"(magic),				\
 		"b"(cmd),				\
 		"c"(in_ecx),				\
-		"d"(port_num),				\
+		"d"(flags),				\
 		"S"(in_si),				\
 		"D"(in_di),				\
 		"r"(bp) :				\
@@ -159,13 +160,13 @@
  * just pushed it.
  */
 #define VMW_PORT_HB_OUT(cmd, in_ecx, in_si, in_di,	\
-			port_num, magic, bp,		\
+			flags, magic, bp,		\
 			eax, ebx, ecx, edx, si, di)	\
 ({							\
 	asm volatile ("push %12;"			\
 		"push %%ebp;"				\
 		"mov 0x04(%%esp), %%ebp;"		\
-		"rep outsb;"				\
+		VMWARE_HYPERCALL_HB_OUT			\
 		"pop %%ebp;"				\
 		"add $0x04, %%esp;" :			\
 		"=a"(eax),				\
@@ -177,7 +178,7 @@
 		"a"(magic),				\
 		"b"(cmd),				\
 		"c"(in_ecx),				\
-		"d"(port_num),				\
+		"d"(flags),				\
 		"S"(in_si),				\
 		"D"(in_di),				\
 		"m"(bp) :				\
@@ -186,13 +187,13 @@
 
 
 #define VMW_PORT_HB_IN(cmd, in_ecx, in_si, in_di,	\
-		       port_num, magic, bp,		\
+		       flags, magic, bp,		\
 		       eax, ebx, ecx, edx, si, di)	\
 ({							\
 	asm volatile ("push %12;"			\
 		"push %%ebp;"				\
 		"mov 0x04(%%esp), %%ebp;"		\
-		"rep insb;"				\
+		VMWARE_HYPERCALL_HB_IN			\
 		"pop %%ebp;"				\
 		"add $0x04, %%esp;" :			\
 		"=a"(eax),				\
@@ -204,7 +205,7 @@
 		"a"(magic),				\
 		"b"(cmd),				\
 		"c"(in_ecx),				\
-		"d"(port_num),				\
+		"d"(flags),				\
 		"S"(in_si),				\
 		"D"(in_di),				\
 		"m"(bp) :				\

@@ -27,14 +27,16 @@
  *          Alex Deucher
  *          Jerome Glisse
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
+#include <linux/pci.h>
+
+#include "atom.h"
 #include "radeon.h"
 #include "radeon_asic.h"
 #include "radeon_audio.h"
-#include "atom.h"
 #include "rs690d.h"
 
 int rs690_mc_wait_for_idle(struct radeon_device *rdev)

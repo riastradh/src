@@ -27,17 +27,22 @@
  *          Alex Deucher
  *          Jerome Glisse
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/seq_file.h>
 #include <linux/slab.h>
-#include <drm/drmP.h>
-#include "rv515d.h"
+
+#include <drm/drm_debugfs.h>
+#include <drm/drm_device.h>
+#include <drm/drm_file.h>
+
+#include "atom.h"
 #include "radeon.h"
 #include "radeon_asic.h"
-#include "atom.h"
 #include "rv515_reg_safe.h"
+#include "rv515d.h"
 
 /* This files gather functions specifics to: rv515 */
 static int rv515_debugfs_pipes_info_init(struct radeon_device *rdev);
@@ -143,7 +148,7 @@ int rv515_mc_wait_for_idle(struct radeon_device *rdev)
 		if (tmp & MC_STATUS_IDLE) {
 			return 0;
 		}
-		DRM_UDELAY(1);
+		udelay(1);
 	}
 	return -1;
 }

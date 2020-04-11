@@ -30,7 +30,11 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
+
 #include <asm/unaligned.h>
+
+#include <drm/drm_device.h>
+#include <drm/drm_util.h>
 
 #define ATOM_DEBUG
 

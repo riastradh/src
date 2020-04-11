@@ -46,6 +46,9 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #define TTM_MEMORY_ALLOC_RETRIES 4
 
+struct ttm_mem_global ttm_mem_glob;
+EXPORT_SYMBOL(ttm_mem_glob);
+
 struct ttm_mem_zone {
 	struct kobject kobj;
 	struct ttm_mem_global *glob;
@@ -83,7 +86,7 @@ static void ttm_mem_zone_kobj_release(struct kobject *kobj)
 	struct ttm_mem_zone *zone =
 		container_of(kobj, struct ttm_mem_zone, kobj);
 
-	pr_info("Zone %7s: Used memory at exit: %llu kiB\n",
+	pr_info("Zone %7s: Used memory at exit: %llu KiB\n",
 		zone->name, (unsigned long long)zone->used_mem >> 10);
 	kfree(zone);
 }
@@ -221,14 +224,6 @@ static ssize_t ttm_mem_global_store(struct kobject *kobj,
 	return size;
 }
 
-static void ttm_mem_global_kobj_release(struct kobject *kobj)
-{
-	struct ttm_mem_global *glob =
-		container_of(kobj, struct ttm_mem_global, kobj);
-
-	kfree(glob);
-}
-
 static struct attribute *ttm_mem_global_attrs[] = {
 	&ttm_mem_global_lower_mem_limit,
 	NULL
@@ -240,7 +235,6 @@ static const struct sysfs_ops ttm_mem_global_ops = {
 };
 
 static struct kobj_type ttm_mem_glob_kobj_type = {
-	.release = &ttm_mem_global_kobj_release,
 	.sysfs_ops = &ttm_mem_global_ops,
 	.default_attrs = ttm_mem_global_attrs,
 };
@@ -286,7 +280,7 @@ static void ttm_shrink(struct ttm_mem_global *glob, bool from_wq,
 
 	while (ttm_zones_above_swap_target(glob, from_wq, extra)) {
 		spin_unlock(&glob->lock);
-		ret = ttm_bo_swapout(glob->bo_glob, ctx);
+		ret = ttm_bo_swapout(&ttm_bo_glob, ctx);
 		spin_lock(&glob->lock);
 		if (unlikely(ret != 0))
 			break;
@@ -459,7 +453,7 @@ int ttm_mem_global_init(struct ttm_mem_global *glob)
 #endif
 	for (i = 0; i < glob->num_zones; ++i) {
 		zone = glob->zones[i];
-		pr_info("Zone %7s: Available graphics memory: %llu kiB\n",
+		pr_info("Zone %7s: Available graphics memory: %llu KiB\n",
 			zone->name, (unsigned long long)zone->max_mem >> 10);
 	}
 	ttm_page_alloc_init(glob, glob->zone_kernel->max_mem/(2*PAGE_SIZE));
@@ -469,12 +463,11 @@ out_no_zone:
 	ttm_mem_global_release(glob);
 	return ret;
 }
-EXPORT_SYMBOL(ttm_mem_global_init);
 
 void ttm_mem_global_release(struct ttm_mem_global *glob)
 {
-	unsigned int i;
 	struct ttm_mem_zone *zone;
+	unsigned int i;
 
 	/* let the page allocator first stop the shrink work. */
 	ttm_page_alloc_fini();
@@ -487,11 +480,11 @@ void ttm_mem_global_release(struct ttm_mem_global *glob)
 		zone = glob->zones[i];
 		kobject_del(&zone->kobj);
 		kobject_put(&zone->kobj);
-			}
+	}
 	kobject_del(&glob->kobj);
 	kobject_put(&glob->kobj);
+	memset(glob, 0, sizeof(*glob));
 }
-EXPORT_SYMBOL(ttm_mem_global_release);
 
 static void ttm_check_swapping(struct ttm_mem_global *glob)
 {
@@ -535,7 +528,7 @@ static void ttm_mem_global_free_zone(struct ttm_mem_global *glob,
 void ttm_mem_global_free(struct ttm_mem_global *glob,
 			 uint64_t amount)
 {
-	return ttm_mem_global_free_zone(glob, NULL, amount);
+	return ttm_mem_global_free_zone(glob, glob->zone_kernel, amount);
 }
 EXPORT_SYMBOL(ttm_mem_global_free);
 
@@ -634,10 +627,10 @@ int ttm_mem_global_alloc(struct ttm_mem_global *glob, uint64_t memory,
 {
 	/**
 	 * Normal allocations of kernel memory are registered in
-	 * all zones.
+	 * the kernel zone.
 	 */
 
-	return ttm_mem_global_alloc_zone(glob, NULL, memory, ctx);
+	return ttm_mem_global_alloc_zone(glob, glob->zone_kernel, memory, ctx);
 }
 EXPORT_SYMBOL(ttm_mem_global_alloc);
 

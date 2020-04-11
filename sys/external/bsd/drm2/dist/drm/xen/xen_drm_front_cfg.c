@@ -13,9 +13,9 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
-
 #include <linux/device.h>
+
+#include <drm/drm_print.h>
 
 #include <xen/interface/io/displif.h>
 #include <xen/xenbus.h>

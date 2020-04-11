@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NV31_MPEG_H__
 #define __NV31_MPEG_H__
 #define nv31_mpeg(p) container_of((p), struct nv31_mpeg, engine)

@@ -43,10 +43,10 @@
  * If we are asked to block we wait on all the oldest fence of all
  * rings. We just wait for any of those fence to complete.
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
 #include "radeon.h"
 
 static void radeon_sa_bo_remove_locked(struct radeon_sa_bo *sa_bo);

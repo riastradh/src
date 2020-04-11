@@ -23,21 +23,25 @@
  *
  * Authors: Alex Deucher
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
+#include <linux/pci.h>
 #include <linux/slab.h>
-#include <drm/drmP.h>
+
+#include <drm/drm_vblank.h>
+#include <drm/radeon_drm.h>
+
+#include "atom.h"
+#include "avivod.h"
+#include "evergreen_blit_shaders.h"
+#include "evergreen_reg.h"
+#include "evergreend.h"
 #include "radeon.h"
 #include "radeon_asic.h"
 #include "radeon_audio.h"
-#include <drm/radeon_drm.h>
-#include "evergreend.h"
-#include "atom.h"
-#include "avivod.h"
-#include "evergreen_reg.h"
-#include "evergreen_blit_shaders.h"
 #include "radeon_ucode.h"
 
 #define DC_HPDx_CONTROL(x)        (DC_HPD1_CONTROL     + (x * 0xc))
@@ -4946,7 +4950,7 @@ static void evergreen_uvd_init(struct radeon_device *rdev)
 		 * there. So it is pointless to try to go through that code
 		 * hence why we disable uvd here.
 		 */
-		rdev->has_uvd = 0;
+		rdev->has_uvd = false;
 		return;
 	}
 	rdev->ring[R600_RING_TYPE_UVD_INDEX].ring_obj = NULL;

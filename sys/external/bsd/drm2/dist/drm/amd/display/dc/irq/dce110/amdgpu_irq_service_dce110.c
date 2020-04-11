@@ -28,6 +28,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
+#include <linux/slab.h>
+
 #include "dm_services.h"
 
 #include "include/logger_interface.h"
@@ -83,6 +85,11 @@ static const struct irq_source_info_funcs pflip_irq_info_funcs = {
 
 static const struct irq_source_info_funcs vblank_irq_info_funcs = {
 	.set = dce110_vblank_set,
+	.ack = NULL
+};
+
+static const struct irq_source_info_funcs vupdate_irq_info_funcs = {
+	.set = NULL,
 	.ack = NULL
 };
 
@@ -142,7 +149,7 @@ static const struct irq_source_info_funcs vblank_irq_info_funcs = {
 		CRTC_V_UPDATE_INT_STATUS__CRTC_V_UPDATE_INT_CLEAR_MASK,\
 		.ack_value =\
 		CRTC_V_UPDATE_INT_STATUS__CRTC_V_UPDATE_INT_CLEAR_MASK,\
-		.funcs = &vblank_irq_info_funcs\
+		.funcs = &vupdate_irq_info_funcs\
 	}
 
 #define vblank_int_entry(reg_num)\
@@ -202,7 +209,7 @@ bool dce110_vblank_set(struct irq_service *irq_service,
 		       bool enable)
 {
 	struct dc_context *dc_ctx = irq_service->ctx;
-	struct dc *core_dc = irq_service->ctx->dc;
+	struct dc *dc = irq_service->ctx->dc;
 	enum dc_irq_source dal_irq_src =
 			dc_interrupt_to_irq_source(irq_service->ctx->dc,
 						   info->src_id,
@@ -210,7 +217,7 @@ bool dce110_vblank_set(struct irq_service *irq_service,
 	uint8_t pipe_offset = dal_irq_src - IRQ_TYPE_VBLANK;
 
 	struct timing_generator *tg =
-			core_dc->current_state->res_ctx.pipe_ctx[pipe_offset].stream_res.tg;
+			dc->current_state->res_ctx.pipe_ctx[pipe_offset].stream_res.tg;
 
 	if (enable) {
 		if (!tg || !tg->funcs->arm_vert_intr(tg, 2)) {
@@ -401,7 +408,7 @@ static const struct irq_service_funcs irq_service_funcs_dce110 = {
 		.to_dal_irq_source = to_dal_irq_source_dce110
 };
 
-static void construct(struct irq_service *irq_service,
+static void dce110_irq_construct(struct irq_service *irq_service,
 		      struct irq_service_init_data *init_data)
 {
 	dal_irq_service_construct(irq_service, init_data);
@@ -419,6 +426,6 @@ dal_irq_service_dce110_create(struct irq_service_init_data *init_data)
 	if (!irq_service)
 		return NULL;
 
-	construct(irq_service, init_data);
+	dce110_irq_construct(irq_service, init_data);
 	return irq_service;
 }

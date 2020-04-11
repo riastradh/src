@@ -28,6 +28,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include "hwmgr.h"
 #include "vega10_hwmgr.h"
+#include "vega10_smumgr.h"
 #include "vega10_powertune.h"
 #include "vega10_ppsmc.h"
 #include "vega10_inc.h"
@@ -941,7 +942,7 @@ static int vega10_enable_cac_driving_se_didt_config(struct pp_hwmgr *hwmgr)
 
 	num_se = adev->gfx.config.max_shader_engines;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	mutex_lock(&adev->grbm_idx_mutex);
 	for (count = 0; count < num_se; count++) {
@@ -966,7 +967,7 @@ static int vega10_enable_cac_driving_se_didt_config(struct pp_hwmgr *hwmgr)
 
 	vega10_didt_set_mask(hwmgr, true);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	return 0;
 }
@@ -975,11 +976,11 @@ static int vega10_disable_cac_driving_se_didt_config(struct pp_hwmgr *hwmgr)
 {
 	struct amdgpu_device *adev = hwmgr->adev;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	vega10_didt_set_mask(hwmgr, false);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	return 0;
 }
@@ -992,7 +993,7 @@ static int vega10_enable_psm_gc_didt_config(struct pp_hwmgr *hwmgr)
 
 	num_se = adev->gfx.config.max_shader_engines;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	mutex_lock(&adev->grbm_idx_mutex);
 	for (count = 0; count < num_se; count++) {
@@ -1011,7 +1012,7 @@ static int vega10_enable_psm_gc_didt_config(struct pp_hwmgr *hwmgr)
 
 	vega10_didt_set_mask(hwmgr, true);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	vega10_program_gc_didt_config_registers(hwmgr, GCDiDtDroopCtrlConfig_vega10);
 	if (PP_CAP(PHM_PlatformCaps_GCEDC))
@@ -1028,11 +1029,11 @@ static int vega10_disable_psm_gc_didt_config(struct pp_hwmgr *hwmgr)
 	struct amdgpu_device *adev = hwmgr->adev;
 	uint32_t data;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	vega10_didt_set_mask(hwmgr, false);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	if (PP_CAP(PHM_PlatformCaps_GCEDC)) {
 		data = 0x00000000;
@@ -1053,7 +1054,7 @@ static int vega10_enable_se_edc_config(struct pp_hwmgr *hwmgr)
 
 	num_se = adev->gfx.config.max_shader_engines;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	mutex_lock(&adev->grbm_idx_mutex);
 	for (count = 0; count < num_se; count++) {
@@ -1074,7 +1075,7 @@ static int vega10_enable_se_edc_config(struct pp_hwmgr *hwmgr)
 
 	vega10_didt_set_mask(hwmgr, true);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	return 0;
 }
@@ -1083,11 +1084,11 @@ static int vega10_disable_se_edc_config(struct pp_hwmgr *hwmgr)
 {
 	struct amdgpu_device *adev = hwmgr->adev;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	vega10_didt_set_mask(hwmgr, false);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	return 0;
 }
@@ -1101,7 +1102,7 @@ static int vega10_enable_psm_gc_edc_config(struct pp_hwmgr *hwmgr)
 
 	num_se = adev->gfx.config.max_shader_engines;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	vega10_program_gc_didt_config_registers(hwmgr, AvfsPSMResetConfig_vega10);
 
@@ -1122,7 +1123,7 @@ static int vega10_enable_psm_gc_edc_config(struct pp_hwmgr *hwmgr)
 
 	vega10_didt_set_mask(hwmgr, true);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	vega10_program_gc_didt_config_registers(hwmgr, PSMGCEDCDroopCtrlConfig_vega10);
 
@@ -1142,11 +1143,11 @@ static int vega10_disable_psm_gc_edc_config(struct pp_hwmgr *hwmgr)
 	struct amdgpu_device *adev = hwmgr->adev;
 	uint32_t data;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	vega10_didt_set_mask(hwmgr, false);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	if (PP_CAP(PHM_PlatformCaps_GCEDC)) {
 		data = 0x00000000;
@@ -1164,7 +1165,7 @@ static int vega10_enable_se_edc_force_stall_config(struct pp_hwmgr *hwmgr)
 	struct amdgpu_device *adev = hwmgr->adev;
 	int result;
 
-	adev->gfx.rlc.funcs->enter_safe_mode(adev);
+	amdgpu_gfx_rlc_enter_safe_mode(adev);
 
 	mutex_lock(&adev->grbm_idx_mutex);
 	WREG32_SOC15(GC, 0, mmGRBM_GFX_INDEX, 0xE0000000);
@@ -1177,7 +1178,7 @@ static int vega10_enable_se_edc_force_stall_config(struct pp_hwmgr *hwmgr)
 
 	vega10_didt_set_mask(hwmgr, false);
 
-	adev->gfx.rlc.funcs->exit_safe_mode(adev);
+	amdgpu_gfx_rlc_exit_safe_mode(adev);
 
 	return 0;
 }
@@ -1346,6 +1347,9 @@ int vega10_enable_power_containment(struct pp_hwmgr *hwmgr)
 
 	hwmgr->default_power_limit = hwmgr->power_limit =
 			(uint32_t)(tdp_table->usMaximumPowerDeliveryLimit);
+
+	if (!hwmgr->not_vf)
+		return 0;
 
 	if (PP_CAP(PHM_PlatformCaps_PowerContainment)) {
 		if (data->smu_features[GNLD_PPT].supported)

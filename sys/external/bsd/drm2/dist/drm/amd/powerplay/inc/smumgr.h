@@ -43,6 +43,7 @@ enum SMU_MEMBER {
 	HandshakeDisables = 0,
 	VoltageChangeTimeout,
 	AverageGraphicsActivity,
+	AverageMemoryActivity,
 	PreVBlankGap,
 	VBlankTimeout,
 	UcodeLoadStatus,

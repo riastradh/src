@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVBIOS_ICCSENSE_H__
 #define __NVBIOS_ICCSENSE_H__
 struct pwr_rail_resistor_t {

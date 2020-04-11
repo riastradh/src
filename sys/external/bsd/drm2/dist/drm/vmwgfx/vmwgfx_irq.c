@@ -30,7 +30,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
+#include <linux/sched/signal.h>
+
 #include "vmwgfx_drv.h"
 
 #define VMW_FENCE_WRAP (1 << 24)

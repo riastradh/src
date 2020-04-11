@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_FB_NV50_H__
 #define __NVKM_FB_NV50_H__
 #define nv50_fb(p) container_of((p), struct nv50_fb, base)

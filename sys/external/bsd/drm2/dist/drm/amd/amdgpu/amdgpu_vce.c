@@ -32,7 +32,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/firmware.h>
 #include <linux/module.h>
-#include <drm/drmP.h>
+
 #include <drm/drm.h>
 
 #include "amdgpu.h"
@@ -85,6 +85,11 @@ MODULE_FIRMWARE(FIRMWARE_VEGA12);
 MODULE_FIRMWARE(FIRMWARE_VEGA20);
 
 static void amdgpu_vce_idle_work_handler(struct work_struct *work);
+static int amdgpu_vce_get_create_msg(struct amdgpu_ring *ring, uint32_t handle,
+				     struct amdgpu_bo *bo,
+				     struct dma_fence **fence);
+static int amdgpu_vce_get_destroy_msg(struct amdgpu_ring *ring, uint32_t handle,
+				      bool direct, struct dma_fence **fence);
 
 /**
  * amdgpu_vce_init - allocate memory, load vce firmware
@@ -216,6 +221,7 @@ int amdgpu_vce_sw_fini(struct amdgpu_device *adev)
 	if (adev->vce.vcpu_bo == NULL)
 		return 0;
 
+	cancel_delayed_work_sync(&adev->vce.idle_work);
 	drm_sched_entity_destroy(&adev->vce.entity);
 
 	amdgpu_bo_free_kernel(&adev->vce.vcpu_bo, &adev->vce.gpu_addr,
@@ -239,12 +245,13 @@ int amdgpu_vce_sw_fini(struct amdgpu_device *adev)
 int amdgpu_vce_entity_init(struct amdgpu_device *adev)
 {
 	struct amdgpu_ring *ring;
-	struct drm_sched_rq *rq;
+	struct drm_gpu_scheduler *sched;
 	int r;
 
 	ring = &adev->vce.ring[0];
-	rq = &ring->sched.sched_rq[DRM_SCHED_PRIORITY_NORMAL];
-	r = drm_sched_entity_init(&adev->vce.entity, &rq, 1, NULL);
+	sched = &ring->sched;
+	r = drm_sched_entity_init(&adev->vce.entity, DRM_SCHED_PRIORITY_NORMAL,
+				  &sched, 1, NULL);
 	if (r != 0) {
 		DRM_ERROR("Failed setting up VCE run queue.\n");
 		return r;
@@ -263,6 +270,8 @@ int amdgpu_vce_suspend(struct amdgpu_device *adev)
 {
 	int i;
 
+	cancel_delayed_work_sync(&adev->vce.idle_work);
+
 	if (adev->vce.vcpu_bo == NULL)
 		return 0;
 
@@ -273,7 +282,6 @@ int amdgpu_vce_suspend(struct amdgpu_device *adev)
 	if (i == AMDGPU_MAX_VCE_HANDLES)
 		return 0;
 
-	cancel_delayed_work_sync(&adev->vce.idle_work);
 	/* TODO: suspending running encoding sessions isn't supported */
 	return -EINVAL;
 }
@@ -432,14 +440,15 @@ void amdgpu_vce_free_handles(struct amdgpu_device *adev, struct drm_file *filp)
  *
  * Open up a stream for HW test
  */
-int amdgpu_vce_get_create_msg(struct amdgpu_ring *ring, uint32_t handle,
-			      struct dma_fence **fence)
+static int amdgpu_vce_get_create_msg(struct amdgpu_ring *ring, uint32_t handle,
+				     struct amdgpu_bo *bo,
+				     struct dma_fence **fence)
 {
 	const unsigned ib_size_dw = 1024;
 	struct amdgpu_job *job;
 	struct amdgpu_ib *ib;
 	struct dma_fence *f = NULL;
-	uint64_t dummy;
+	uint64_t addr;
 	int i, r;
 
 	r = amdgpu_job_alloc_with_ib(ring->adev, ib_size_dw * 4, &job);
@@ -448,7 +457,7 @@ int amdgpu_vce_get_create_msg(struct amdgpu_ring *ring, uint32_t handle,
 
 	ib = &job->ibs[0];
 
-	dummy = ib->gpu_addr + 1024;
+	addr = amdgpu_bo_gpu_offset(bo);
 
 	/* stitch together an VCE create msg */
 	ib->length_dw = 0;
@@ -480,8 +489,8 @@ int amdgpu_vce_get_create_msg(struct amdgpu_ring *ring, uint32_t handle,
 
 	ib->ptr[ib->length_dw++] = 0x00000014; /* len */
 	ib->ptr[ib->length_dw++] = 0x05000005; /* feedback buffer */
-	ib->ptr[ib->length_dw++] = upper_32_bits(dummy);
-	ib->ptr[ib->length_dw++] = dummy;
+	ib->ptr[ib->length_dw++] = upper_32_bits(addr);
+	ib->ptr[ib->length_dw++] = addr;
 	ib->ptr[ib->length_dw++] = 0x00000001;
 
 	for (i = ib->length_dw; i < ib_size_dw; ++i)
@@ -511,8 +520,8 @@ err:
  *
  * Close up a stream for HW test or if userspace failed to do so
  */
-int amdgpu_vce_get_destroy_msg(struct amdgpu_ring *ring, uint32_t handle,
-			       bool direct, struct dma_fence **fence)
+static int amdgpu_vce_get_destroy_msg(struct amdgpu_ring *ring, uint32_t handle,
+				      bool direct, struct dma_fence **fence)
 {
 	const unsigned ib_size_dw = 1024;
 	struct amdgpu_job *job;
@@ -648,7 +657,7 @@ static int amdgpu_vce_cs_reloc(struct amdgpu_cs_parser *p, uint32_t ib_idx,
 
 	if ((addr + (uint64_t)size) >
 	    (mapping->last + 1) * AMDGPU_GPU_PAGE_SIZE) {
-		DRM_ERROR("BO to small for addr 0x%010Lx %d %d\n",
+		DRM_ERROR("BO too small for addr 0x%010Lx %d %d\n",
 			  addr, lo, hi);
 		return -EINVAL;
 	}
@@ -1036,8 +1045,10 @@ out:
  * @ib: the IB to execute
  *
  */
-void amdgpu_vce_ring_emit_ib(struct amdgpu_ring *ring, struct amdgpu_ib *ib,
-			     unsigned vmid, bool ctx_switch)
+void amdgpu_vce_ring_emit_ib(struct amdgpu_ring *ring,
+				struct amdgpu_job *job,
+				struct amdgpu_ib *ib,
+				uint32_t flags)
 {
 	amdgpu_ring_write(ring, VCE_CMD_IB);
 	amdgpu_ring_write(ring, lower_32_bits(ib->gpu_addr));
@@ -1074,7 +1085,7 @@ void amdgpu_vce_ring_emit_fence(struct amdgpu_ring *ring, u64 addr, u64 seq,
 int amdgpu_vce_ring_test_ring(struct amdgpu_ring *ring)
 {
 	struct amdgpu_device *adev = ring->adev;
-	uint32_t rptr = amdgpu_ring_get_rptr(ring);
+	uint32_t rptr;
 	unsigned i;
 	int r, timeout = adev->usec_timeout;
 
@@ -1083,28 +1094,22 @@ int amdgpu_vce_ring_test_ring(struct amdgpu_ring *ring)
 		return 0;
 
 	r = amdgpu_ring_alloc(ring, 16);
-	if (r) {
-		DRM_ERROR("amdgpu: vce failed to lock ring %d (%d).\n",
-			  ring->idx, r);
+	if (r)
 		return r;
-	}
+
+	rptr = amdgpu_ring_get_rptr(ring);
+
 	amdgpu_ring_write(ring, VCE_CMD_END);
 	amdgpu_ring_commit(ring);
 
 	for (i = 0; i < timeout; i++) {
 		if (amdgpu_ring_get_rptr(ring) != rptr)
 			break;
-		DRM_UDELAY(1);
+		udelay(1);
 	}
 
-	if (i < timeout) {
-		DRM_DEBUG("ring test on %d succeeded in %d usecs\n",
-			 ring->idx, i);
-	} else {
-		DRM_ERROR("amdgpu: ring %d test failed\n",
-			  ring->idx);
+	if (i >= timeout)
 		r = -ETIMEDOUT;
-	}
 
 	return r;
 }
@@ -1118,35 +1123,36 @@ int amdgpu_vce_ring_test_ring(struct amdgpu_ring *ring)
 int amdgpu_vce_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 {
 	struct dma_fence *fence = NULL;
+	struct amdgpu_bo *bo = NULL;
 	long r;
 
 	/* skip vce ring1/2 ib test for now, since it's not reliable */
 	if (ring != &ring->adev->vce.ring[0])
 		return 0;
 
-	r = amdgpu_vce_get_create_msg(ring, 1, NULL);
-	if (r) {
-		DRM_ERROR("amdgpu: failed to get create msg (%ld).\n", r);
+	r = amdgpu_bo_create_reserved(ring->adev, 512, PAGE_SIZE,
+				      AMDGPU_GEM_DOMAIN_VRAM,
+				      &bo, NULL, NULL);
+	if (r)
+		return r;
+
+	r = amdgpu_vce_get_create_msg(ring, 1, bo, NULL);
+	if (r)
 		goto error;
-	}
 
 	r = amdgpu_vce_get_destroy_msg(ring, 1, true, &fence);
-	if (r) {
-		DRM_ERROR("amdgpu: failed to get destroy ib (%ld).\n", r);
+	if (r)
 		goto error;
-	}
 
 	r = dma_fence_wait_timeout(fence, false, timeout);
-	if (r == 0) {
-		DRM_ERROR("amdgpu: IB test timed out.\n");
+	if (r == 0)
 		r = -ETIMEDOUT;
-	} else if (r < 0) {
-		DRM_ERROR("amdgpu: fence wait failed (%ld).\n", r);
-	} else {
-		DRM_DEBUG("ib test on ring %d succeeded\n", ring->idx);
+	else if (r > 0)
 		r = 0;
-	}
+
 error:
 	dma_fence_put(fence);
+	amdgpu_bo_unreserve(bo);
+	amdgpu_bo_unref(&bo);
 	return r;
 }

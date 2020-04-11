@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_MC_PRIV_H__
 #define __NVKM_MC_PRIV_H__
 #define nvkm_mc(p) container_of((p), struct nvkm_mc, subdev)
@@ -28,6 +28,7 @@ struct nvkm_mc_func {
 	void (*intr_mask)(struct nvkm_mc *, u32 mask, u32 stat);
 	/* retrieve pending interrupt mask (NV_PMC_INTR) */
 	u32 (*intr_stat)(struct nvkm_mc *);
+	void (*intr_hack)(struct nvkm_mc *, bool *handled);
 	const struct nvkm_mc_map *reset;
 	void (*unk260)(struct nvkm_mc *, u32);
 };

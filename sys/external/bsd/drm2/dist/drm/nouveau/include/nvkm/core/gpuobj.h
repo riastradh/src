@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_GPUOBJ_H__
 #define __NVKM_GPUOBJ_H__
 #include <core/memory.h>

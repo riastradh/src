@@ -25,12 +25,13 @@
  * Authors: Dave Airlie
  *          Alex Deucher
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/export.h>
+#include <linux/pci.h>
 
-#include <drm/drmP.h>
 #include <drm/drm_edid.h>
 #include <drm/amdgpu_drm.h>
 #include "amdgpu.h"

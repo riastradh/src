@@ -193,7 +193,7 @@ int vmw_get_cap_3d_ioctl(struct drm_device *dev, void *data,
 	struct vmw_fpriv *vmw_fp = vmw_fpriv(file_priv);
 
 	if (unlikely(arg->pad64 != 0 || arg->max_size == 0)) {
-		DRM_ERROR("Illegal GET_3D_CAP argument.\n");
+		VMW_DEBUG_USER("Illegal GET_3D_CAP argument.\n");
 		return -EINVAL;
 	}
 
@@ -273,7 +273,7 @@ int vmw_present_ioctl(struct drm_device *dev, void *data,
 		return 0;
 
 	if (clips_ptr == NULL) {
-		DRM_ERROR("Variable clips_ptr must be specified.\n");
+		VMW_DEBUG_USER("Variable clips_ptr must be specified.\n");
 		ret = -EINVAL;
 		goto out_clips;
 	}
@@ -296,7 +296,7 @@ int vmw_present_ioctl(struct drm_device *dev, void *data,
 
 	fb = drm_framebuffer_lookup(dev, file_priv, arg->fb_id);
 	if (!fb) {
-		DRM_ERROR("Invalid framebuffer id.\n");
+		VMW_DEBUG_USER("Invalid framebuffer id.\n");
 		ret = -ENOENT;
 		goto out_no_fb;
 	}
@@ -356,7 +356,7 @@ int vmw_present_readback_ioctl(struct drm_device *dev, void *data,
 		return 0;
 
 	if (clips_ptr == NULL) {
-		DRM_ERROR("Argument clips_ptr must be specified.\n");
+		VMW_DEBUG_USER("Argument clips_ptr must be specified.\n");
 		ret = -EINVAL;
 		goto out_clips;
 	}
@@ -379,14 +379,14 @@ int vmw_present_readback_ioctl(struct drm_device *dev, void *data,
 
 	fb = drm_framebuffer_lookup(dev, file_priv, arg->fb_id);
 	if (!fb) {
-		DRM_ERROR("Invalid framebuffer id.\n");
+		VMW_DEBUG_USER("Invalid framebuffer id.\n");
 		ret = -ENOENT;
 		goto out_no_fb;
 	}
 
 	vfb = vmw_framebuffer_to_vfb(fb);
 	if (!vfb->bo) {
-		DRM_ERROR("Framebuffer not buffer backed.\n");
+		VMW_DEBUG_USER("Framebuffer not buffer backed.\n");
 		ret = -EINVAL;
 		goto out_no_ttm_lock;
 	}

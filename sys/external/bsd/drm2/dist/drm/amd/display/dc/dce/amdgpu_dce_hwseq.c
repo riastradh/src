@@ -30,7 +30,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include "dce_hwseq.h"
 #include "reg_helper.h"
-#include "hw_sequencer.h"
+#include "hw_sequencer_private.h"
 #include "core_types.h"
 
 #define CTX \

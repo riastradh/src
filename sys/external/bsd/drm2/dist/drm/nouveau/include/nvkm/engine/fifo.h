@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_FIFO_H__
 #define __NVKM_FIFO_H__
 #include <core/engine.h>
@@ -76,4 +76,5 @@ int gm20b_fifo_new(struct nvkm_device *, int, struct nvkm_fifo **);
 int gp100_fifo_new(struct nvkm_device *, int, struct nvkm_fifo **);
 int gp10b_fifo_new(struct nvkm_device *, int, struct nvkm_fifo **);
 int gv100_fifo_new(struct nvkm_device *, int, struct nvkm_fifo **);
+int tu102_fifo_new(struct nvkm_device *, int, struct nvkm_fifo **);
 #endif

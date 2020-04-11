@@ -40,8 +40,8 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
-#include <drm/mga_drm.h>
+#include <linux/delay.h>
+
 #include "mga_drv.h"
 
 #define MGA_DEFAULT_USEC_TIMEOUT	10000
@@ -67,7 +67,7 @@ int mga_do_wait_for_idle(drm_mga_private_t *dev_priv)
 			MGA_WRITE8(MGA_CRTC_INDEX, 0);
 			return 0;
 		}
-		DRM_UDELAY(1);
+		udelay(1);
 	}
 
 #if MGA_DMA_DEBUG
@@ -119,7 +119,7 @@ void mga_do_dma_flush(drm_mga_private_t *dev_priv)
 		status = MGA_READ(MGA_STATUS) & MGA_ENGINE_IDLE_MASK;
 		if (status == MGA_ENDPRDMASTS)
 			break;
-		DRM_UDELAY(1);
+		udelay(1);
 	}
 
 	if (primary->tail == primary->last_flush) {
@@ -1125,7 +1125,7 @@ int mga_dma_buffers(struct drm_device *dev, void *data,
 	 */
 	if (d->send_count != 0) {
 		DRM_ERROR("Process %d trying to send %d buffers via drmDMA\n",
-			  DRM_CURRENTPID, d->send_count);
+			  task_pid_nr(current), d->send_count);
 		return -EINVAL;
 	}
 
@@ -1133,7 +1133,8 @@ int mga_dma_buffers(struct drm_device *dev, void *data,
 	 */
 	if (d->request_count < 0 || d->request_count > dma->buf_count) {
 		DRM_ERROR("Process %d trying to get %d buffers (of %d max)\n",
-			  DRM_CURRENTPID, d->request_count, dma->buf_count);
+			  task_pid_nr(current), d->request_count,
+			  dma->buf_count);
 		return -EINVAL;
 	}
 

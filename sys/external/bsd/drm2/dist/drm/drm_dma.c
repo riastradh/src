@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/**
+/*
  * \file drm_dma.c
  * DMA IOCTL and function support
  *
@@ -39,7 +39,11 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/export.h>
-#include <drm/drmP.h>
+
+#include <drm/drm_drv.h>
+#include <drm/drm_pci.h>
+#include <drm/drm_print.h>
+
 #include "drm_legacy.h"
 
 /**

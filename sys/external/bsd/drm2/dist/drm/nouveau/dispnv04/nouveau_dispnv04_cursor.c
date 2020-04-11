@@ -1,10 +1,9 @@
 /*	$NetBSD$	*/
 
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: MIT
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
 #include <drm/drm_mode.h>
 #include "nouveau_drv.h"
 #include "nouveau_reg.h"

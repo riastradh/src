@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 static uint32_t gt215_ce_data[] = {
 /* 0x0000: ctx_object */
 	0x00000000,

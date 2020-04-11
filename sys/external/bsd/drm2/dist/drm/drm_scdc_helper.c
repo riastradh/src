@@ -29,8 +29,8 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/slab.h>
 #include <linux/delay.h>
 
+#include <drm/drm_print.h>
 #include <drm/drm_scdc_helper.h>
-#include <drm/drmP.h>
 
 /**
  * DOC: scdc helpers

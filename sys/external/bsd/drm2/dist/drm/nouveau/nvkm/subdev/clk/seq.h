@@ -1,6 +1,6 @@
 /*	$NetBSD$	*/
 
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_CLK_SEQ_H__
 #define __NVKM_CLK_SEQ_H__
 #include <subdev/bus/hwsq.h>
