@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_DEBUG_H__
 #define __NVKM_DEBUG_H__
 #define NV_DBG_FATAL    0

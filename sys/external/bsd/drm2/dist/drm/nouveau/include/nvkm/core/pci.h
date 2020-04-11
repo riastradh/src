@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_DEVICE_PCI_H__
 #define __NVKM_DEVICE_PCI_H__
 #include <core/device.h>

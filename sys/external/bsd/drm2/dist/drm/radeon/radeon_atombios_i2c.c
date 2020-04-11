@@ -24,10 +24,10 @@
  * Authors: Alex Deucher
  *
  */
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
 #include <drm/radeon_drm.h>
 #include "radeon.h"
 #include "atom.h"
@@ -40,7 +40,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 static int radeon_process_i2c_ch(struct radeon_i2c_chan *chan,
 				 u8 slave_addr, u8 flags,
-				 u8 *buf, u8 num)
+				 u8 *buf, int num)
 {
 	struct drm_device *dev = chan->dev;
 	struct radeon_device *rdev = dev->dev_private;

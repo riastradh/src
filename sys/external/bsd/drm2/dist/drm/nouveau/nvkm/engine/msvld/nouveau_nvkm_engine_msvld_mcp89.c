@@ -32,7 +32,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 static const struct nvkm_falcon_func
 mcp89_msvld = {
-	.pmc_enable = 0x04008000,
 	.init = g98_msvld_init,
 	.sclass = {
 		{ -1, -1, IGT21A_MSVLD },

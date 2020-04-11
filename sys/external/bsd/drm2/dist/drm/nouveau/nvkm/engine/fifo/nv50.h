@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NV50_FIFO_H__
 #define __NV50_FIFO_H__
 #define nv50_fifo(p) container_of((p), struct nv50_fifo, base)

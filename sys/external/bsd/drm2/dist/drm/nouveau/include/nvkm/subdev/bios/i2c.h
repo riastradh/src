@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVBIOS_I2C_H__
 #define __NVBIOS_I2C_H__
 enum dcb_i2c_type {

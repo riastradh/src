@@ -1,9 +1,9 @@
 /*	$NetBSD$	*/
 
+// SPDX-License-Identifier: GPL-2.0 OR MIT
 /**************************************************************************
  *
- * Copyright (C) 2010 VMware, Inc., Palo Alto, CA., USA
- * All Rights Reserved.
+ * Copyright 2010 VMware, Inc., Palo Alto, CA., USA
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the

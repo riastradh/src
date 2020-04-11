@@ -36,11 +36,14 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include <drm/drmP.h>
+#include <video/sisfb.h>
+
+#include <drm/drm_device.h>
+#include <drm/drm_file.h>
 #include <drm/sis_drm.h>
+
 #include "sis_drv.h"
 
-#include <video/sisfb.h>
 
 #define VIDEO_TYPE 0
 #define AGP_TYPE 1
@@ -116,8 +119,7 @@ static int sis_drm_alloc(struct drm_device *dev, struct drm_file *file,
 	if (pool == AGP_TYPE) {
 		retval = drm_mm_insert_node(&dev_priv->agp_mm,
 					    &item->mm_node,
-					    mem->size, 0,
-					    DRM_MM_SEARCH_DEFAULT);
+					    mem->size);
 		offset = item->mm_node.start;
 	} else {
 #if defined(CONFIG_FB_SIS) || defined(CONFIG_FB_SIS_MODULE)
@@ -129,8 +131,7 @@ static int sis_drm_alloc(struct drm_device *dev, struct drm_file *file,
 #else
 		retval = drm_mm_insert_node(&dev_priv->vram_mm,
 					    &item->mm_node,
-					    mem->size, 0,
-					    DRM_MM_SEARCH_DEFAULT);
+					    mem->size);
 		offset = item->mm_node.start;
 #endif
 	}
@@ -325,7 +326,7 @@ void sis_reclaim_buffers_locked(struct drm_device *dev,
 	struct sis_file_private *file_priv = file->driver_priv;
 	struct sis_memblock *entry, *next;
 
-	if (!(file->minor->master && file->master->lock.hw_lock))
+	if (!(dev->master && file->master->lock.hw_lock))
 		return;
 
 	drm_legacy_idlelock_take(&file->master->lock);

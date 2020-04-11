@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_GR_REGS_H__
 #define __NVKM_GR_REGS_H__
 

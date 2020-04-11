@@ -26,7 +26,6 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include "drmP.h"
 #include "radeon.h"
 #include "sumod.h"
 #include "sumo_dpm.h"

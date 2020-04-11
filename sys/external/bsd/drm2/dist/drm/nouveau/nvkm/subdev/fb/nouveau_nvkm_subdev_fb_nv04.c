@@ -30,14 +30,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include "ram.h"
 #include "regsnv04.h"
 
-bool
-nv04_fb_memtype_valid(struct nvkm_fb *fb, u32 tile_flags)
-{
-	if (!(tile_flags & 0xff00))
-		return true;
-	return false;
-}
-
 static void
 nv04_fb_init(struct nvkm_fb *fb)
 {
@@ -54,7 +46,6 @@ static const struct nvkm_fb_func
 nv04_fb = {
 	.init = nv04_fb_init,
 	.ram_new = nv04_ram_new,
-	.memtype_valid = nv04_fb_memtype_valid,
 };
 
 int

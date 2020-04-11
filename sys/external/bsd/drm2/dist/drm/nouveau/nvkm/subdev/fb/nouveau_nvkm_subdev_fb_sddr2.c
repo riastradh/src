@@ -29,6 +29,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include "ram.h"
 #include "priv.h"
+#include "ram.h"
 
 struct ramxlat {
 	int id;

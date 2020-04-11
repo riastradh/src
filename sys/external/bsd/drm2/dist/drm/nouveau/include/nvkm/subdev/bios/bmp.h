@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVBIOS_BMP_H__
 #define __NVBIOS_BMP_H__
 static inline u16

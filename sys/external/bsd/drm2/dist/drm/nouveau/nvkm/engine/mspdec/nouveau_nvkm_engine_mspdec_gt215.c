@@ -32,7 +32,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 static const struct nvkm_falcon_func
 gt215_mspdec = {
-	.pmc_enable = 0x01020000,
 	.init = g98_mspdec_init,
 	.sclass = {
 		{ -1, -1, GT212_MSPDEC },

@@ -38,7 +38,8 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/compat.h>
 
-#include <drm/drmP.h>
+#include <drm/drm.h>
+#include <drm/drm_ioctl.h>
 
 #include "nouveau_ioctl.h"
 

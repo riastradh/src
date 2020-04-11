@@ -26,10 +26,7 @@
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 
-#include "dmacnv50.h"
-#include "rootnv50.h"
-
-#include <nvif/class.h>
+#include "channv50.h"
 
 static const struct nv50_disp_mthd_list
 gk104_disp_core_mthd_head = {
@@ -111,7 +108,7 @@ gk104_disp_core_mthd_head = {
 };
 
 const struct nv50_disp_chan_mthd
-gk104_disp_core_chan_mthd = {
+gk104_disp_core_mthd = {
 	.name = "Core",
 	.addr = 0x000000,
 	.prev = -0x020000,
@@ -125,13 +122,10 @@ gk104_disp_core_chan_mthd = {
 	}
 };
 
-const struct nv50_disp_dmac_oclass
-gk104_disp_core_oclass = {
-	.base.oclass = GK104_DISP_CORE_CHANNEL_DMA,
-	.base.minver = 0,
-	.base.maxver = 0,
-	.ctor = nv50_disp_core_new,
-	.func = &gf119_disp_core_func,
-	.mthd = &gk104_disp_core_chan_mthd,
-	.chid = 0,
-};
+int
+gk104_disp_core_new(const struct nvkm_oclass *oclass, void *argv, u32 argc,
+		    struct nv50_disp *disp, struct nvkm_object **pobject)
+{
+	return nv50_disp_core_new_(&gf119_disp_core_func, &gk104_disp_core_mthd,
+				   disp, 0, oclass, argv, argc, pobject);
+}

@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_MSPPP_PRIV_H__
 #define __NVKM_MSPPP_PRIV_H__
 #include <engine/msppp.h>

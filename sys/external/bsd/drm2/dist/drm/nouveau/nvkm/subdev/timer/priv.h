@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_TIMER_PRIV_H__
 #define __NVKM_TIMER_PRIV_H__
 #define nvkm_timer(p) container_of((p), struct nvkm_timer, subdev)

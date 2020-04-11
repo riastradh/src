@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_BUS_H__
 #define __NVKM_BUS_H__
 #include <core/subdev.h>

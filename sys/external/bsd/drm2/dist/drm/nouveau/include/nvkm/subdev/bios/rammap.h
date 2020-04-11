@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVBIOS_RAMMAP_H__
 #define __NVBIOS_RAMMAP_H__
 #include <subdev/bios/ramcfg.h>

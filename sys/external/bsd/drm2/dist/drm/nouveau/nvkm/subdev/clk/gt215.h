@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_CLK_NVA3_H__
 #define __NVKM_CLK_NVA3_H__
 #include "priv.h"

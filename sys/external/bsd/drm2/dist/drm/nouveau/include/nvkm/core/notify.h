@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_NOTIFY_H__
 #define __NVKM_NOTIFY_H__
 #include <core/os.h>

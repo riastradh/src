@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NV10_GR_H__
 #define __NV10_GR_H__
 #include "priv.h"

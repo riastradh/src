@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_MSPDEC_PRIV_H__
 #define __NVKM_MSPDEC_PRIV_H__
 #include <engine/mspdec.h>

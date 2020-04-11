@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVBIOS_RAMCFG_H__
 #define __NVBIOS_RAMCFG_H__
 struct nvbios_ramcfg {

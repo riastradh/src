@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_CIPHER_H__
 #define __NVKM_CIPHER_H__
 #include <core/engine.h>

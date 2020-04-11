@@ -26,7 +26,7 @@
 __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/hdmi.h>
-#include <drm/drmP.h>
+
 #include "radeon.h"
 #include "radeon_asic.h"
 #include "radeon_audio.h"

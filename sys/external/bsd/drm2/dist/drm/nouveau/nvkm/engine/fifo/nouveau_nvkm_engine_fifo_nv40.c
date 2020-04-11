@@ -86,7 +86,7 @@ nv40_fifo_init(struct nvkm_fifo *base)
 	case 0x49:
 	case 0x4b:
 		nvkm_wr32(device, 0x002230, 0x00000001);
-		/*FALLTHROUGH*/
+		/* fall through */
 	case 0x40:
 	case 0x41:
 	case 0x42:

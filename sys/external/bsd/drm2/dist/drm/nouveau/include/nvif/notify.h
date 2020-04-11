@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVIF_NOTIFY_H__
 #define __NVIF_NOTIFY_H__
 

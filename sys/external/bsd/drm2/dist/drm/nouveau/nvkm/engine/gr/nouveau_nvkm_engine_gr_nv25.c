@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+// SPDX-License-Identifier: MIT
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD$");
 

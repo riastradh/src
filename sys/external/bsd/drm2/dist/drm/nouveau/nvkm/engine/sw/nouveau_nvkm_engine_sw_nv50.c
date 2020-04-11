@@ -33,8 +33,8 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <engine/fifo/chan.h>
 #include <subdev/bar.h>
 
+#include <nvif/class.h>
 #include <nvif/event.h>
-#include <nvif/ioctl.h>
 
 /*******************************************************************************
  * software context
@@ -141,7 +141,7 @@ static const struct nvkm_sw_func
 nv50_sw = {
 	.chan_new = nv50_sw_chan_new,
 	.sclass = {
-		{ nvkm_nvsw_new, { -1, -1, NVIF_IOCTL_NEW_V0_SW_NV50 } },
+		{ nvkm_nvsw_new, { -1, -1, NVIF_CLASS_SW_NV50 } },
 		{}
 	}
 };

@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVMXM_MXMS_H__
 #define __NVMXM_MXMS_H__
 #include "priv.h"

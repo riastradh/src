@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_OPROXY_H__
 #define __NVKM_OPROXY_H__
 #define nvkm_oproxy(p) container_of((p), struct nvkm_oproxy, base)

@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NOUVEAU_USIF_H__
 #define __NOUVEAU_USIF_H__
 

@@ -1,5 +1,6 @@
 /*	$NetBSD$	*/
 
+/* SPDX-License-Identifier: MIT */
 #ifndef __NVKM_SW_NV50_H__
 #define __NVKM_SW_NV50_H__
 #define nv50_sw_chan(p) container_of((p), struct nv50_sw_chan, base)
