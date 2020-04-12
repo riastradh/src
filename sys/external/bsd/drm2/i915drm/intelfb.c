@@ -36,7 +36,7 @@ __KERNEL_RCSID(0, "$NetBSD: intelfb.c,v 1.17 2019/08/15 00:27:47 rin Exp $");
 #include <sys/bus.h>
 #include <sys/device.h>
 
-#include <drm/drmP.h>
+#include <drm/drm_device.h>
 #include <drm/drmfb.h>
 #include <drm/drmfb_pci.h>
 

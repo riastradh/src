@@ -39,11 +39,12 @@ __KERNEL_RCSID(0, "$NetBSD: via_pci.c,v 1.3 2018/08/27 14:12:44 riastradh Exp $"
 
 #include <linux/pci.h>
 
-#include <drm/drmP.h>
 #include <drm/drm_pciids.h>
 #include <drm/via_drm.h>
 
 #include "via_drv.h"
+
+struct drm_device;
 
 struct viadrm_softc {
 	device_t		sc_dev;
