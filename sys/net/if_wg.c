@@ -816,7 +816,7 @@ wg_algo_generate_keypair(uint8_t pubkey[WG_EPHEMERAL_KEY_LEN],
 
 	CTASSERT(WG_EPHEMERAL_KEY_LEN == crypto_scalarmult_curve25519_BYTES);
 
-	cprng_fast(privkey, WG_EPHEMERAL_KEY_LEN);
+	cprng_strong(kern_cprng, privkey, WG_EPHEMERAL_KEY_LEN, 0);
 	crypto_scalarmult_base(pubkey, privkey);
 }
 
