@@ -1,6 +1,7 @@
-defflag		LIBSODIUM
+#	$NetBSD$
 
 define		libsodium
+
 makeoptions libsodium SODIUM_CPPFLAGS+="-I$S/external/isc/libsodium/include"
 makeoptions libsodium SODIUM_CPPFLAGS+="-I$S/external/isc/libsodium/dist/src/libsodium/include/sodium"
 makeoptions libsodium SODIUM_CPPFLAGS+="-Wno-unused-function -Wno-unused-variable -DHAVE_TI_MODE"

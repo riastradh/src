@@ -1433,7 +1433,7 @@ defpseudo carp:		ifnet, ether, arp
 defpseudodev l2tp:	ifnet, ether, arp
 defpseudo canloop:	ifnet
 defpseudo ipsecif:	ifnet		# avoid to confuse ipsec itself option
-defpseudo wg:		ifnet
+defpseudo wg:		ifnet, blake2s, libsodium
 
 defpseudo sequencer
 defpseudo clockctl
