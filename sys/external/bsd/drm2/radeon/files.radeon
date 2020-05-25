@@ -9,8 +9,6 @@ attach	radeon at pci
 # XXX Rename this to radeonfb when the legacy radeonfb(4) is gone.
 device	radeondrmkmsfb: radeonfbbus, drmfb, drmfb_pci, wsemuldisplaydev
 attach	radeondrmkmsfb at radeonfbbus
-
-makeoptions	radeon	"CPPFLAGS.radeon"+="${CPPFLAGS.drmkms}"
 makeoptions	radeondrmkmsfb	"CPPFLAGS.radeondrmkmsfb"+="${CPPFLAGS.radeon}"
 
 # Our overrides first.
