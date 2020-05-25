@@ -10,13 +10,16 @@ attach	radeon at pci
 device	radeondrmkmsfb: radeonfbbus, drmfb, drmfb_pci, wsemuldisplaydev
 attach	radeondrmkmsfb at radeonfbbus
 
+makeoptions	radeon	"CPPFLAGS.radeon"+="${CPPFLAGS.drmkms}"
+makeoptions	radeondrmkmsfb	"CPPFLAGS.radeondrmkmsfb"+="${CPPFLAGS.radeon}"
+
 # Our overrides first.
-makeoptions	radeon	CPPFLAGS+="-I$S/external/bsd/drm2/include/radeon"
-makeoptions	radeon	CPPFLAGS+="-I$S/external/bsd/drm2/radeon"
+makeoptions	radeon	"CPPFLAGS.radeon"+="-I$S/external/bsd/drm2/include/radeon"
+makeoptions	radeon	"CPPFLAGS.radeon"+="-I$S/external/bsd/drm2/radeon"
 
 # Then their header files.
-makeoptions	radeon	CPPFLAGS+="-I$S/external/bsd/drm2/dist/drm/amd/include"
-makeoptions	radeon	CPPFLAGS+="-I$S/external/bsd/drm2/dist/drm/radeon"
+makeoptions	radeon	"CPPFLAGS.radeon"+="-I$S/external/bsd/drm2/dist/drm/amd/include"
+makeoptions	radeon	"CPPFLAGS.radeon"+="-I$S/external/bsd/drm2/dist/drm/radeon"
 
 makeoptions	radeon	"CPPFLAGS.radeon"+="-DCONFIG_AGP=1"
 
