@@ -17,7 +17,6 @@ makeoptions	nouveaufb	"CPPFLAGS.nouveaufb"+="${CPPFLAGS.nouveau}"
 file	external/bsd/drm2/nouveau/nouveau_vga.c			nouveau
 file	external/bsd/drm2/nouveau/nouveaufb.c			nouveaufb
 
-makeoptions	nouveau	"CPPFLAGS.nouveau"+="${CPPFLAGS.drmkms}"
 makeoptions	nouveau	"CPPFLAGS.nouveau"+="-I$S/external/bsd/drm2/dist/drm/nouveau"
 makeoptions	nouveau	"CPPFLAGS.nouveau"+="-I$S/external/bsd/drm2/dist/drm/nouveau/include"
 makeoptions	nouveau	"CPPFLAGS.nouveau"+="-I$S/external/bsd/drm2/dist/drm/nouveau/include/nvkm"
