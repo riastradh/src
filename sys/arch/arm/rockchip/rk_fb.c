@@ -37,7 +37,7 @@ __KERNEL_RCSID(0, "$NetBSD: rk_fb.c,v 1.1 2019/11/09 23:30:14 jmcneill Exp $");
 
 #include <dev/fdt/fdtvar.h>
 
-#include <drm/drmP.h>
+#include <drm/drm_drv.h>
 #include <drm/drmfb.h>
 
 #include <arm/rockchip/rk_drm.h>
