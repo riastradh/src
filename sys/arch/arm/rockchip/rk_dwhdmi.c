@@ -31,20 +31,20 @@ __KERNEL_RCSID(0, "$NetBSD: rk_dwhdmi.c,v 1.4 2019/12/17 18:26:36 jakllsch Exp $
 
 #include <sys/param.h>
 #include <sys/bus.h>
+#include <sys/conf.h>
 #include <sys/device.h>
 #include <sys/intr.h>
-#include <sys/systm.h>
 #include <sys/kernel.h>
-#include <sys/conf.h>
+#include <sys/systm.h>
 
-#include <drm/drm_drv.h>
-#include <drm/drm_crtc_helper.h>
-
-#include <dev/fdt/fdtvar.h>
 #include <dev/fdt/fdt_port.h>
+#include <dev/fdt/fdtvar.h>
 #include <dev/fdt/syscon.h>
 
 #include <dev/ic/dw_hdmi.h>
+
+#include <drm/drm_drv.h>
+#include <drm/drm_crtc_helper.h>
 
 #define	RK3399_GRF_SOC_CON20		0x6250
 #define	 HDMI_LCDC_SEL			__BIT(6)

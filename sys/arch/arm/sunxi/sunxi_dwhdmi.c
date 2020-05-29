@@ -31,20 +31,20 @@ __KERNEL_RCSID(0, "$NetBSD: sunxi_dwhdmi.c,v 1.8 2019/11/24 10:27:37 jmcneill Ex
 
 #include <sys/param.h>
 #include <sys/bus.h>
+#include <sys/conf.h>
 #include <sys/device.h>
 #include <sys/intr.h>
-#include <sys/systm.h>
 #include <sys/kernel.h>
-#include <sys/conf.h>
+#include <sys/systm.h>
 
-#include <drm/drm_drv.h>
-
-#include <dev/fdt/fdtvar.h>
 #include <dev/fdt/fdt_port.h>
+#include <dev/fdt/fdtvar.h>
 
 #include <dev/ic/dw_hdmi.h>
 
 #include <arm/sunxi/sunxi_hdmiphy.h>
+
+#include <drm/drm_drv.h>
 
 enum {
 	DWHDMI_PORT_INPUT = 0,
