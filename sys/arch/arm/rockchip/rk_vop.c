@@ -38,9 +38,10 @@ __KERNEL_RCSID(0, "$NetBSD: rk_vop.c,v 1.6 2020/01/05 12:14:35 mrg Exp $");
 #include <sys/conf.h>
 #include <sys/sysctl.h>
 
-#include <drm/drmP.h>
+#include <drm/drm_drv.h>
 #include <drm/drm_crtc.h>
 #include <drm/drm_crtc_helper.h>
+#include <drm/drm_fourcc.h>
 #include <drm/drm_plane_helper.h>
 
 #include <dev/fdt/fdtvar.h>
@@ -237,7 +238,7 @@ rk_vop_mode_do_set_base(struct drm_crtc *crtc, struct drm_framebuffer *fb,
 	uint64_t paddr = (uint64_t)sfb->obj->dmamap->dm_segs[0].ds_addr;
 
 	paddr += y * sfb->base.pitches[0];
-	paddr += x * drm_format_plane_cpp(sfb->base.pixel_format, 0);
+	paddr += x * sfb->base.format->cpp[0];
 
 	KASSERT((paddr & ~0xffffffff) == 0);
 
@@ -307,7 +308,8 @@ rk_vop_mode_set(struct drm_crtc *crtc, struct drm_display_mode *mode,
 	int error;
 	u_int pol;
 	int connector_type = 0;
-	struct drm_connector * connector;
+	struct drm_connector *connector;
+	struct drm_connector_list_iter conn_iter;
 
 	const u_int hactive = adjusted_mode->hdisplay;
 	const u_int hsync_len = adjusted_mode->hsync_end - adjusted_mode->hsync_start;
@@ -359,14 +361,16 @@ rk_vop_mode_set(struct drm_crtc *crtc, struct drm_display_mode *mode,
 	if ((adjusted_mode->flags & DRM_MODE_FLAG_PVSYNC) != 0)
 		pol |= DSP_VSYNC_POL;
 
-	drm_for_each_connector(connector, crtc->dev) {
-		if ((connector->encoder) == NULL)
+	drm_connector_list_iter_begin(crtc->dev, &conn_iter);
+	drm_for_each_connector_iter(connector, &conn_iter) {
+		if (connector->encoder == NULL)
 			continue;
 		if (connector->encoder->crtc == crtc) {
 			connector_type = connector->connector_type;
 			break;
 		}
 	}
+	drm_connector_list_iter_end(&conn_iter);
 
 	switch (connector_type) {
 	case DRM_MODE_CONNECTOR_HDMIA:
