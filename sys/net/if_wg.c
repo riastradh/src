@@ -2354,8 +2354,9 @@ wg_handle_msg_data(struct wg_softc *wg, struct mbuf *m,
 		mutex_exit(wgs_prev->wgs_lock);
 
 		/* Anyway run a softint to flush pending packets */
-		KASSERT(cpu_softintr_p());
+		kpreempt_disable();
 		softint_schedule(wgp->wgp_si);
+		kpreempt_enable();
 	} else {
 		if (__predict_false(wg_need_to_send_init_message(wgs))) {
 			wg_schedule_peer_task(wgp, WGP_TASK_SEND_INIT_MESSAGE);
