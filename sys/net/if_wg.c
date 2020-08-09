@@ -3472,8 +3472,8 @@ wg_send_data_msg(struct wg_peer *wgp, struct wg_session *wgs,
 	error = wg->wg_ops->send_data_msg(wgp, n);
 	if (error == 0) {
 		struct ifnet *ifp = &wg->wg_if;
-		ifp->if_obytes += mlen;
-		ifp->if_opackets++;
+		if_statadd(ifp, if_obytes, mlen);
+		if_statinc(ifp, if_opackets);
 		if (wgs->wgs_is_initiator && wgs->wgs_time_last_data_sent == 0) {
 			/*
 			 * [W] 6.2 Transport Message Limits
@@ -3534,8 +3534,8 @@ wg_input(struct ifnet *ifp, struct mbuf *m, const int af)
 
 	const u_int h = curcpu()->ci_index;
 	if (__predict_true(pktq_enqueue(pktq, m, h))) {
-		ifp->if_ibytes += pktlen;
-		ifp->if_ipackets++;
+		if_statadd(ifp, if_ibytes, pktlen);
+		if_statinc(ifp, if_ipackets);
 	} else {
 		m_freem(m);
 	}
