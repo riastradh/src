@@ -209,6 +209,8 @@ static bool wg_force_underload = false;
 #endif
 
 #ifdef WG_DEBUG_DUMP
+
+#ifdef WG_RUMPKERNEL
 static void
 wg_dump_buf(const char *func, const char *buf, const size_t size)
 {
@@ -218,6 +220,7 @@ wg_dump_buf(const char *func, const char *buf, const size_t size)
 		log(LOG_DEBUG, "%02x ", (int)(0xff & buf[i]));
 	log(LOG_DEBUG, "\n");
 }
+#endif
 
 static void
 wg_dump_hash(const uint8_t *func, const uint8_t *name, const uint8_t *hash,
