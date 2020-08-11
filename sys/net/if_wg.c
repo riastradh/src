@@ -1360,7 +1360,7 @@ wg_handle_msg_init(struct wg_softc *wg, const struct wg_msg_init *wgmi,
 	 * "the responder, ..., must always reject messages with an invalid
 	 *  msg.mac1"
 	 */
-	if (memcmp(mac1, wgmi->wgmi_mac1, sizeof(mac1)) != 0) {
+	if (!consttime_memequal(mac1, wgmi->wgmi_mac1, sizeof(mac1))) {
 		WG_DLOG("mac1 is invalid\n");
 		goto out;
 	}
@@ -1376,7 +1376,7 @@ wg_handle_msg_init(struct wg_softc *wg, const struct wg_msg_init *wgmi,
 		 *  message"
 		 */
 		uint8_t zero[WG_MAC_LEN] = {0};
-		if (memcmp(wgmi->wgmi_mac2, zero, sizeof(zero)) == 0) {
+		if (consttime_memequal(wgmi->wgmi_mac2, zero, sizeof(zero))) {
 			WG_TRACE("sending a cookie message: no cookie included");
 			(void)wg_send_cookie_msg(wg, wgp, wgmi->wgmi_sender,
 			    wgmi->wgmi_mac1, src);
@@ -1392,7 +1392,7 @@ wg_handle_msg_init(struct wg_softc *wg, const struct wg_msg_init *wgmi,
 		wg_algo_mac(mac2, sizeof(mac2), wgp->wgp_last_sent_cookie,
 		    WG_COOKIE_LEN, (const uint8_t *)wgmi,
 		    offsetof(struct wg_msg_init, wgmi_mac2), NULL, 0);
-		if (memcmp(mac2, wgmi->wgmi_mac2, sizeof(mac2)) != 0) {
+		if (!consttime_memequal(mac2, wgmi->wgmi_mac2, sizeof(mac2))) {
 			WG_DLOG("mac2 is invalid\n");
 			goto out;
 		}
@@ -1718,7 +1718,7 @@ wg_handle_msg_resp(struct wg_softc *wg, const struct wg_msg_resp *wgmr,
 	 * "the responder, ..., must always reject messages with an invalid
 	 *  msg.mac1"
 	 */
-	if (memcmp(mac1, wgmr->wgmr_mac1, sizeof(mac1)) != 0) {
+	if (!consttime_memequal(mac1, wgmr->wgmr_mac1, sizeof(mac1))) {
 		WG_DLOG("mac1 is invalid\n");
 		goto out;
 	}
@@ -1734,7 +1734,7 @@ wg_handle_msg_resp(struct wg_softc *wg, const struct wg_msg_resp *wgmr,
 		 *  message"
 		 */
 		uint8_t zero[WG_MAC_LEN] = {0};
-		if (memcmp(wgmr->wgmr_mac2, zero, sizeof(zero)) == 0) {
+		if (consttime_memequal(wgmr->wgmr_mac2, zero, sizeof(zero))) {
 			WG_TRACE("sending a cookie message: no cookie included");
 			(void)wg_send_cookie_msg(wg, wgp, wgmr->wgmr_sender,
 			    wgmr->wgmr_mac1, src);
@@ -1750,7 +1750,7 @@ wg_handle_msg_resp(struct wg_softc *wg, const struct wg_msg_resp *wgmr,
 		wg_algo_mac(mac2, sizeof(mac2), wgp->wgp_last_sent_cookie,
 		    WG_COOKIE_LEN, (const uint8_t *)wgmr,
 		    offsetof(struct wg_msg_resp, wgmr_mac2), NULL, 0);
-		if (memcmp(mac2, wgmr->wgmr_mac2, sizeof(mac2)) != 0) {
+		if (!consttime_memequal(mac2, wgmr->wgmr_mac2, sizeof(mac2))) {
 			WG_DLOG("mac2 is invalid\n");
 			goto out;
 		}
@@ -1895,7 +1895,8 @@ wg_lookup_peer_by_pubkey(struct wg_softc *wg,
 	int s = pserialize_read_enter();
 	/* XXX O(n) */
 	WG_PEER_READER_FOREACH(wgp, wg) {
-		if (memcmp(wgp->wgp_pubkey, pubkey, sizeof(wgp->wgp_pubkey)) == 0)
+		if (consttime_memequal(wgp->wgp_pubkey, pubkey,
+			sizeof(wgp->wgp_pubkey)))
 			break;
 	}
 	if (wgp != NULL)
@@ -4061,7 +4062,8 @@ wg_ioctl_get(struct wg_softc *wg, struct ifdrv *ifd)
 			goto next;
 
 		uint8_t psk_zero[WG_PRESHARED_KEY_LEN] = {0};
-		if (memcmp(wgp->wgp_psk, psk_zero, sizeof(wgp->wgp_psk) != 0)) {
+		if (!consttime_memequal(wgp->wgp_psk, psk_zero,
+			sizeof(wgp->wgp_psk))) {
 			if (!prop_dictionary_set_data(prop_peer,
 				"preshared_key",
 				wgp->wgp_psk, sizeof(wgp->wgp_psk)))
