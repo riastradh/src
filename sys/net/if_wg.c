@@ -3015,7 +3015,7 @@ wg_session_hit_limits(struct wg_session *wgs)
 static void
 wg_peer_softint(void *arg)
 {
-	struct wg_peer *wgp = (struct wg_peer *)arg;
+	struct wg_peer *wgp = arg;
 	struct wg_session *wgs;
 	struct mbuf *m;
 	struct psref psref;
@@ -3358,7 +3358,7 @@ wg_clone_create(struct if_clone *ifc, int unit)
 static int
 wg_clone_destroy(struct ifnet *ifp)
 {
-	struct wg_softc *wg = (void *) ifp;
+	struct wg_softc *wg = container_of(ifp, struct wg_softc, wg_if);
 
 	mutex_enter(&wg_softcs.lock);
 	LIST_REMOVE(wg, wg_list);
@@ -3416,7 +3416,7 @@ wg_pick_peer_by_sa(struct wg_softc *wg, const struct sockaddr *sa,
 
 	WG_TRACE("success");
 
-	wga = (struct wg_allowedip *)rn;
+	wga = container_of(rn, struct wg_allowedip, wga_nodes[0]);
 	wgp = wga->wga_peer;
 	wg_get_peer(wgp, psref);
 
