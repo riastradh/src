@@ -910,7 +910,7 @@ wg_algo_dh(uint8_t out[WG_DH_OUTPUT_LEN],
 
 	CTASSERT(WG_STATIC_KEY_LEN == crypto_scalarmult_curve25519_BYTES);
 
-	int ret = crypto_scalarmult(out, privkey, pubkey);
+	int ret __diagused = crypto_scalarmult(out, privkey, pubkey);
 	KASSERT(ret == 0);
 }
 
