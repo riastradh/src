@@ -1832,13 +1832,14 @@ wg_handle_msg_resp(struct wg_softc *wg, const struct wg_msg_resp *wgmr,
 	wg_clear_states(wgs);
 	WG_TRACE("WGS_STATE_ESTABLISHED");
 
+	wg_stop_handshake_timeout_timer(wgp);
+
 	mutex_enter(wgp->wgp_lock);
 	wg_swap_sessions(wgp);
 	wgs_prev = wgp->wgp_session_unstable;
 	mutex_enter(wgs_prev->wgs_lock);
 
 	getnanotime(&wgp->wgp_last_handshake_time);
-	wg_stop_handshake_timeout_timer(wgp);
 	wgp->wgp_handshake_start_time = 0;
 	wgp->wgp_last_sent_mac1_valid = false;
 	wgp->wgp_last_sent_cookie_valid = false;
