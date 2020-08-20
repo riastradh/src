@@ -1641,6 +1641,7 @@ pseudo-device	npf			# NPF packet filter
 pseudo-device	kttcp
 # srt is EXPERIMENTAL
 pseudo-device	srt			# source-address-based routing
+pseudo-device	wg			# WireGuard
 
 pseudo-device	canloop			# CAN loopback interface
 
