@@ -11,6 +11,7 @@ attach	intelfb at intelfbbus
 
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-I$S/external/bsd/drm2/i915drm"
 
+makeoptions	intelfb		"CPPFLAGS.intelfb"+="-I$S/external/bsd/drm2/dist/drm/i915"
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-I$S/external/bsd/drm2/dist/drm/i915"
 
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_FBDEV_EMULATION=1"
