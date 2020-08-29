@@ -32,6 +32,8 @@
 #ifndef	_LINUX_TASKLET_H_
 #define	_LINUX_TASKLET_H_
 
+#include <linux/atomic.h>
+
 /* namespace */
 #define	tasklet_disable			linux_tasklet_disable
 #define	tasklet_disable_sync_once	linux_tasklet_disable_sync_once
@@ -46,29 +48,52 @@
 
 struct tasklet_struct {
 	SIMPLEQ_ENTRY(tasklet_struct)	tl_entry;
-	volatile unsigned		tl_state;
-	volatile unsigned		tl_disablecount;
 	/* begin Linux API */
 	void				(*func)(unsigned long);
 	unsigned long			data;
+	atomic_t			count;
+	volatile unsigned long		state;
 	/* end Linux API */
 };
 
+#define TASKLET_STATE_SCHED	1
+#define TASKLET_STATE_RUN	0
+
 #define	DEFINE_TASKLET(name, func, data)				      \
 	struct tasklet_struct name = {					      \
-	    .tl_state = 0,						      \
-	    .tl_disablecount = 0,					      \
+	    .state = 0,							      \
+	    .count = 0,							      \
 	    .func = (func),						      \
 	    .data = (data),						      \
 	}
 
 #define	DEFINE_TASKLET_DISABLED(name, func, data)			      \
 	struct tasklet_struct name = {					      \
-	    .tl_state = 0,						      \
-	    .tl_disablecount = 1,					      \
+	    .state = 0,							      \
+	    .count = 1,							      \
 	    .func = (func),						      \
 	    .data = (data),						      \
 	}
+
+static inline int
+tasklet_trylock(struct tasklet_struct *ts)
+{
+	return !test_and_set_bit(TASKLET_STATE_RUN, &ts->state);
+}
+
+static inline void
+tasklet_unlock(struct tasklet_struct *ts)
+{
+	smp_mb__before_atomic();
+	clear_bit(TASKLET_STATE_RUN, &ts->state);
+}
+
+static inline void
+tasklet_unlock_wait(struct tasklet_struct *ts)
+{
+	while (test_bit(TASKLET_STATE_RUN, &ts->state))
+		barrier();
+}
 
 int	linux_tasklets_init(void);
 void	linux_tasklets_fini(void);

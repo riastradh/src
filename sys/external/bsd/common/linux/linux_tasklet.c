@@ -47,9 +47,6 @@ __KERNEL_RCSID(0, "$NetBSD$");
 
 #include <linux/tasklet.h>
 
-#define	TASKLET_SCHEDULED	((unsigned)__BIT(0))
-#define	TASKLET_RUNNING		((unsigned)__BIT(1))
-
 struct tasklet_queue {
 	struct percpu	*tq_percpu;	/* struct tasklet_cpu */
 	void		*tq_sih;
@@ -207,15 +204,15 @@ tasklet_softintr(void *cookie)
 		 * before it completed.
 		 */
 		do {
-			state = tasklet->tl_state;
+			state = tasklet->state;
 			/* It had better be scheduled.  */
-			KASSERT(state & TASKLET_SCHEDULED);
-			if (state & TASKLET_RUNNING)
+			KASSERT(state & TASKLET_STATE_SCHED);
+			if (state & TASKLET_STATE_RUN)
 				break;
-		} while (atomic_cas_uint(&tasklet->tl_state, state,
-			state | TASKLET_RUNNING) != state);
+		} while (atomic_cas_uint(&tasklet->state, state,
+			state | TASKLET_STATE_RUN) != state);
 
-		if (state & TASKLET_RUNNING) {
+		if (state & TASKLET_STATE_RUN) {
 			/*
 			 * Put it back on the queue to run it again in
 			 * a sort of busy-wait, and move on to the next
@@ -229,20 +226,20 @@ tasklet_softintr(void *cookie)
 		membar_enter();
 
 		/* Check whether it's currently disabled.  */
-		if (tasklet->tl_disablecount) {
+		if (tasklet->count) {
 			/*
 			 * Disabled: clear the RUNNING bit and, requeue
 			 * it, but keep it SCHEDULED.
 			 */
-			KASSERT(tasklet->tl_state & TASKLET_RUNNING);
-			atomic_and_uint(&tasklet->tl_state, ~TASKLET_RUNNING);
+			KASSERT(tasklet->state & TASKLET_STATE_RUN);
+			atomic_and_uint(&tasklet->state, ~TASKLET_STATE_RUN);
 			tasklet_queue_enqueue(tq, tasklet);
 			continue;
 		}
 
 		/* Not disabled.  Clear SCHEDULED and call func.  */
-		KASSERT(tasklet->tl_state & TASKLET_SCHEDULED);
-		atomic_and_uint(&tasklet->tl_state, ~TASKLET_SCHEDULED);
+		KASSERT(tasklet->state & TASKLET_STATE_SCHED);
+		atomic_and_uint(&tasklet->state, ~TASKLET_STATE_SCHED);
 
 		(*tasklet->func)(tasklet->data);
 
@@ -253,7 +250,7 @@ tasklet_softintr(void *cookie)
 		membar_exit();
 
 		/* Clear RUNNING to notify tasklet_disable.  */
-		atomic_and_uint(&tasklet->tl_state, ~TASKLET_RUNNING);
+		atomic_and_uint(&tasklet->state, ~TASKLET_STATE_RUN);
 	}
 }
 
@@ -271,11 +268,11 @@ tasklet_queue_schedule(struct tasklet_queue *tq,
 
 	/* Test and set the SCHEDULED bit.  If already set, we're done.  */
 	do {
-		ostate = tasklet->tl_state;
-		if (ostate & TASKLET_SCHEDULED)
+		ostate = tasklet->state;
+		if (ostate & TASKLET_STATE_SCHED)
 			return;
-		nstate = ostate | TASKLET_SCHEDULED;
-	} while (atomic_cas_uint(&tasklet->tl_state, ostate, nstate)
+		nstate = ostate | TASKLET_STATE_SCHED;
+	} while (atomic_cas_uint(&tasklet->state, ostate, nstate)
 	    != ostate);
 
 	/*
@@ -297,7 +294,7 @@ tasklet_queue_enqueue(struct tasklet_queue *tq, struct tasklet_struct *tasklet)
 	struct tasklet_cpu *tc;
 	int s;
 
-	KASSERT(tasklet->tl_state & TASKLET_SCHEDULED);
+	KASSERT(tasklet->state & TASKLET_STATE_SCHED);
 
 	/*
 	 * Insert on the current CPU's queue while all interrupts are
@@ -326,8 +323,8 @@ tasklet_init(struct tasklet_struct *tasklet, void (*func)(unsigned long),
     unsigned long data)
 {
 
-	tasklet->tl_state = 0;
-	tasklet->tl_disablecount = 0;
+	tasklet->state = 0;
+	tasklet->count = 0;
 	tasklet->func = func;
 	tasklet->data = data;
 }
@@ -376,15 +373,15 @@ tasklet_hi_schedule(struct tasklet_struct *tasklet)
 void
 tasklet_disable(struct tasklet_struct *tasklet)
 {
-	unsigned int disablecount __diagused;
+	atomic_t count __diagused;
 
 	/* Increment the disable count.  */
-	disablecount = atomic_inc_uint_nv(&tasklet->tl_disablecount);
-	KASSERT(disablecount < UINT_MAX);
-	KASSERT(disablecount != 0);
+	count = atomic_fetch_inc(&tasklet->count);
+	KASSERT(count < UINT_MAX);
+	KASSERT(count != 0);
 
 	/* Wait for it to finish running, if it was running.  */
-	while (tasklet->tl_state & TASKLET_RUNNING)
+	while (tasklet->state & TASKLET_STATE_RUN)
 		SPINLOCK_BACKOFF_HOOK;
 
 	/*
@@ -393,7 +390,7 @@ tasklet_disable(struct tasklet_struct *tasklet)
 	 *
 	 * XXX membar_sync is overkill here.  It is tempting to issue
 	 * membar_enter, but it only orders stores | loads, stores;
-	 * what we really want here is load_acquire(&tasklet->tl_state)
+	 * what we really want here is load_acquire(&tasklet->state)
 	 * above, i.e. to witness all side effects preceding the store
 	 * whose value we loaded.  Absent that, membar_sync is the best
 	 * we can do.
@@ -410,7 +407,7 @@ tasklet_disable(struct tasklet_struct *tasklet)
 void
 tasklet_enable(struct tasklet_struct *tasklet)
 {
-	unsigned int disablecount __diagused;
+	atomic_t count __diagused;
 
 	/*
 	 * Guarantee all caller-relevant reads or writes have completed
@@ -420,8 +417,8 @@ tasklet_enable(struct tasklet_struct *tasklet)
 	membar_exit();
 
 	/* Decrement the disable count.  */
-	disablecount = atomic_dec_uint_nv(&tasklet->tl_disablecount);
-	KASSERT(disablecount != UINT_MAX);
+	count = atomic_fetch_dec(&tasklet->count);
+	KASSERT(count != UINT_MAX);
 }
 
 /*
@@ -439,7 +436,7 @@ tasklet_kill(struct tasklet_struct *tasklet)
 	    "deadlock: soft interrupts are blocked in interrupt context");
 
 	/* Wait for it to be removed from the queue.  */
-	while (tasklet->tl_state & TASKLET_SCHEDULED)
+	while (tasklet->state & TASKLET_STATE_SCHED)
 		SPINLOCK_BACKOFF_HOOK;
 
 	/*
@@ -459,12 +456,12 @@ tasklet_kill(struct tasklet_struct *tasklet)
 	 */
 
 	/* Wait for it to finish running.  */
-	while (tasklet->tl_state & TASKLET_RUNNING)
+	while (tasklet->state & TASKLET_STATE_RUN)
 		SPINLOCK_BACKOFF_HOOK;
 
 	/*
 	 * Wait for any side effects running.  Again, membar_sync is
-	 * overkill; we really want load_acquire(&tasklet->tl_state)
+	 * overkill; we really want load_acquire(&tasklet->state)
 	 * here.
 	 */
 	membar_sync();
@@ -484,19 +481,19 @@ tasklet_kill(struct tasklet_struct *tasklet)
 void
 tasklet_disable_sync_once(struct tasklet_struct *tasklet)
 {
-	unsigned int disablecount;
+	atomic_t count;
 
 	/* Increment the disable count.  */
-	disablecount = atomic_inc_uint_nv(&tasklet->tl_disablecount);
-	KASSERT(disablecount < UINT_MAX);
-	KASSERT(disablecount != 0);
+	count = atomic_inc_uint_nv(&tasklet->count);
+	KASSERT(count < UINT_MAX);
+	KASSERT(count != 0);
 
 	/*
 	 * If it was zero, wait for it to finish running.  If it was
 	 * not zero, caller must not care whether it was running.
 	 */
-	if (disablecount == 1) {
-		while (tasklet->tl_state & TASKLET_RUNNING)
+	if (count == 1) {
+		while (tasklet->state & TASKLET_STATE_RUN)
 			SPINLOCK_BACKOFF_HOOK;
 		membar_sync();
 	}
@@ -511,17 +508,17 @@ tasklet_disable_sync_once(struct tasklet_struct *tasklet)
 void
 tasklet_enable_sync_once(struct tasklet_struct *tasklet)
 {
-	unsigned int disablecount;
+	atomic_t count;
 
 	/* Decrement the disable count.  */
-	disablecount = atomic_dec_uint_nv(&tasklet->tl_disablecount);
-	KASSERT(disablecount < UINT_MAX);
+	count = atomic_fetch_dec(&tasklet->count);
+	KASSERT(count < UINT_MAX);
 
 	/*
 	 * If it became zero, kill the tasklet.  If it was not zero,
 	 * caller must not care whether it was running.
 	 */
-	if (disablecount == 0)
+	if (count == 0)
 		tasklet_kill(tasklet);
 }
 
@@ -535,9 +532,9 @@ tasklet_enable_sync_once(struct tasklet_struct *tasklet)
 bool
 tasklet_is_enabled(const struct tasklet_struct *tasklet)
 {
-	unsigned int disablecount;
+	atomic_t count;
 
-	disablecount = tasklet->tl_disablecount;
+	count = tasklet->count;
 
-	return (disablecount == 0);
+	return (count == 0);
 }
