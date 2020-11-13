@@ -16,12 +16,18 @@
 #include <linux/kref.h>
 #include <linux/notifier.h> /* for NOTIFY_DONE */
 #include <linux/wait.h>
+#include <drm/drm_wait_netbsd.h>
 
 struct completion;
 struct dma_resv;
 
 struct i915_sw_fence {
+#ifdef __linux__
 	wait_queue_head_t wait;
+#else
+	drm_waitqueue_t wait;
+	spinlock_t lock;
+#endif
 	unsigned long flags;
 	atomic_t pending;
 	int error;
@@ -68,7 +74,11 @@ void i915_sw_fence_commit(struct i915_sw_fence *fence);
 
 int i915_sw_fence_await_sw_fence(struct i915_sw_fence *fence,
 				 struct i915_sw_fence *after,
+#ifdef __linux__
 				 wait_queue_entry_t *wq);
+#else
+				 drm_waitqueue_t wq);
+#endif
 int i915_sw_fence_await_sw_fence_gfp(struct i915_sw_fence *fence,
 				     struct i915_sw_fence *after,
 				     gfp_t gfp);
@@ -108,7 +118,26 @@ static inline bool i915_sw_fence_done(const struct i915_sw_fence *fence)
 
 static inline void i915_sw_fence_wait(struct i915_sw_fence *fence)
 {
+#ifdef __linux__
 	wait_event(fence->wait, i915_sw_fence_done(fence));
+#else
+	if (cold) {
+		unsigned timo = 1000;
+		while (timo --> 0) {
+			if (!i915_sw_fence_done(fence))
+				return;
+			DELAY(100);
+		}
+		printf("%s: spinout", __func__);
+		return;
+	}
+	int ret;
+	spin_lock(&fence->lock);
+	DRM_SPIN_WAIT_NOINTR_UNTIL(ret, &fence->wait, &fence->lock,
+	    i915_sw_fence_done(fence));
+	spin_unlock(&fence->lock);
+	KASSERT(ret == 0);
+#endif
 }
 
 static inline void
