@@ -127,7 +127,7 @@ cpu_lwp_fork(struct lwp *l1, struct lwp *l2, void *stack, size_t stacksize,
 	ktf->tf_reg[27] = (uint64_t)func;
 	ktf->tf_reg[28] = (uint64_t)arg;
 	ktf->tf_reg[29] = 0;
-	KASSERT(reg_daif_read() == 0);
+	//KASSERT(reg_daif_read() == 0);
 	ktf->tf_lr = (uintptr_t)lwp_trampoline;
 
 	pcb2->pcb_tf = ktf;
