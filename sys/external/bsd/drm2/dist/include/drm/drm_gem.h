@@ -232,7 +232,7 @@ struct drm_gem_object {
 	struct uvm_object *filp;
 
 	/* UVM object with custom pager ops for device memory mappings.  */
-	struct uvm_object gemo_uvmobj;
+	struct uvm_object *gemo_uvmobj;
 #else
 	/**
 	 * @filp:

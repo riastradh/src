@@ -60,6 +60,7 @@ __KERNEL_RCSID(0, "$NetBSD$");
 #include <linux/pci.h>
 #include <linux/dma-buf.h>
 #include <linux/mman.h>
+#include <linux/uaccess.h>
 
 #include "display/intel_display.h"
 #include "display/intel_frontbuffer.h"
@@ -205,6 +206,9 @@ i915_gem_phys_pwrite(struct drm_i915_gem_object *obj,
 		     struct drm_i915_gem_pwrite *args,
 		     struct drm_file *file)
 {
+#ifdef __NetBSD__
+	panic("TODO");
+#else
 	void *vaddr = sg_page(obj->mm.pages->sgl) + args->offset;
 	char __user *user_data = u64_to_user_ptr(args->data_ptr);
 
@@ -221,6 +225,7 @@ i915_gem_phys_pwrite(struct drm_i915_gem_object *obj,
 	intel_gt_chipset_flush(&to_i915(obj->base.dev)->gt);
 
 	i915_gem_object_flush_frontbuffer(obj, ORIGIN_CPU);
+#endif
 	return 0;
 }
 
@@ -388,6 +393,9 @@ i915_gem_shmem_pread(struct drm_i915_gem_object *obj,
 	return ret;
 }
 
+#ifdef __NetBSD__
+#define __iomem
+#endif
 static inline bool
 gtt_user_read(struct io_mapping *mapping,
 	      loff_t base, int offset,
@@ -396,21 +404,33 @@ gtt_user_read(struct io_mapping *mapping,
 	void __iomem *vaddr;
 	unsigned long unwritten;
 
+#ifdef __NetBSD__
+	// No fast path for us.
+	unwritten = -EFAULT;
+#else
 	/* We can use the cpu mem copy function because this is X86. */
 	vaddr = io_mapping_map_atomic_wc(mapping, base);
 	unwritten = __copy_to_user_inatomic(user_data,
 					    (void __force *)vaddr + offset,
 					    length);
 	io_mapping_unmap_atomic(vaddr);
+#endif
 	if (unwritten) {
 		vaddr = io_mapping_map_wc(mapping, base, PAGE_SIZE);
 		unwritten = copy_to_user(user_data,
 					 (void __force *)vaddr + offset,
 					 length);
+#ifdef __NetBSD__
+		io_mapping_unmap(mapping, vaddr);
+#else
 		io_mapping_unmap(vaddr);
+#endif
 	}
 	return unwritten;
 }
+#ifdef __NetBSD__
+#undef __iomem
+#endif
 
 static int
 i915_gem_gtt_pread(struct drm_i915_gem_object *obj,
@@ -571,6 +591,9 @@ ggtt_write(struct io_mapping *mapping,
 	   loff_t base, int offset,
 	   char __user *user_data, int length)
 {
+#ifdef __NetBSD__
+	return length;
+#else
 	void __iomem *vaddr;
 	unsigned long unwritten;
 
@@ -587,6 +610,7 @@ ggtt_write(struct io_mapping *mapping,
 	}
 
 	return unwritten;
+#endif
 }
 
 /**
@@ -776,7 +800,11 @@ i915_gem_shmem_pwrite(struct drm_i915_gem_object *obj,
 	 */
 	partial_cacheline_write = 0;
 	if (needs_clflush & CLFLUSH_BEFORE)
+#ifdef __NetBSD__
+		partial_cacheline_write = cpu_info_primary.ci_cflush_lsize - 1;
+#else
 		partial_cacheline_write = boot_cpu_data.x86_clflush_size - 1;
+#endif
 
 	user_data = u64_to_user_ptr(args->data_ptr);
 	remain = args->size;

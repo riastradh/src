@@ -182,7 +182,7 @@ drm_gem_cma_fault(struct uvm_faultinfo *ufi, vaddr_t vaddr,
 	struct vm_map_entry *entry = ufi->entry;
 	struct uvm_object *uobj = entry->object.uvm_obj;
 	struct drm_gem_object *gem_obj =
-	    container_of(uobj, struct drm_gem_object, gemo_uvmobj);
+	    container_of(&uobj, struct drm_gem_object, gemo_uvmobj);
 	struct drm_gem_cma_object *obj = to_drm_gem_cma_obj(gem_obj);
 	off_t curr_offset;
 	vaddr_t curr_va;

@@ -49,7 +49,7 @@ static int	drm_gem_mmap_object_locked(struct drm_device *, off_t, size_t,
 void
 drm_gem_pager_reference(struct uvm_object *uobj)
 {
-	struct drm_gem_object *const obj = container_of(uobj,
+	struct drm_gem_object *const obj = container_of(&uobj,
 	    struct drm_gem_object, gemo_uvmobj);
 
 	drm_gem_object_get(obj);
@@ -58,7 +58,7 @@ drm_gem_pager_reference(struct uvm_object *uobj)
 void
 drm_gem_pager_detach(struct uvm_object *uobj)
 {
-	struct drm_gem_object *const obj = container_of(uobj,
+	struct drm_gem_object *const obj = container_of(&uobj,
 	    struct drm_gem_object, gemo_uvmobj);
 
 	drm_gem_object_put_unlocked(obj);
@@ -129,10 +129,16 @@ drm_gem_mmap_object_locked(struct drm_device *dev, off_t byte_offset,
 	struct drm_gem_object *const obj = container_of(node,
 	    struct drm_gem_object, vma_node);
 	KASSERT(obj->dev == dev);
-
+	
 	/* Success!  */
 	drm_gem_object_get(obj);
-	*uobjp = &obj->gemo_uvmobj;
+
+	if (!obj->gemo_uvmobj) {
+		KASSERT(dev->driver->gem_uvm_ops != NULL);
+		uvm_obj_init(obj->gemo_uvmobj, dev->driver->gem_uvm_ops, true, 1);
+		uvm_obj_setlock(obj->gemo_uvmobj, obj->filp->vmobjlock);
+	}
+	*uobjp = obj->gemo_uvmobj;
 	*uoffsetp = 0;
 	return 0;
 }
