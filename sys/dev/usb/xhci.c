@@ -649,6 +649,7 @@ xhci_detach(struct xhci_softc *sc, int flags)
 	/* do we need to wait for stop? */
 
 	xhci_op_write_8(sc, XHCI_CRCR, 0);
+	printf("%s(%d): free sc->sc_cr\n", __func__, __LINE__);
 	xhci_ring_free(sc, &sc->sc_cr);
 	cv_destroy(&sc->sc_command_cv);
 	cv_destroy(&sc->sc_cmdbusy_cv);
@@ -949,6 +950,10 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	 *
 	 * XXX Hope just zeroing it is good enough!
 	 */
+	printf("%s: sc->sc_cr=%p\n", __func__, sc->sc_cr);
+	printf("%s: sc->sc_cr->xr_dma@%p\n", __func__, &sc->sc_cr->xr_dma);
+	printf("%s: sc->sc_cr->xr_dma.udma_block=%p\n", __func__,
+	    sc->sc_cr->xr_dma.udma_block);
 	xhci_host_dequeue(sc->sc_cr);
 
 	/*
@@ -1408,6 +1413,10 @@ xhci_init(struct xhci_softc *sc)
 		rv = ENOMEM;
 		goto bad1;
 	}
+	printf("%s: sc->sc_cr=%p\n", __func__, sc->sc_cr);
+	printf("%s: sc->sc_cr->xr_dma@%p\n", __func__, &sc->sc_cr->xr_dma);
+	printf("%s: sc->sc_cr->xr_dma.udma_block=%p\n", __func__,
+	    sc->sc_cr->xr_dma.udma_block);
 
 	err = xhci_ring_init(sc, &sc->sc_er, XHCI_EVENT_RING_TRBS,
 	    XHCI_EVENT_RING_SEGMENTS_ALIGN);
@@ -1533,6 +1542,7 @@ xhci_init(struct xhci_softc *sc)
  bad3:
 	xhci_ring_free(sc, &sc->sc_er);
  bad2:
+	printf("%s(%d): free sc->sc_cr\n", __func__, __LINE__);
 	xhci_ring_free(sc, &sc->sc_cr);
 	i = sc->sc_maxspbuf;
  bad1:
