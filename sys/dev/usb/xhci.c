@@ -1028,12 +1028,18 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	 */
 	for (i = 0; i < sc->sc_maxslots; i++) {
 		struct xhci_slot *xs = &sc->sc_slots[i];
+
+		/* Skip if the slot is not in use.  */
 		if (xs->xs_idx == 0)
 			continue;
-		for (dci = 0; dci <= XHCI_MAX_DCI; dci++) {
+
+		for (dci = XHCI_DCI_SLOT; dci <= XHCI_MAX_DCI; dci++) {
+			/* Skip if the endpoint is not Running.  */
 			if (xhci_get_epstate(sc, xs, dci) !=
 			    XHCI_EPSTATE_RUNNING)
 				continue;
+
+			/* Ring the doorbell.  */
 			xhci_db_write_4(sc, XHCI_DOORBELL(xs->xs_idx), dci);
 		}
 	}
