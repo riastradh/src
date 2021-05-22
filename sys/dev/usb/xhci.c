@@ -389,7 +389,6 @@ xhci_rt_write_4(const struct xhci_softc * const sc, bus_size_t offset,
 	bus_space_write_4(sc->sc_iot, sc->sc_rbh, offset, value);
 }
 
-#if 0 /* unused */
 static inline uint64_t
 xhci_rt_read_8(const struct xhci_softc * const sc, bus_size_t offset)
 {
@@ -409,7 +408,6 @@ xhci_rt_read_8(const struct xhci_softc * const sc, bus_size_t offset)
 
 	return value;
 }
-#endif /* unused */
 
 static inline void
 xhci_rt_write_8(const struct xhci_softc * const sc, bus_size_t offset,
@@ -730,6 +728,16 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 		}
 	}
 
+	sc->sc_regs.usbcmd = xhci_op_read_4(sc, XHCI_USBCMD);
+	sc->sc_regs.dnctrl = xhci_op_read_4(sc, XHCI_DNCTRL);
+	sc->sc_regs.dcbaap = xhci_op_read_8(sc, XHCI_DCBAAP);
+	sc->sc_regs.config = xhci_op_read_4(sc, XHCI_CONFIG);
+	sc->sc_regs.iman0 = xhci_rt_read_4(sc, XHCI_IMAN(0));
+	sc->sc_regs.imod0 = xhci_rt_read_4(sc, XHCI_IMOD(0));
+	sc->sc_regs.erstsz0 = xhci_rt_read_4(sc, XHCI_ERSTSZ(0));
+	sc->sc_regs.erstba0 = xhci_rt_read_8(sc, XHCI_ERSTBA(0));
+	sc->sc_regs.erdp0 = xhci_rt_read_8(sc, XHCI_ERDP(0));
+
 	return true;
 }
 
@@ -812,7 +820,17 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 		return false;
 	}*/
 
-	xhci_config(sc);
+	xhci_op_write_4(sc, XHCI_USBCMD, sc->sc_regs.usbcmd);
+	xhci_op_write_4(sc, XHCI_DNCTRL, sc->sc_regs.dnctrl);
+	xhci_op_write_8(sc, XHCI_DCBAAP, sc->sc_regs.dcbaap);
+	xhci_op_write_4(sc, XHCI_CONFIG, sc->sc_regs.config);
+	xhci_rt_write_4(sc, XHCI_IMAN(0), sc->sc_regs.iman0);
+	xhci_rt_write_4(sc, XHCI_IMOD(0), sc->sc_regs.imod0);
+	xhci_rt_write_4(sc, XHCI_ERSTSZ(0), sc->sc_regs.erstsz0);
+	xhci_rt_write_8(sc, XHCI_ERSTBA(0), sc->sc_regs.erstba0);
+	xhci_rt_write_8(sc, XHCI_ERDP(0), sc->sc_regs.erdp0);
+
+	memset(&sc->sc_regs, 0, sizeof(sc->sc_regs)); /* paranoia */
 
 	for (size_t bn = 0; bn < 2; bn++) {
 		for (size_t i = 1; i <= sc->sc_rhportcount[bn]; i++) {
