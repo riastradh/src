@@ -714,6 +714,10 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	sc->sc_bus2.ub_usepolling++;
 	mutex_spin_exit(&sc->sc_intr_lock);
 
+	/* Disable interrupts.  */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) & ~XHCI_CMD_INTE);
+
 	/*
 	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.23.2:
 	 * xHCI Power Management, p. 342
@@ -1107,6 +1111,10 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 		device_printf(self, "resume error, USBSTS.SRE\n");
 		goto out;
 	}
+
+	/* Re-enable interrupts.  */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_INTE);
 
 	/* Success!  */
 	ok = true;
