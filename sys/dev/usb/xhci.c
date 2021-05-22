@@ -864,69 +864,6 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 }
 
 bool
-xhci_shutdown(device_t self, int flags)
-{
-	return false;
-}
-
-static int
-xhci_hc_reset(struct xhci_softc * const sc)
-{
-	uint32_t usbcmd, usbsts;
-	int i;
-
-	/* Check controller not ready */
-	for (i = 0; i < XHCI_WAIT_CNR; i++) {
-		usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
-		if ((usbsts & XHCI_STS_CNR) == 0)
-			break;
-		usb_delay_ms(&sc->sc_bus, 1);
-	}
-	if (i >= XHCI_WAIT_CNR) {
-		aprint_error_dev(sc->sc_dev, "controller not ready timeout\n");
-		return EIO;
-	}
-
-	/* Halt controller */
-	usbcmd = 0;
-	xhci_op_write_4(sc, XHCI_USBCMD, usbcmd);
-	usb_delay_ms(&sc->sc_bus, 1);
-
-	/* Reset controller */
-	usbcmd = XHCI_CMD_HCRST;
-	xhci_op_write_4(sc, XHCI_USBCMD, usbcmd);
-	for (i = 0; i < XHCI_WAIT_HCRST; i++) {
-		/*
-		 * Wait 1ms first. Existing Intel xHCI requies 1ms delay to
-		 * prevent system hang (Errata).
-		 */
-		usb_delay_ms(&sc->sc_bus, 1);
-		usbcmd = xhci_op_read_4(sc, XHCI_USBCMD);
-		if ((usbcmd & XHCI_CMD_HCRST) == 0)
-			break;
-	}
-	if (i >= XHCI_WAIT_HCRST) {
-		aprint_error_dev(sc->sc_dev, "host controller reset timeout\n");
-		return EIO;
-	}
-
-	/* Check controller not ready */
-	for (i = 0; i < XHCI_WAIT_CNR; i++) {
-		usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
-		if ((usbsts & XHCI_STS_CNR) == 0)
-			break;
-		usb_delay_ms(&sc->sc_bus, 1);
-	}
-	if (i >= XHCI_WAIT_CNR) {
-		aprint_error_dev(sc->sc_dev,
-		    "controller not ready timeout after reset\n");
-		return EIO;
-	}
-
-	return 0;
-}
-
-bool
 xhci_resume(device_t self, const pmf_qual_t *qual)
 {
 	struct xhci_softc * const sc = device_private(self);
@@ -1122,6 +1059,69 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	}
 
 	return true;
+}
+
+bool
+xhci_shutdown(device_t self, int flags)
+{
+	return false;
+}
+
+static int
+xhci_hc_reset(struct xhci_softc * const sc)
+{
+	uint32_t usbcmd, usbsts;
+	int i;
+
+	/* Check controller not ready */
+	for (i = 0; i < XHCI_WAIT_CNR; i++) {
+		usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
+		if ((usbsts & XHCI_STS_CNR) == 0)
+			break;
+		usb_delay_ms(&sc->sc_bus, 1);
+	}
+	if (i >= XHCI_WAIT_CNR) {
+		aprint_error_dev(sc->sc_dev, "controller not ready timeout\n");
+		return EIO;
+	}
+
+	/* Halt controller */
+	usbcmd = 0;
+	xhci_op_write_4(sc, XHCI_USBCMD, usbcmd);
+	usb_delay_ms(&sc->sc_bus, 1);
+
+	/* Reset controller */
+	usbcmd = XHCI_CMD_HCRST;
+	xhci_op_write_4(sc, XHCI_USBCMD, usbcmd);
+	for (i = 0; i < XHCI_WAIT_HCRST; i++) {
+		/*
+		 * Wait 1ms first. Existing Intel xHCI requies 1ms delay to
+		 * prevent system hang (Errata).
+		 */
+		usb_delay_ms(&sc->sc_bus, 1);
+		usbcmd = xhci_op_read_4(sc, XHCI_USBCMD);
+		if ((usbcmd & XHCI_CMD_HCRST) == 0)
+			break;
+	}
+	if (i >= XHCI_WAIT_HCRST) {
+		aprint_error_dev(sc->sc_dev, "host controller reset timeout\n");
+		return EIO;
+	}
+
+	/* Check controller not ready */
+	for (i = 0; i < XHCI_WAIT_CNR; i++) {
+		usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
+		if ((usbsts & XHCI_STS_CNR) == 0)
+			break;
+		usb_delay_ms(&sc->sc_bus, 1);
+	}
+	if (i >= XHCI_WAIT_CNR) {
+		aprint_error_dev(sc->sc_dev,
+		    "controller not ready timeout after reset\n");
+		return EIO;
+	}
+
+	return 0;
 }
 
 /* 7.2 xHCI Support Protocol Capability */
