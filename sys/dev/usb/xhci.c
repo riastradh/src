@@ -963,8 +963,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
 			v = xhci_op_read_4(sc, port);
 			printf("%s: bn = %zu, i = %zu, v = %x\n", __func__, bn, i, v);
-			if (((v & XHCI_PS_PED) == 0) ||
-			    XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3) {
+			if (XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3) {
 				printf("Skipping\n");
 				continue;
 			}
