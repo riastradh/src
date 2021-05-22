@@ -806,6 +806,12 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 		    "controller not ready timeout after controller save state\n");
 	}
 
+	/*
+	 * `Note: After a Save or Restore operation completes, the
+	 *  Save/Restore Error (SRE) flag in the USBSTS register should
+	 *  be checked to ensure that the operation completed
+	 *  successfully.'
+	 */
 	if (xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_SRE) {
 		device_printf(self, "suspend error, USBSTS.SRE\n");
 		return false;
@@ -1032,6 +1038,12 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 		}
 	}
 
+	/*
+	 * `Note: After a Save or Restore operation completes, the
+	 *  Save/Restore Error (SRE) flag in the USBSTS register should
+	 *  be checked to ensure that the operation completed
+	 *  successfully.'
+	 */
 	if (xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_SRE) {
 		device_printf(self, "resume error, USBSTS.SRE\n");
 		return false;
