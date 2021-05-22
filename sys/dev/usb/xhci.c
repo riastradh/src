@@ -139,6 +139,7 @@ struct xhci_pipe {
 #define XHCI_EVENT_RING_SEGMENTS 1
 #define XHCI_TRB_3_ED_BIT XHCI_TRB_3_ISP_BIT
 
+static void xhci_config(struct xhci_softc *);
 static usbd_status xhci_open(struct usbd_pipe *);
 static void xhci_close_pipe(struct usbd_pipe *);
 static int xhci_intr1(struct xhci_softc * const);
@@ -700,13 +701,7 @@ xhci_activate(device_t self, enum devact act)
 bool
 xhci_suspend(device_t dv, const pmf_qual_t *qual)
 {
-	return false;
-}
-
-bool
-xhci_resume(device_t dv, const pmf_qual_t *qual)
-{
-	return false;
+	return true;
 }
 
 bool
@@ -772,6 +767,21 @@ xhci_hc_reset(struct xhci_softc * const sc)
 	return 0;
 }
 
+bool
+xhci_resume(device_t self, const pmf_qual_t *qual)
+{
+	struct xhci_softc * const sc = device_private(self);
+	int rv;
+
+	rv = xhci_hc_reset(sc);
+	if (!rv) {
+		return false;
+	}
+
+	xhci_config(sc);
+
+	return true;
+}
 
 /* 7.2 xHCI Support Protocol Capability */
 static void
@@ -934,6 +944,42 @@ xhci_ecp(struct xhci_softc *sc)
 	"b\0U3C\0"						\
 	"\0"
 
+static void
+xhci_config(struct xhci_softc *sc)
+{
+	uint32_t config;
+
+	config = xhci_op_read_4(sc, XHCI_CONFIG);
+	config &= ~0xFF;
+	config |= sc->sc_maxslots & 0xFF;
+	xhci_op_write_4(sc, XHCI_CONFIG, config);
+
+	struct xhci_erste *erst;
+	erst = KERNADDR(&sc->sc_eventst_dma, 0);
+	erst[0].erste_0 = htole64(xhci_ring_trbp(sc->sc_er, 0));
+	erst[0].erste_2 = htole32(sc->sc_er->xr_ntrb);
+	erst[0].erste_3 = htole32(0);
+	usb_syncmem(&sc->sc_eventst_dma, 0,
+	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS, BUS_DMASYNC_PREWRITE);
+
+	xhci_rt_write_4(sc, XHCI_ERSTSZ(0), XHCI_EVENT_RING_SEGMENTS);
+	xhci_rt_write_8(sc, XHCI_ERSTBA(0), DMAADDR(&sc->sc_eventst_dma, 0));
+	xhci_rt_write_8(sc, XHCI_ERDP(0), xhci_ring_trbp(sc->sc_er, 0) |
+	    XHCI_ERDP_BUSY);
+
+	xhci_op_write_8(sc, XHCI_DCBAAP, DMAADDR(&sc->sc_dcbaa_dma, 0));
+	xhci_op_write_8(sc, XHCI_CRCR, xhci_ring_trbp(sc->sc_cr, 0) |
+	    sc->sc_cr->xr_cs);
+
+	xhci_barrier(sc, BUS_SPACE_BARRIER_WRITE);
+
+	HEXDUMP("eventst", KERNADDR(&sc->sc_eventst_dma, 0),
+	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS);
+
+	//if ((sc->sc_quirks & XHCI_DEFERRED_START) == 0)
+	xhci_start(sc);
+}
+
 void
 xhci_start(struct xhci_softc *sc)
 {
@@ -957,7 +1003,7 @@ xhci_init(struct xhci_softc *sc)
 {
 	bus_size_t bsz;
 	uint32_t hcs1, hcs2, hcs3, dboff, rtsoff;
-	uint32_t pagesize, config;
+	uint32_t pagesize;
 	int i = 0;
 	uint16_t hciversion;
 	uint8_t caplength;
@@ -1032,10 +1078,10 @@ xhci_init(struct xhci_softc *sc)
 		sc->sc_rhportmap[j] = kmem_zalloc(sc->sc_maxports * sizeof(int), KM_SLEEP);
 	}
 
-	/*
-	 * Process all Extended Capabilities
-	 */
-	xhci_ecp(sc);
+		/*
+		 * Process all Extended Capabilities
+		 */
+		xhci_ecp(sc);
 
 	bsz = XHCI_PORTSC(sc->sc_maxports);
 	if (bus_space_subregion(sc->sc_iot, sc->sc_ioh, caplength, bsz,
@@ -1117,11 +1163,6 @@ xhci_init(struct xhci_softc *sc)
 		usb_syncmem(&sc->sc_spbufarray_dma, 0,
 		    sizeof(uint64_t) * sc->sc_maxspbuf, BUS_DMASYNC_PREWRITE);
 	}
-
-	config = xhci_op_read_4(sc, XHCI_CONFIG);
-	config &= ~0xFF;
-	config |= sc->sc_maxslots & 0xFF;
-	xhci_op_write_4(sc, XHCI_CONFIG, config);
 
 	err = xhci_ring_init(sc, &sc->sc_cr, XHCI_COMMAND_RING_TRBS,
 	    XHCI_COMMAND_RING_SEGMENTS_ALIGN);
@@ -1211,30 +1252,7 @@ xhci_init(struct xhci_softc *sc)
 	mutex_init(&sc->sc_lock, MUTEX_DEFAULT, IPL_SOFTUSB);
 	mutex_init(&sc->sc_intr_lock, MUTEX_DEFAULT, IPL_USB);
 
-	struct xhci_erste *erst;
-	erst = KERNADDR(&sc->sc_eventst_dma, 0);
-	erst[0].erste_0 = htole64(xhci_ring_trbp(sc->sc_er, 0));
-	erst[0].erste_2 = htole32(sc->sc_er->xr_ntrb);
-	erst[0].erste_3 = htole32(0);
-	usb_syncmem(&sc->sc_eventst_dma, 0,
-	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS, BUS_DMASYNC_PREWRITE);
-
-	xhci_rt_write_4(sc, XHCI_ERSTSZ(0), XHCI_EVENT_RING_SEGMENTS);
-	xhci_rt_write_8(sc, XHCI_ERSTBA(0), DMAADDR(&sc->sc_eventst_dma, 0));
-	xhci_rt_write_8(sc, XHCI_ERDP(0), xhci_ring_trbp(sc->sc_er, 0) |
-	    XHCI_ERDP_BUSY);
-
-	xhci_op_write_8(sc, XHCI_DCBAAP, DMAADDR(&sc->sc_dcbaa_dma, 0));
-	xhci_op_write_8(sc, XHCI_CRCR, xhci_ring_trbp(sc->sc_cr, 0) |
-	    sc->sc_cr->xr_cs);
-
-	xhci_barrier(sc, BUS_SPACE_BARRIER_WRITE);
-
-	HEXDUMP("eventst", KERNADDR(&sc->sc_eventst_dma, 0),
-	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS);
-
-	if ((sc->sc_quirks & XHCI_DEFERRED_START) == 0)
-		xhci_start(sc);
+	xhci_config(sc);
 
 	return 0;
 
