@@ -1028,6 +1028,8 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	 */
 	for (i = 0; i < sc->sc_maxslots; i++) {
 		struct xhci_slot *xs = &sc->sc_slots[i];
+		if (xs->xs_idx == 0)
+			continue;
 		for (dci = 0; dci <= XHCI_MAX_DCI; dci++) {
 			if (xhci_get_epstate(sc, xs, dci) !=
 			    XHCI_EPSTATE_RUNNING)
