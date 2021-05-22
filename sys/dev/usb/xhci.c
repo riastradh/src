@@ -702,8 +702,14 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	size_t i, j, bn;
 	int port;
 	uint32_t v;
+	bool ok = false;
 
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
+
+	mutex_spin_enter(&sc->sc_intr_lock);
+	sc->sc_bus.ub_usepolling++;
+	sc->sc_bus2.ub_usepolling++;
+	mutex_spin_exit(&sc->sc_intr_lock);
 
 	/*
 	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.15:
@@ -857,10 +863,17 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	 */
 	if (xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_SRE) {
 		device_printf(self, "suspend error, USBSTS.SRE\n");
-		return false;
+		goto out;
 	}
 
-	return true;
+	/* Success!  */
+	ok = true;
+
+out:	mutex_spin_enter(&sc->sc_intr_lock);
+	sc->sc_bus.ub_usepolling--;
+	sc->sc_bus2.ub_usepolling--;
+	mutex_spin_exit(&sc->sc_intr_lock);
+	return ok;
 }
 
 bool
@@ -870,8 +883,14 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	size_t i, j, bn, dci;
 	int port;
 	uint32_t v;
+	bool ok = false;
 
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
+
+	mutex_spin_enter(&sc->sc_intr_lock);
+	sc->sc_bus.ub_usepolling++;
+	sc->sc_bus2.ub_usepolling++;
+	mutex_spin_exit(&sc->sc_intr_lock);
 
 	/*
 	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.23.2:
@@ -917,7 +936,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	}
 	if (i >= XHCI_WAIT_RSS) {
 		device_printf(self, "suspend timeout, USBSTS.RSS\n");
-		return false;
+		goto out;
 	}
 
 	/*
@@ -1017,7 +1036,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 				device_printf(self,
 				    "resume timeout on bus %zu port %zu\n",
 				    bn, i);
-				return false;
+				goto out;
 			}
 		}
 	}
@@ -1052,10 +1071,17 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	 */
 	if (xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_SRE) {
 		device_printf(self, "resume error, USBSTS.SRE\n");
-		return false;
+		goto out;
 	}
 
-	return true;
+	/* Success!  */
+	ok = true;
+
+out:	mutex_spin_enter(&sc->sc_intr_lock);
+	sc->sc_bus.ub_usepolling--;
+	sc->sc_bus2.ub_usepolling--;
+	mutex_spin_exit(&sc->sc_intr_lock);
+	return ok;
 }
 
 bool
