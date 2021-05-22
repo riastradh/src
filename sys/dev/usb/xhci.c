@@ -78,7 +78,7 @@ __KERNEL_RCSID(0, "$NetBSD: xhci.c,v 1.138 2021/01/05 18:00:21 skrll Exp $");
 	    if (xhcidebug > 0) \
 		    hexdump(printf, a, b, c); \
     } while (/*CONSTCOND*/0)
-static int xhcidebug = 0;
+static int xhcidebug = 10;
 
 SYSCTL_SETUP(sysctl_hw_xhci_setup, "sysctl hw.xhci setup")
 {
@@ -701,8 +701,36 @@ xhci_activate(device_t self, enum devact act)
 bool
 xhci_suspend(device_t self, const pmf_qual_t *qual)
 {
+	struct xhci_softc * const sc = device_private(self);
+	uint32_t v;
 
-	return config_detach_children(self, DETACH_FORCE) == 0;
+	XHCIHIST_FUNC(); XHCIHIST_CALLED();
+
+	for (size_t bn = 0; bn < 2; bn++) {
+		for (size_t i = 1; i <= sc->sc_rhportcount[bn]; i++) {
+			v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
+			printf("%s: bn = %zu, i = %zu, v = %x\n", __func__, bn, i, v);
+			if (((v & XHCI_PS_PED) == 0) ||
+			     XHCI_PS_PLS_GET(v) >= 3) {
+				printf("Skipping\n");
+				continue;
+			}
+
+			v &= ~XHCI_PS_PLS_MASK;
+			v &= ~XHCI_PS_CLEAR;
+			v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_U3) | XHCI_PS_LWS;
+			xhci_op_write_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)), v);
+
+			while (XHCI_PS_PLS_GET(xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i))))
+			    != XHCI_PS_PLS_U3)
+				usb_delay_ms(&sc->sc_bus, 1);  /* plus countdown to timeout */
+
+			v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
+			printf("%s (just before suspend): bn = %zu, i = %zu, v = %x, pls = %lx\n", __func__, bn, i, v, XHCI_PS_PLS_GET(v));
+		}
+	}
+
+	return true;
 }
 
 bool
@@ -772,17 +800,60 @@ bool
 xhci_resume(device_t self, const pmf_qual_t *qual)
 {
 	struct xhci_softc * const sc = device_private(self);
-	int rv;
+	//int rv;
+	uint32_t v;
 
+	XHCIHIST_FUNC(); XHCIHIST_CALLED();
+
+	/*
 	rv = xhci_hc_reset(sc);
-	if (!rv) {
+	if (rv) {
+		printf("%s: Reset failed\n", __func__);
 		return false;
-	}
+	}*/
 
 	xhci_config(sc);
-	sc->sc_child = config_found(self, &sc->sc_bus, usbctlprint, CFARG_EOL);
-	sc->sc_child2 = config_found(self, &sc->sc_bus2, usbctlprint,
-	    CFARG_EOL);
+
+	for (size_t bn = 0; bn < 2; bn++) {
+		for (size_t i = 1; i <= sc->sc_rhportcount[bn]; i++) {
+			v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
+			printf("%s: bn = %zu, i = %zu, v = %x\n", __func__, bn, i, v);
+			if (((v & XHCI_PS_PED) == 0) ||
+			     XHCI_PS_PLS_GET(v) != 3) {
+				printf("Skipping\n");
+				continue;
+			}
+
+			if (bn == 1) {
+				v &= ~XHCI_PS_PLS_MASK;
+				v &= ~XHCI_PS_CLEAR;
+				v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETRESUME) | XHCI_PS_LWS;
+				xhci_op_write_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)), v);
+				usb_delay_ms(&sc->sc_bus, 20);	/* plus countdown to timeout */
+			}
+
+			v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
+			v &= ~XHCI_PS_PLS_MASK;
+			v &= ~XHCI_PS_CLEAR;
+
+			v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_U0) | XHCI_PS_LWS;
+			xhci_op_write_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)), v);
+
+			size_t j;
+			for (j = 0; j < 100; j++) {
+				v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
+				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U0)
+					break;
+
+				usb_delay_ms(&sc->sc_bus, 1);  /* plus countdown to timeout */
+			}
+			if (j == 100)
+				printf("Timeout resuming bn = %zu, i = %zu, v = %x\n", bn, i, v);
+
+			v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
+			printf("%s (just before suspend): bn = %zu, i = %zu, v = %x, pls = %lx\n", __func__, bn, i, v, XHCI_PS_PLS_GET(v));
+		}
+	}
 
 	return true;
 }
@@ -1082,10 +1153,10 @@ xhci_init(struct xhci_softc *sc)
 		sc->sc_rhportmap[j] = kmem_zalloc(sc->sc_maxports * sizeof(int), KM_SLEEP);
 	}
 
-		/*
-		 * Process all Extended Capabilities
-		 */
-		xhci_ecp(sc);
+	/*
+	 * Process all Extended Capabilities
+	 */
+	xhci_ecp(sc);
 
 	bsz = XHCI_PORTSC(sc->sc_maxports);
 	if (bus_space_subregion(sc->sc_iot, sc->sc_ioh, caplength, bsz,
