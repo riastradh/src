@@ -806,6 +806,11 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 		    "controller not ready timeout after controller save state\n");
 	}
 
+	if (xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_SRE) {
+		device_printf(self, "suspend error, USBSTS.SRE\n");
+		return false;
+	}
+
 	return true;
 }
 
@@ -1014,6 +1019,11 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 				continue;
 			xhci_db_write_4(sc, XHCI_DOORBELL(xs->xs_idx), dci);
 		}
+	}
+
+	if (xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_SRE) {
+		device_printf(self, "resume error, USBSTS.SRE\n");
+		return false;
 	}
 
 	return true;
