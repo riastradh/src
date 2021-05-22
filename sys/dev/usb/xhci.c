@@ -78,7 +78,7 @@ __KERNEL_RCSID(0, "$NetBSD: xhci.c,v 1.138 2021/01/05 18:00:21 skrll Exp $");
 	    if (xhcidebug > 0) \
 		    hexdump(printf, a, b, c); \
     } while (/*CONSTCOND*/0)
-static int xhcidebug = 10;
+static int xhcidebug = 0;
 
 SYSCTL_SETUP(sysctl_hw_xhci_setup, "sysctl hw.xhci setup")
 {
@@ -139,7 +139,6 @@ struct xhci_pipe {
 #define XHCI_EVENT_RING_SEGMENTS 1
 #define XHCI_TRB_3_ED_BIT XHCI_TRB_3_ISP_BIT
 
-static void xhci_config(struct xhci_softc *);
 static usbd_status xhci_open(struct usbd_pipe *);
 static void xhci_close_pipe(struct usbd_pipe *);
 static int xhci_intr1(struct xhci_softc * const);
@@ -1087,42 +1086,6 @@ xhci_ecp(struct xhci_softc *sc)
 	"b\0U3C\0"						\
 	"\0"
 
-static void
-xhci_config(struct xhci_softc *sc)
-{
-	uint32_t config;
-
-	config = xhci_op_read_4(sc, XHCI_CONFIG);
-	config &= ~0xFF;
-	config |= sc->sc_maxslots & 0xFF;
-	xhci_op_write_4(sc, XHCI_CONFIG, config);
-
-	struct xhci_erste *erst;
-	erst = KERNADDR(&sc->sc_eventst_dma, 0);
-	erst[0].erste_0 = htole64(xhci_ring_trbp(sc->sc_er, 0));
-	erst[0].erste_2 = htole32(sc->sc_er->xr_ntrb);
-	erst[0].erste_3 = htole32(0);
-	usb_syncmem(&sc->sc_eventst_dma, 0,
-	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS, BUS_DMASYNC_PREWRITE);
-
-	xhci_rt_write_4(sc, XHCI_ERSTSZ(0), XHCI_EVENT_RING_SEGMENTS);
-	xhci_rt_write_8(sc, XHCI_ERSTBA(0), DMAADDR(&sc->sc_eventst_dma, 0));
-	xhci_rt_write_8(sc, XHCI_ERDP(0), xhci_ring_trbp(sc->sc_er, 0) |
-	    XHCI_ERDP_BUSY);
-
-	xhci_op_write_8(sc, XHCI_DCBAAP, DMAADDR(&sc->sc_dcbaa_dma, 0));
-	xhci_op_write_8(sc, XHCI_CRCR, xhci_ring_trbp(sc->sc_cr, 0) |
-	    sc->sc_cr->xr_cs);
-
-	xhci_barrier(sc, BUS_SPACE_BARRIER_WRITE);
-
-	HEXDUMP("eventst", KERNADDR(&sc->sc_eventst_dma, 0),
-	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS);
-
-	//if ((sc->sc_quirks & XHCI_DEFERRED_START) == 0)
-	xhci_start(sc);
-}
-
 void
 xhci_start(struct xhci_softc *sc)
 {
@@ -1146,7 +1109,7 @@ xhci_init(struct xhci_softc *sc)
 {
 	bus_size_t bsz;
 	uint32_t hcs1, hcs2, hcs3, dboff, rtsoff;
-	uint32_t pagesize;
+	uint32_t pagesize, config;
 	int i = 0;
 	uint16_t hciversion;
 	uint8_t caplength;
@@ -1307,6 +1270,11 @@ xhci_init(struct xhci_softc *sc)
 		    sizeof(uint64_t) * sc->sc_maxspbuf, BUS_DMASYNC_PREWRITE);
 	}
 
+	config = xhci_op_read_4(sc, XHCI_CONFIG);
+	config &= ~0xFF;
+	config |= sc->sc_maxslots & 0xFF;
+	xhci_op_write_4(sc, XHCI_CONFIG, config);
+
 	err = xhci_ring_init(sc, &sc->sc_cr, XHCI_COMMAND_RING_TRBS,
 	    XHCI_COMMAND_RING_SEGMENTS_ALIGN);
 	if (err) {
@@ -1395,7 +1363,30 @@ xhci_init(struct xhci_softc *sc)
 	mutex_init(&sc->sc_lock, MUTEX_DEFAULT, IPL_SOFTUSB);
 	mutex_init(&sc->sc_intr_lock, MUTEX_DEFAULT, IPL_USB);
 
-	xhci_config(sc);
+	struct xhci_erste *erst;
+	erst = KERNADDR(&sc->sc_eventst_dma, 0);
+	erst[0].erste_0 = htole64(xhci_ring_trbp(sc->sc_er, 0));
+	erst[0].erste_2 = htole32(sc->sc_er->xr_ntrb);
+	erst[0].erste_3 = htole32(0);
+	usb_syncmem(&sc->sc_eventst_dma, 0,
+	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS, BUS_DMASYNC_PREWRITE);
+
+	xhci_rt_write_4(sc, XHCI_ERSTSZ(0), XHCI_EVENT_RING_SEGMENTS);
+	xhci_rt_write_8(sc, XHCI_ERSTBA(0), DMAADDR(&sc->sc_eventst_dma, 0));
+	xhci_rt_write_8(sc, XHCI_ERDP(0), xhci_ring_trbp(sc->sc_er, 0) |
+	    XHCI_ERDP_BUSY);
+
+	xhci_op_write_8(sc, XHCI_DCBAAP, DMAADDR(&sc->sc_dcbaa_dma, 0));
+	xhci_op_write_8(sc, XHCI_CRCR, xhci_ring_trbp(sc->sc_cr, 0) |
+	    sc->sc_cr->xr_cs);
+
+	xhci_barrier(sc, BUS_SPACE_BARRIER_WRITE);
+
+	HEXDUMP("eventst", KERNADDR(&sc->sc_eventst_dma, 0),
+	    XHCI_ERSTE_SIZE * XHCI_EVENT_RING_SEGMENTS);
+
+	if ((sc->sc_quirks & XHCI_DEFERRED_START) == 0)
+		xhci_start(sc);
 
 	return 0;
 
