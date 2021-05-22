@@ -143,11 +143,11 @@ struct xhci_softc {
 		uint32_t	dnctrl;
 		uint64_t	dcbaap;
 		uint32_t	config;
-		uint32_t	iman0;
-		uint32_t	imod0;
 		uint32_t	erstsz0;
 		uint64_t	erstba0;
 		uint64_t	erdp0;
+		uint32_t	iman0;
+		uint32_t	imod0;
 	} sc_regs;
 };
 
