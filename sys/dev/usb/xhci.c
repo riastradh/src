@@ -699,9 +699,10 @@ xhci_activate(device_t self, enum devact act)
 }
 
 bool
-xhci_suspend(device_t dv, const pmf_qual_t *qual)
+xhci_suspend(device_t self, const pmf_qual_t *qual)
 {
-	return true;
+
+	return config_detach_children(self, DETACH_FORCE) == 0;
 }
 
 bool
@@ -779,6 +780,9 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	}
 
 	xhci_config(sc);
+	sc->sc_child = config_found(self, &sc->sc_bus, usbctlprint, CFARG_EOL);
+	sc->sc_child2 = config_found(self, &sc->sc_bus2, usbctlprint,
+	    CFARG_EOL);
 
 	return true;
 }
