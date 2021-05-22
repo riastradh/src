@@ -701,11 +701,12 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 {
 	struct xhci_softc * const sc = device_private(self);
 	uint32_t v;
+	size_t i;
 
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
 
 	for (size_t bn = 0; bn < 2; bn++) {
-		for (size_t i = 1; i <= sc->sc_rhportcount[bn]; i++) {
+		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
 			v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
 			printf("%s: bn = %zu, i = %zu, v = %x\n", __func__, bn, i, v);
 			if (((v & XHCI_PS_PED) == 0) ||
@@ -728,15 +729,36 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 		}
 	}
 
+	/* Step 3: Stop the controller by setting Run/Stop to 0 */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) & ~XHCI_CMD_RS);
+
+	/* Step 4: Read the Operational Runtime and save its state */
 	sc->sc_regs.usbcmd = xhci_op_read_4(sc, XHCI_USBCMD);
 	sc->sc_regs.dnctrl = xhci_op_read_4(sc, XHCI_DNCTRL);
 	sc->sc_regs.dcbaap = xhci_op_read_8(sc, XHCI_DCBAAP);
 	sc->sc_regs.config = xhci_op_read_4(sc, XHCI_CONFIG);
-	sc->sc_regs.iman0 = xhci_rt_read_4(sc, XHCI_IMAN(0));
-	sc->sc_regs.imod0 = xhci_rt_read_4(sc, XHCI_IMOD(0));
 	sc->sc_regs.erstsz0 = xhci_rt_read_4(sc, XHCI_ERSTSZ(0));
 	sc->sc_regs.erstba0 = xhci_rt_read_8(sc, XHCI_ERSTBA(0));
 	sc->sc_regs.erdp0 = xhci_rt_read_8(sc, XHCI_ERDP(0));
+	sc->sc_regs.iman0 = xhci_rt_read_4(sc, XHCI_IMAN(0));
+	sc->sc_regs.imod0 = xhci_rt_read_4(sc, XHCI_IMOD(0));
+
+	/* Step 5: Set the Controller Save State flag in the USBCMD register */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_CSS);
+
+	/* ...And wait for the Save State Status to transition to 0 */
+	for (i = 0; i < XHCI_WAIT_CNR; i++) {
+		uint32_t usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
+		if ((usbsts & XHCI_STS_SSS) == 0)
+			break;
+		usb_delay_ms(&sc->sc_bus, 1);
+	}
+	if (i >= XHCI_WAIT_CNR) {
+		aprint_error_dev(sc->sc_dev,
+		    "controller not ready timeout after controller save state\n");
+	}
 
 	return true;
 }
@@ -809,6 +831,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 {
 	struct xhci_softc * const sc = device_private(self);
 	//int rv;
+	size_t i;
 	uint32_t v;
 
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
@@ -820,20 +843,47 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 		return false;
 	}*/
 
-	xhci_op_write_4(sc, XHCI_USBCMD, sc->sc_regs.usbcmd);
+	/* Step 4: Restore the Operational Runtime */
 	xhci_op_write_4(sc, XHCI_DNCTRL, sc->sc_regs.dnctrl);
 	xhci_op_write_8(sc, XHCI_DCBAAP, sc->sc_regs.dcbaap);
 	xhci_op_write_4(sc, XHCI_CONFIG, sc->sc_regs.config);
-	xhci_rt_write_4(sc, XHCI_IMAN(0), sc->sc_regs.iman0);
-	xhci_rt_write_4(sc, XHCI_IMOD(0), sc->sc_regs.imod0);
 	xhci_rt_write_4(sc, XHCI_ERSTSZ(0), sc->sc_regs.erstsz0);
 	xhci_rt_write_8(sc, XHCI_ERSTBA(0), sc->sc_regs.erstba0);
 	xhci_rt_write_8(sc, XHCI_ERDP(0), sc->sc_regs.erdp0);
+	xhci_rt_write_4(sc, XHCI_IMAN(0), sc->sc_regs.iman0);
+	xhci_rt_write_4(sc, XHCI_IMOD(0), sc->sc_regs.imod0);
+	xhci_op_write_4(sc, XHCI_USBCMD, sc->sc_regs.usbcmd);
+
+	/* Step 5: Set the Controller Restore State flag in the USBCMD register */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_CRS);
+
+	/* ...And wait for the Restore State Status to transition to 0 */
+	for (i = 0; i < XHCI_WAIT_CNR; i++) {
+		uint32_t usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
+		if ((usbsts & XHCI_STS_RSS) == 0)
+			break;
+		usb_delay_ms(&sc->sc_bus, 1);
+	}
+	if (i >= XHCI_WAIT_CNR) {
+		aprint_error_dev(sc->sc_dev,
+		    "controller not ready timeout after controller restore state\n");
+		return false;
+	}
+
+	/* Step 7: Write the CRCR with the address and RCS value of the
+	 * reinitialized(?) Command Ring */
+	xhci_op_write_8(sc, XHCI_CRCR, xhci_ring_trbp(sc->sc_cr, 0) |
+	    sc->sc_cr->xr_cs);
+
+	/* Step 8: Enable the controller by setting Run/Stop to 1 */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_RS);
 
 	memset(&sc->sc_regs, 0, sizeof(sc->sc_regs)); /* paranoia */
 
 	for (size_t bn = 0; bn < 2; bn++) {
-		for (size_t i = 1; i <= sc->sc_rhportcount[bn]; i++) {
+		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
 			v = xhci_op_read_4(sc, XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i)));
 			printf("%s: bn = %zu, i = %zu, v = %x\n", __func__, bn, i, v);
 			if (((v & XHCI_PS_PED) == 0) ||
