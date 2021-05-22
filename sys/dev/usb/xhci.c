@@ -876,7 +876,7 @@ bool
 xhci_resume(device_t self, const pmf_qual_t *qual)
 {
 	struct xhci_softc * const sc = device_private(self);
-	size_t i, j, bn;
+	size_t i, j, bn, dci;
 	int port;
 	uint32_t v;
 
@@ -1000,6 +1000,18 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 			v = xhci_op_read_4(sc, port);
 			printf("%s (just before suspend): bn = %zu, i = %zu, v = %x, pls = %lx\n", __func__, bn, i, v, XHCI_PS_PLS_GET(v));
 		}
+	}
+
+	/*
+	 * `10. Restart each of the previously Running endpoints by
+	 *      ringing their doorbells.'
+	 *
+	 * XXX This rings all the doorbells, even if nobody's home!
+	 */
+	for (i = 0; i < sc->sc_maxslots; i++) {
+		struct xhci_slot *xs = &sc->sc_slots[i];
+		for (dci = 0; dci <= XHCI_MAX_DCI; dci++)
+			xhci_db_write_4(sc, XHCI_DOORBELL(xs->xs_idx), dci);
 	}
 
 	return true;
