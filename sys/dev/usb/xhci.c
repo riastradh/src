@@ -949,9 +949,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	 *
 	 * XXX Hope just zeroing it is good enough!
 	 */
-	memset(sc->sc_cr->xr_trb, 0, sc->sc_cr->xr_ntrb * XHCI_TRB_SIZE);
-	usb_syncmem(&sc->sc_cr->xr_dma, 0, sc->sc_cr->xr_ntrb * XHCI_TRB_SIZE,
-	    BUS_DMASYNC_PREWRITE);
+	xhci_host_dequeue(sc->sc_cr);
 
 	/*
 	 * `7. Write the CRCR with the address and RCS value of the
