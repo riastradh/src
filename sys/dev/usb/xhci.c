@@ -706,39 +706,70 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
 
 	/*
-	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.23.2:
-	 * xHCI Power Management, p. 342
-	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=342
+	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.15:
+	 * Suspend-Resume, pp. 276-283
+	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=276
 	 */
 
 	for (bn = 0; bn < 2; bn++) {
 		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
+			/* 4.15.1: Port Suspend.  */
 			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
-			v = xhci_op_read_4(sc, port);
-			printf("%s: bn = %zu, i = %zu, v = %x\n", __func__, bn, i, v);
-			if (((v & XHCI_PS_PED) == 0) ||
-			    XHCI_PS_PLS_GET(v) >= XHCI_PS_PLS_U3) {
-				printf("Skipping\n");
-				continue;
-			}
 
-			v &= ~XHCI_PS_PLS_MASK;
-			v &= ~XHCI_PS_CLEAR;
-			v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU3);
-			v |= XHCI_PS_LWS;
+			/*
+			 * `System software places individual ports
+			 *  into suspend mode by writing a ``3'' into
+			 *  the appropriate PORTSC register Port Link
+			 *  State (PLS) field (refer to Section 5.4.8).
+			 *  Software should only set the PLS field to
+			 *  ``3'' when the port is in the Enabled
+			 *  state.'
+			 *
+			 * `Software should not attempt to suspend a
+			 *  port unless the port reports that it is in
+			 *  the enabled (PED = ``1''; PLS < ``3'')
+			 *  state (refer to Section 5.4.8 for more
+			 *  information about PED and PLS).'
+			 */
+			v = xhci_op_read_4(sc, port);
+			if (((v & XHCI_PS_PED) == 0) ||
+			    XHCI_PS_PLS_GET(v) >= XHCI_PS_PLS_U3)
+				continue;
+			v &= ~(XHCI_PS_CLEAR | XHCI_PS_PLS_MASK);
+			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU3);
 			xhci_op_write_4(sc, port, v);
 
-			for (j = 0; j < 100; j++) {
+			/*
+			 * `When the PLS field is written with U3
+			 *  (``3''), the status of the PLS bit will not
+			 *  change to the target U state U3 until the
+			 *  suspend signaling has completed to the
+			 *  attached device (which may be as long as
+			 *  10ms.).'
+			 *
+			 * `Software is required to wait for U3
+			 *  transitions to complete before it puts the
+			 *  xHC into a low power state, and before
+			 *  resuming the port.'
+			 *
+			 * XXX Take advantage of the technique to
+			 * reduce polling on host controllers that
+			 * support the U3C capability.
+			 */
+			for (j = 0; j < XHCI_WAIT_PLS_U3; j++) {
 				v = xhci_op_read_4(sc, port);
-				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U0)
+				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U3)
 					break;
 				usb_delay_ms(&sc->sc_bus, 1);
 			}
-
-			v = xhci_op_read_4(sc, port);
-			printf("%s (just before suspend): bn = %zu, i = %zu, v = %x, pls = %lx\n", __func__, bn, i, v, XHCI_PS_PLS_GET(v));
 		}
 	}
+
+	/*
+	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.23.2:
+	 * xHCI Power Management, p. 342
+	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=342
+	 */
 
 	/*
 	 * `1. Stop all USB activity by issuing Stop Endpoint Commands
@@ -795,15 +826,17 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	 *    ` and wait for the Save State Status (SSS) flag in the
 	 *     USBSTS register (5.4.2) to transition to ``0''.'
 	 */
-	for (i = 0; i < XHCI_WAIT_CNR; i++) {
-		uint32_t usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
-		if ((usbsts & XHCI_STS_SSS) == 0)
+	for (i = 0; i < XHCI_WAIT_SSS; i++) {
+		if ((xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_SSS) == 0)
 			break;
 		usb_delay_ms(&sc->sc_bus, 1);
 	}
-	if (i >= XHCI_WAIT_CNR) {
-		aprint_error_dev(sc->sc_dev,
-		    "controller not ready timeout after controller save state\n");
+	if (i >= XHCI_WAIT_SSS) {
+		device_printf(self, "suspend timeout, USBSTS.SSS\n");
+		/*
+		 * Just optimistically go on and check SRE anyway --
+		 * what's the worst that could happen?
+		 */
 	}
 
 	/*
@@ -930,15 +963,13 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	 *    `...and wait for the Restore State Status (RSS) in the
 	 *     USBSTS register (5.4.2) to transition to ``0''.'
 	 */
-	for (i = 0; i < XHCI_WAIT_CNR; i++) {
-		uint32_t usbsts = xhci_op_read_4(sc, XHCI_USBSTS);
-		if ((usbsts & XHCI_STS_RSS) == 0)
+	for (i = 0; i < XHCI_WAIT_RSS; i++) {
+		if ((xhci_op_read_4(sc, XHCI_USBSTS) & XHCI_STS_RSS) == 0)
 			break;
 		usb_delay_ms(&sc->sc_bus, 1);
 	}
-	if (i >= XHCI_WAIT_CNR) {
-		aprint_error_dev(sc->sc_dev,
-		    "controller not ready timeout after controller restore state\n");
+	if (i >= XHCI_WAIT_RSS) {
+		device_printf(self, "suspend timeout, USBSTS.RSS\n");
 		return false;
 	}
 
@@ -984,41 +1015,58 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	for (bn = 0; bn < 2; bn++) {
 		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
 			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
-			v = xhci_op_read_4(sc, port);
-			printf("%s: bn = %zu, i = %zu, v = %x\n", __func__, bn, i, v);
-			if (XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3) {
-				printf("Skipping\n");
-				continue;
-			}
 
+			/* `When a port is in the U3 state: ...' */
+			v = xhci_op_read_4(sc, port);
+			if (XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3)
+				continue;
+
+			/*
+			 * `For a USB2 protocol port, software shall
+			 *  write a ``15'' (Resume) to the PLS field to
+			 *  initiate resume signaling.  The port shall
+			 *  transition to the Resume substate and the
+			 *  xHC shall transmit the resume signaling
+			 *  within 1ms (T_URSM).  Software shall ensure
+			 *  that resume is signaled for at least 20ms
+			 *  (T_DRSMDN).  Software shall start timing
+			 *  T_DRSMDN from the write of ``15'' (Resume)
+			 *  to PLS.'
+			 */
 			if (bn == 1) {
-				/* USB 2.0: Set RESUME first before U0.  */
-				v &= ~XHCI_PS_PLS_MASK;
-				v &= ~XHCI_PS_CLEAR;
-				v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETRESUME);
+				KASSERT(sc->sc_bus2.ub_revision == USBREV_2_0);
+				v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 				v |= XHCI_PS_LWS;
+				v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETRESUME);
 				xhci_op_write_4(sc, port, v);
 				usb_delay_ms(&sc->sc_bus, 20);
+			} else {
+				KASSERT(sc->sc_bus.ub_revision > USBREV_2_0);
 			}
 
+			/*
+			 * `For a USB3 protocol port [and a USB2
+			 *  protocol port after transitioning to
+			 *  Resume], software shall write a ``0'' (U0)
+			 *  to the PLS field...'
+			 */
 			v = xhci_op_read_4(sc, port);
-			v &= ~XHCI_PS_PLS_MASK;
-			v &= ~XHCI_PS_CLEAR;
-			v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU0);
-			v |= XHCI_PS_LWS;
+			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
+			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU0);
 			xhci_op_write_4(sc, port, v);
 
-			for (j = 0; j < 100; j++) {
+			for (j = 0; j < XHCI_WAIT_PLS_U0; j++) {
 				v = xhci_op_read_4(sc, port);
 				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U0)
 					break;
 				usb_delay_ms(&sc->sc_bus, 1);
 			}
-			if (j == 100)
-				printf("Timeout resuming bn = %zu, i = %zu, v = %x\n", bn, i, v);
-
-			v = xhci_op_read_4(sc, port);
-			printf("%s (just before suspend): bn = %zu, i = %zu, v = %x, pls = %lx\n", __func__, bn, i, v, XHCI_PS_PLS_GET(v));
+			if (j == XHCI_WAIT_PLS_U0) {
+				device_printf(self,
+				    "resume timeout on bus %zu port %zu\n",
+				    bn, i);
+				return false;
+			}
 		}
 	}
 
