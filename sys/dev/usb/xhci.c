@@ -937,6 +937,17 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	}
 
 	/*
+	 * `6. Reinitialize the Command Ring, i.e. so its Cycle bits
+	 *     are consistent with the RCS values to be written to the
+	 *     CRCR.'
+	 *
+	 * XXX Hope just zeroing it is good enough!
+	 */
+	memset(sc->sc_cr->xr_trb, 0, sc->sc_cr->xr_ntrb * XHCI_TRB_SIZE);
+	usb_syncmem(&sc->sc_cr->xr_dma, 0, sc->sc_cr->xr_ntrb * XHCI_TRB_SIZE,
+	    BUS_DMASYNC_PREWRITE);
+
+	/*
 	 * `7. Write the CRCR with the address and RCS value of the
 	 *     reinitialized Command Ring.  Note that this write will
 	 *     cause the Command Ring to restart at the address
