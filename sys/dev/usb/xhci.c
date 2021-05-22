@@ -739,7 +739,7 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			if (((v & XHCI_PS_PED) == 0) ||
 			    XHCI_PS_PLS_GET(v) >= XHCI_PS_PLS_U3)
 				continue;
-			v &= ~(XHCI_PS_CLEAR | XHCI_PS_PLS_MASK);
+			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU3);
 			xhci_op_write_4(sc, port, v);
 		}
