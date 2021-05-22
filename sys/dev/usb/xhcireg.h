@@ -135,7 +135,7 @@
 #define	XHCI_WAIT_RSS		100		/* in 1ms */
 #define	XHCI_WAIT_SSS		100		/* in 1ms */
 #define	XHCI_WAIT_PLS_U0	100		/* in 1ms */
-#define	XHCI_WAIT_PLS_U3	100		/* in 1ms, XXX reduce to 10ms */
+#define	XHCI_WAIT_PLS_U3	10		/* in 1ms */
 
 #define	XHCI_USBSTS		0x04	/* XHCI status */
 #define	 XHCI_STS_HCH		__BIT(0)	/* RO - Host Controller Halted */
