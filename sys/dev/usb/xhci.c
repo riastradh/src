@@ -833,7 +833,7 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_CSS);
 
 	/*
-	 *    ` and wait for the Save State Status (SSS) flag in the
+	 *    `...and wait for the Save State Status (SSS) flag in the
 	 *     USBSTS register (5.4.2) to transition to ``0''.'
 	 */
 	for (i = 0; i < XHCI_WAIT_SSS; i++) {
