@@ -947,6 +947,9 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	xhci_op_write_4(sc, XHCI_USBCMD,
 	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_RS);
 
+	/* XXX why */
+	usb_delay_ms(&sc->sc_bus, 5);
+
 	/*
 	 * `9. Software shall walk the USB topology and initialize each
 	 *     of the xHC PORTSC, PORTPMSC, and PORTLI registers, and
