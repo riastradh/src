@@ -706,7 +706,6 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
 
-	mutex_enter(&sc->sc_lock);
 	mutex_spin_enter(&sc->sc_intr_lock);
 	sc->sc_bus.ub_usepolling++;
 	sc->sc_bus2.ub_usepolling++;
@@ -884,7 +883,6 @@ out:	mutex_spin_enter(&sc->sc_intr_lock);
 	sc->sc_bus.ub_usepolling--;
 	sc->sc_bus2.ub_usepolling--;
 	mutex_spin_exit(&sc->sc_intr_lock);
-	mutex_exit(&sc->sc_lock);
 	return ok;
 }
 
@@ -899,7 +897,6 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
 
-	mutex_enter(&sc->sc_lock);
 	mutex_spin_enter(&sc->sc_intr_lock);
 	sc->sc_bus.ub_usepolling++;
 	sc->sc_bus2.ub_usepolling++;
@@ -1098,7 +1095,6 @@ out:	mutex_spin_enter(&sc->sc_intr_lock);
 	sc->sc_bus.ub_usepolling--;
 	sc->sc_bus2.ub_usepolling--;
 	mutex_spin_exit(&sc->sc_intr_lock);
-	mutex_exit(&sc->sc_lock);
 	return ok;
 }
 
