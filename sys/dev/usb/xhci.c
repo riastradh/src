@@ -157,8 +157,6 @@ static int xhci_roothub_ctrl(struct usbd_bus *, usb_device_request_t *,
 static usbd_status xhci_configure_endpoint(struct usbd_pipe *);
 //static usbd_status xhci_unconfigure_endpoint(struct usbd_pipe *);
 static usbd_status xhci_reset_endpoint(struct usbd_pipe *);
-static usbd_status xhci_stop_endpoint_cmd(struct xhci_softc *,
-    struct xhci_slot *, u_int, uint32_t);
 static usbd_status xhci_stop_endpoint(struct usbd_pipe *);
 
 static void xhci_host_dequeue(struct xhci_ring * const);
@@ -701,10 +699,9 @@ bool
 xhci_suspend(device_t self, const pmf_qual_t *qual)
 {
 	struct xhci_softc * const sc = device_private(self);
-	size_t i, j, bn, dci;
+	size_t i, j, bn;
 	int port;
 	uint32_t v;
-	usbd_status err;
 	bool ok = false;
 
 	XHCIHIST_FUNC(); XHCIHIST_CALLED();
@@ -719,47 +716,10 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	    xhci_op_read_4(sc, XHCI_USBCMD) & ~XHCI_CMD_INTE);
 
 	/*
-	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.23.2:
-	 * xHCI Power Management, p. 342
-	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=342
+	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.15:
+	 * Suspend-Resume, pp. 276-283
+	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=276
 	 */
-
-	/*
-	 * `1. Stop all USB activity by issuing Stop Endpoint Commands
-	 *     for Busy endpoints in the Running state.  If the Force
-	 *     Save Context Capability (FSC = ``0'') is not supported,
-	 *     then Stop Endpoint Commands shall be issued for all idle
-	 *     endpoints in the Running state as well.  The Stop
-	 *     Endpoint Command causes the xHC to update the respective
-	 *     Endpoint or Stream Contexts in system memory, e.g. the
-	 *     TR Dequeue Pointer, DCS, etc. fields.  Refer to
-	 *     Implementation Note "0".'
-	 */
-	for (i = 0; i < sc->sc_maxslots; i++) {
-		struct xhci_slot *xs = &sc->sc_slots[i];
-
-		/* Skip if the slot is not in use.  */
-		if (xs->xs_idx == 0)
-			continue;
-
-		for (dci = XHCI_DCI_SLOT; dci <= XHCI_MAX_DCI; dci++) {
-			/* Skip if the endpoint is not Running.  */
-			/* XXX What about Busy?  */
-			if (xhci_get_epstate(sc, xs, dci) !=
-			    XHCI_EPSTATE_RUNNING)
-				continue;
-
-			/* Stop endpoint.  */
-			err = xhci_stop_endpoint_cmd(sc, xs, dci,
-			    XHCI_TRB_3_SUSP_EP_BIT);
-			if (err) {
-				device_printf(self, "failed to stop endpoint"
-				    " slot %zu dci %zu err %d\n",
-				    i, dci, err);
-				goto out;
-			}
-		}
-	}
 
 	/*
 	 * 4.15.1: Port Suspend.  We initiate suspend for all ports at
@@ -830,6 +790,12 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			}
 		}
 	}
+
+	/*
+	 * xHCI Requirements Specification 1.2, May 2019, Sec. 4.23.2:
+	 * xHCI Power Management, p. 342
+	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=342
+	 */
 
 	/*
 	 * `1. Stop all USB activity by issuing Stop Endpoint Commands
@@ -1943,43 +1909,31 @@ xhci_reset_endpoint(struct usbd_pipe *pipe)
 /*
  * 4.6.9, 6.4.3.8
  * Stop execution of TDs on xfer ring.
- * Should be called with sc_lock held or polling enabled.
+ * Should be called with sc_lock held.
  */
-static usbd_status
-xhci_stop_endpoint_cmd(struct xhci_softc *sc, struct xhci_slot *xs, u_int dci,
-    uint32_t trb3flags)
-{
-	struct xhci_soft_trb trb;
-	usbd_status err;
-
-	XHCIHIST_FUNC();
-	XHCIHIST_CALLARGS("slot %ju dci %ju", xs->xs_idx, dci, 0, 0);
-
-	KASSERT(mutex_owned(&sc->sc_lock) || xhci_polling_p(sc));
-
-	trb.trb_0 = 0;
-	trb.trb_2 = 0;
-	trb.trb_3 = XHCI_TRB_3_SLOT_SET(xs->xs_idx) |
-	    XHCI_TRB_3_EP_SET(dci) |
-	    XHCI_TRB_3_TYPE_SET(XHCI_TRB_TYPE_STOP_EP) |
-	    trb3flags;
-
-	err = xhci_do_command_locked(sc, &trb, USBD_DEFAULT_TIMEOUT);
-
-	return err;
-}
-
 static usbd_status
 xhci_stop_endpoint(struct usbd_pipe *pipe)
 {
 	struct xhci_softc * const sc = XHCI_PIPE2SC(pipe);
 	struct xhci_slot * const xs = pipe->up_dev->ud_hcpriv;
+	struct xhci_soft_trb trb;
+	usbd_status err;
 	const u_int dci = xhci_ep_get_dci(pipe->up_endpoint->ue_edesc);
 
 	XHCIHIST_FUNC();
 	XHCIHIST_CALLARGS("slot %ju dci %ju", xs->xs_idx, dci, 0, 0);
 
-	return xhci_stop_endpoint_cmd(sc, xs, dci, 0);
+	KASSERT(mutex_owned(&sc->sc_lock));
+
+	trb.trb_0 = 0;
+	trb.trb_2 = 0;
+	trb.trb_3 = XHCI_TRB_3_SLOT_SET(xs->xs_idx) |
+	    XHCI_TRB_3_EP_SET(dci) |
+	    XHCI_TRB_3_TYPE_SET(XHCI_TRB_TYPE_STOP_EP);
+
+	err = xhci_do_command_locked(sc, &trb, USBD_DEFAULT_TIMEOUT);
+
+	return err;
 }
 
 /*
