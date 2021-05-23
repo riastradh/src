@@ -128,6 +128,7 @@ struct xhci_softc {
 	bool sc_resultpending;
 
 	bool sc_dying;
+	struct lwp *sc_suspender;
 
 	void (*sc_vendor_init)(struct xhci_softc *);
 	int (*sc_vendor_port_status)(struct xhci_softc *, uint32_t, int);
