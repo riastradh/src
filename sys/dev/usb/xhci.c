@@ -711,13 +711,9 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=276
 	 */
 
-	/*
-	 * 4.15.1: Port Suspend.  We initiate suspend for all ports at
-	 * once so they can start suspending in parallel while we wait
-	 * for completion.
-	 */
 	for (bn = 0; bn < 2; bn++) {
 		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
+			/* 4.15.1: Port Suspend.  */
 			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
 
 			/*
@@ -742,12 +738,6 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU3);
 			xhci_op_write_4(sc, port, v);
-		}
-	}
-
-	for (j = 0, bn = 0; bn < 2; bn++) {
-		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
-			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
 
 			/*
 			 * `When the PLS field is written with U3
@@ -766,7 +756,7 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			 * reduce polling on host controllers that
 			 * support the U3C capability.
 			 */
-			for (; j < XHCI_WAIT_PLS_U3; j++) {
+			for (j = 0; j < XHCI_WAIT_PLS_U3; j++) {
 				v = xhci_op_read_4(sc, port);
 				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U3)
 					break;
@@ -958,6 +948,9 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	 *
 	 * This follows the procedure in 4.15 `Suspend-Resume', 4.15.2
 	 * `Port Resume', 4.15.2.1 `Host Initiated'.
+	 *
+	 * XXX We should maybe batch up initiating the state
+	 * transitions, and then wait for them to complete all at once.
 	 */
 	for (bn = 0; bn < 2; bn++) {
 		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
@@ -1001,21 +994,10 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU0);
 			xhci_op_write_4(sc, port, v);
-		}
-	}
 
-	for (j = 0, bn = 0; bn < 2; bn++) {
-		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
-			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
-
-			for (; j < XHCI_WAIT_PLS_U0; j++) {
+			for (j = 0; j < XHCI_WAIT_PLS_U0; j++) {
 				v = xhci_op_read_4(sc, port);
-				/*
-				 * XXX Should verify that the ports
-				 * that _were_ in U3 are now in U0, and
-				 * not in U1 or U2, but whatever.
-				 */
-				if (XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3)
+				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U0)
 					break;
 				usb_delay_ms(&sc->sc_bus, 1);
 			}
