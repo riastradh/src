@@ -1010,6 +1010,11 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 
 			/* `When a port is in the U3 state: ...' */
 			v = xhci_op_read_4(sc, port);
+			if (bn == 1 &&
+			    XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_RESUME) {
+				KASSERT(sc->sc_bus2.ub_revision == USBREV_2_0);
+				goto resume_wait;
+			}
 			if (XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3)
 				continue;
 
@@ -1031,7 +1036,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 				v |= XHCI_PS_LWS;
 				v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETRESUME);
 				xhci_op_write_4(sc, port, v);
-				usb_delay_ms(&sc->sc_bus, 20);
+resume_wait:			usb_delay_ms(&sc->sc_bus, 20);
 			} else {
 				KASSERT(sc->sc_bus.ub_revision > USBREV_2_0);
 			}
