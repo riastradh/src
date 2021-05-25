@@ -1042,6 +1042,17 @@ resume_wait:			usb_delay_ms(&sc->sc_bus, 20);
 			}
 
 			/*
+			 * Clear PLC so any transition will re-signal
+			 * PLC and we will get an interrupt notifying
+			 * us of state change, which will let us notice
+			 * when devices have reattached rather than
+			 * simply resumed.
+			 */
+			v = xhci_op_read_4(sc, port);
+			v &= ~(XHCI_PS_PLC | XHCI_PS_CLEAR);
+			xhci_op_write_4(sc, port, v);
+
+			/*
 			 * `For a USB3 protocol port [and a USB2
 			 *  protocol port after transitioning to
 			 *  Resume], software shall write a ``0'' (U0)
