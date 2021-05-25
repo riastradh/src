@@ -1047,9 +1047,15 @@ resume_wait:			usb_delay_ms(&sc->sc_bus, 20);
 			 * us of state change, which will let us notice
 			 * when devices have reattached rather than
 			 * simply resumed.
+			 *
+			 * Note: `Software shall clear [the PLC] bit by
+			 * writing a ``1'' to it.'  (xHCI 1.2,
+			 * Sec. 5.4.8 `Port and Status Control Register
+			 * (PORTSC)', p. 412)
 			 */
 			v = xhci_op_read_4(sc, port);
-			v &= ~(XHCI_PS_PLC | XHCI_PS_CLEAR);
+			v &= ~XHCI_PS_CLEAR;
+			v |= XHCI_PS_PLC;
 			xhci_op_write_4(sc, port, v);
 
 			/*
