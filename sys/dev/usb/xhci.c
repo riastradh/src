@@ -1090,10 +1090,12 @@ resume_wait:			usb_delay_ms(&sc->sc_bus, 20);
 			continue;
 
 		for (dci = XHCI_DCI_SLOT; dci <= XHCI_MAX_DCI; dci++) {
+#if 0
 			/* Skip if the endpoint is not Running.  */
 			if (xhci_get_epstate(sc, xs, dci) !=
 			    XHCI_EPSTATE_RUNNING)
 				continue;
+#endif
 
 			/* Ring the doorbell.  */
 			xhci_db_write_4(sc, XHCI_DOORBELL(xs->xs_idx), dci);
