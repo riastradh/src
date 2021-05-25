@@ -989,6 +989,10 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	xhci_op_write_4(sc, XHCI_USBCMD,
 	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_RS);
 
+	/* Disable interrupts while we resume ports.  */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) & ~XHCI_CMD_INTE);
+
 	/*
 	 * `9. Software shall walk the USB topology and initialize each
 	 *     of the xHC PORTSC, PORTPMSC, and PORTLI registers, and
@@ -1053,7 +1057,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 				device_printf(self,
 				    "resume timeout on bus %zu port %zu\n",
 				    bn, i);
-				goto out;
+				continue;
 			}
 		}
 	}
@@ -1079,6 +1083,10 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 			xhci_db_write_4(sc, XHCI_DOORBELL(xs->xs_idx), dci);
 		}
 	}
+
+	/* Re-disable interrupts now that ports are resumed.  */
+	xhci_op_write_4(sc, XHCI_USBCMD,
+	    xhci_op_read_4(sc, XHCI_USBCMD) | XHCI_CMD_INTE);
 
 	/*
 	 * `Note: After a Save or Restore operation completes, the
