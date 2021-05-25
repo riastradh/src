@@ -4086,12 +4086,19 @@ xhci_roothub_ctrl(struct usbd_bus *bus, usb_device_request_t *req,
 			return -1;
 		}
 		v = xhci_op_read_4(sc, XHCI_PORTSC(cp));
+		if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_RESUME) {
+			printf("%s: resume in progress bus %u port %u\n",
+			    __func__, (unsigned)bn, (unsigned)index);
+			usb_delay_ms(&sc->sc_bus, USB_RESUME_WAIT);
+			v = xhci_op_read_4(sc, XHCI_PORTSC(cp));
+		}
 		DPRINTFN(4, "getrhportsc %jd 0x%08jx", cp, v, 0, 0);
 		i = xhci_xspeed2psspeed(XHCI_PS_SPEED_GET(v));
 		if (v & XHCI_PS_CCS)	i |= UPS_CURRENT_CONNECT_STATUS;
 		if (v & XHCI_PS_PED)	i |= UPS_PORT_ENABLED;
 		if (v & XHCI_PS_OCA)	i |= UPS_OVERCURRENT_INDICATOR;
-		//if (v & XHCI_PS_SUSP)	i |= UPS_SUSPEND;
+		if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_RESUME)
+					i |= UPS_SUSPEND;
 		if (v & XHCI_PS_PR)	i |= UPS_RESET;
 		if (v & XHCI_PS_PP) {
 			if (i & UPS_OTHER_SPEED)
@@ -4099,7 +4106,8 @@ xhci_roothub_ctrl(struct usbd_bus *bus, usb_device_request_t *req,
 			else
 					i |= UPS_PORT_POWER;
 		}
-		if (i & UPS_OTHER_SPEED)
+		if (i & UPS_OTHER_SPEED &&
+		    XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_RESUME)
 			i |= UPS_PORT_LS_SET(XHCI_PS_PLS_GET(v));
 		if (sc->sc_vendor_port_status)
 			i = sc->sc_vendor_port_status(sc, v, i);
