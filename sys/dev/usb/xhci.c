@@ -3233,9 +3233,8 @@ xhci_do_command_locked(struct xhci_softc * const sc,
 	KASSERTMSG(!cpu_intr_p() && !cpu_softintr_p(), "called from intr ctx");
 	KASSERT(mutex_owned(&sc->sc_lock));
 
-	while (sc->sc_command_addr != 0 &&
-	    sc->sc_suspender != NULL &&
-	    sc->sc_suspender != curlwp)
+	while (sc->sc_command_addr != 0 ||
+	    (sc->sc_suspender != NULL && sc->sc_suspender != curlwp))
 		cv_wait(&sc->sc_cmdbusy_cv, &sc->sc_lock);
 
 	/*
