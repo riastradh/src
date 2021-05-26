@@ -1027,7 +1027,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 				v |= XHCI_PS_LWS;
 				v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETRESUME);
 				xhci_op_write_4(sc, port, v);
-				usb_delay_ms(&sc->sc_bus, 20);
+				usb_delay_ms(&sc->sc_bus, USB_RESUME_WAIT);
 			} else {
 				KASSERT(sc->sc_bus.ub_revision > USBREV_2_0);
 			}
