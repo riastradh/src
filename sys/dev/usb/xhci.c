@@ -771,6 +771,7 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	 * https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/extensible-host-controler-interface-usb-xhci.pdf#page=276
 	 */
 	for (bn = 0; bn < 2; bn++) {
+		sc->sc_susports[bn] = 0;
 		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
 			/* 4.15.1: Port Suspend.  */
 			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
@@ -791,8 +792,10 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			 *  information about PED and PLS).'
 			 */
 			v = xhci_op_read_4(sc, port);
-			if (((v & XHCI_PS_PED) == 0) ||
-			    XHCI_PS_PLS_GET(v) >= XHCI_PS_PLS_U3)
+			if ((v & XHCI_PS_PED) == 0)
+				continue;
+			if (XHCI_PS_PLS_GET(v) >= XHCI_PS_PLS_U3 &&
+			    XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_POLLING)
 				continue;
 			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU3);
