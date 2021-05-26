@@ -801,6 +801,11 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU3);
 			xhci_op_write_4(sc, port, v);
 
+			/* Remember that we are suspending this port.  */
+			KASSERTMSG(i <= 31, "port=%zu", i); /* XXX ??? */
+			KASSERT((sc->sc_susports[bn] & __BIT(i)) == 0);
+			sc->sc_susports[bn] |= __BIT(i);
+
 			/*
 			 * `When the PLS field is written with U3
 			 *  (``3''), the status of the PLS bit will not
@@ -1010,16 +1015,10 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	for (bn = 0; bn < 2; bn++) {
 		for (i = 1; i <= sc->sc_rhportcount[bn]; i++) {
 			port = XHCI_PORTSC(xhci_rhport2ctlrport(sc, bn, i));
-
-			/* `When a port is in the U3 state: ...' */
-			v = xhci_op_read_4(sc, port);
-			if (bn == 1 &&
-			    XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_RESUME) {
-				KASSERT(sc->sc_bus2.ub_revision == USBREV_2_0);
-				goto resume_wait;
-			}
-			if (XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3)
+			if ((sc->sc_susports[bn] & __BIT(i)) == 0)
 				continue;
+
+			/* XXX skip ports in bad states */
 
 			/*
 			 * `For a USB2 protocol port, software shall
@@ -1035,11 +1034,12 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 			 */
 			if (bn == 1) {
 				KASSERT(sc->sc_bus2.ub_revision == USBREV_2_0);
+				v = xhci_op_read_4(sc, port);
 				v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 				v |= XHCI_PS_LWS;
 				v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETRESUME);
 				xhci_op_write_4(sc, port, v);
-resume_wait:			usb_delay_ms(&sc->sc_bus, 20);
+				usb_delay_ms(&sc->sc_bus, 20);
 			} else {
 				KASSERT(sc->sc_bus.ub_revision > USBREV_2_0);
 			}
@@ -1071,6 +1071,8 @@ resume_wait:			usb_delay_ms(&sc->sc_bus, 20);
 			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU0);
 			xhci_op_write_4(sc, port, v);
+
+			sc->sc_susports[bn] &= ~__BIT(i);
 
 			for (j = 0; j < XHCI_WAIT_PLS_U0; j++) {
 				v = xhci_op_read_4(sc, port);
@@ -1131,6 +1133,8 @@ resume_wait:			usb_delay_ms(&sc->sc_bus, 20);
 	cv_broadcast(&sc->sc_cmdbusy_cv);
 
 	/* Success!  */
+	KASSERT(sc->sc_susports[0] == 0);
+	KASSERT(sc->sc_susports[1] == 0);
 	ok = true;
 
 out:	mutex_exit(&sc->sc_lock);
