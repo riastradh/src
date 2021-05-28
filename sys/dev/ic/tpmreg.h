@@ -134,4 +134,38 @@ struct tpm_header {
 
 #define	TPM_NON_FATAL			0x800
 
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Trusted Platform Module Library Specification, Family "2.0",
+ * Level 00, Revision 01.59 -- November 2019
+ *
+ * https://trustedcomputinggroup.org/resource/tpm-library-specification/
+ *
+ * Where this spec names things TPM_* that don't obviously coincide
+ * with the 1.2 things, we name them TPM2_*.
+ */
+
+/* https://trustedcomputinggroup.org/wp-content/uploads/TPM-Rev-2.0-Part-4-Supporting-Routines-01.38-code.pdf#page=172 */
+#define	TPM2_ST_RSP_COMMAND		0x00c4
+#define	TPM2_ST_NULL			0x8000
+#define	TPM2_ST_NO_SESSIONS		0x8001
+#define	TPM2_ST_SESSIONS		0x8002
+/* ... */
+
+/* https://trustedcomputinggroup.org/wp-content/uploads/TPM-Rev-2.0-Part-2-Structures-01.38.pdf#page=45 */
+#define	TPM2_CC_GetRandom		0x0000017b
+
+/* https://trustedcomputinggroup.org/wp-content/uploads/TPM-Rev-2.0-Part-2-Structures-01.38.pdf#page=53 */
+#define	TPM2_RC_SUCCESS			0x000
+#define	TPM2_RC_BAD_TAG			0x01e
+
+#define	TPM2_RC_VER1			0x100
+
+#define	TPM2_RC_FMT1			0x080
+
+#define	TPM2_RC_WARN			0x900
+#define	TPM2_RC_TESTING			(TPM2_RC_WARN + 0x00a)
+#define	TPM2_RC_RETRY			(TPM2_RC_WARN + 0x022)
+
 #endif	/* DEV_IC_TPMREG_H */
