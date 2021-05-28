@@ -139,6 +139,10 @@ ualea_attach(device_t parent, device_t self, void *aux)
 		return;
 	}
 
+	if (!pmf_device_register(self, NULL, NULL))
+		aprint_error_dev(sc->sc_dev, "failed to register power handler"
+		    "\n");
+
 	/* Success!  We are ready to run.  */
 	sc->sc_attached = true;
 	rndsource_setcb(&sc->sc_rnd, ualea_get, sc);
