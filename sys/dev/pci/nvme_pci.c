@@ -82,6 +82,8 @@ static int	nvme_pci_match(device_t, cfdata_t, void *);
 static void	nvme_pci_attach(device_t, device_t, void *);
 static int	nvme_pci_detach(device_t, int);
 static int	nvme_pci_rescan(device_t, const char *, const int *);
+static bool	nvme_pci_suspend(device_t, const pmf_qual_t *);
+static bool	nvme_pci_resume(device_t, const pmf_qual_t *);
 
 CFATTACH_DECL3_NEW(nvme_pci, sizeof(struct nvme_pci_softc),
     nvme_pci_match, nvme_pci_attach, nvme_pci_detach, NULL, nvme_pci_rescan,
@@ -232,7 +234,7 @@ nvme_pci_attach(device_t parent, device_t self, void *aux)
 		goto softintr_free;
 	}
 
-	if (!pmf_device_register(self, NULL, NULL))
+	if (!pmf_device_register(self, nvme_pci_suspend, nvme_pci_resume))
 		aprint_error_dev(self, "couldn't establish power handler\n");
 
 	SET(sc->sc_flags, NVME_F_ATTACHED);
@@ -254,6 +256,34 @@ nvme_pci_rescan(device_t self, const char *attr, const int *flags)
 {
 
 	return nvme_rescan(self, attr, flags);
+}
+
+static bool
+nvme_pci_suspend(device_t self, const pmf_qual_t *qual)
+{
+	struct nvme_pci_softc *psc = device_private(self);
+	struct nvme_softc *sc = &psc->psc_nvme;
+	int error;
+
+	error = nvme_suspend(sc);
+	if (error)
+		return false;
+
+	return true;
+}
+
+static bool
+nvme_pci_resume(device_t self, const pmf_qual_t *qual)
+{
+	struct nvme_pci_softc *psc = device_private(self);
+	struct nvme_softc *sc = &psc->psc_nvme;
+	int error;
+
+	error = nvme_resume(sc);
+	if (error)
+		return false;
+
+	return true;
 }
 
 static int
