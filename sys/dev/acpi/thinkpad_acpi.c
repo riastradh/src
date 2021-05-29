@@ -32,6 +32,7 @@ __KERNEL_RCSID(0, "$NetBSD: thinkpad_acpi.c,v 1.49 2021/01/29 15:49:55 thorpej E
 #include <sys/param.h>
 #include <sys/device.h>
 #include <sys/module.h>
+#include <sys/sdt.h>
 #include <sys/systm.h>
 
 #include <dev/acpi/acpireg.h>
@@ -363,6 +364,10 @@ thinkpad_notify_handler(ACPI_HANDLE hdl, uint32_t notify, void *opaque)
 	(void)AcpiOsExecute(OSL_NOTIFY_HANDLER, thinkpad_get_hotkeys, sc);
 }
 
+SDT_PROBE_DEFINE2(sdt, thinkpad, hotkey, MHKP,
+    "struct thinkpad_softc *"/*sc*/,
+    "ACPI_INTEGER"/*val*/);
+
 static void
 thinkpad_get_hotkeys(void *opaque)
 {
@@ -379,6 +384,7 @@ thinkpad_get_hotkeys(void *opaque)
 			    AcpiFormatException(rv));
 			return;
 		}
+		SDT_PROBE2(sdt, thinkpad, hotkey, MHKP,  sc, val);
 
 		if (val == 0)
 			return;
