@@ -236,6 +236,16 @@ gc_thread(void *cookie)
 	kthread_exit(0);
 }
 
+void
+init_rcu_head(struct rcu_head *head)
+{
+}
+
+void
+destroy_rcu_head(struct rcu_head *head)
+{
+}
+
 int
 linux_rcu_gc_init(void)
 {
