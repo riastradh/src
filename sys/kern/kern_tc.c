@@ -698,10 +698,13 @@ tc_detach(struct timecounter *target)
 		 * before retrying.
 		 */
 		if (l == NULL) {
-			return 0;
+			break;
 		}
 		(void)kpause("tcdetach", false, mstohz(10), NULL);
 	}
+
+	tc->tc_next = NULL;
+	return 0;
 }
 
 /* Report the frequency of the current timecounter. */
