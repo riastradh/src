@@ -34,8 +34,6 @@
 
 #include <sys/lock.h>
 
-#include <machine/param.h>
-
 #define	cpu_relax()	SPINLOCK_BACKOFF_HOOK
 
 #if defined(__i386__) || defined(__x86_64__)
