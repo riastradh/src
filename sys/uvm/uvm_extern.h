@@ -72,6 +72,8 @@
  * NOTE: vm system calls are prototyped in syscallargs.h
  */
 
+#include <sys/types.h>
+
 /*
  * defines
  */
