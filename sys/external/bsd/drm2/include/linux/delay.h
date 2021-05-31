@@ -36,8 +36,6 @@
 #include <sys/kernel.h>
 #include <sys/proc.h>
 
-#include <machine/param.h>
-
 #define	MAX_UDELAY_MS	5
 
 static inline void

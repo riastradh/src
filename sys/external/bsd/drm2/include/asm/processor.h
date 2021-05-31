@@ -32,7 +32,7 @@
 #ifndef _ASM_PROCESSOR_H_
 #define _ASM_PROCESSOR_H_
 
-#include <machine/param.h>
+#include <sys/param.h>
 
 #define	cpu_relax()	DELAY(1)	/* XXX */
 
