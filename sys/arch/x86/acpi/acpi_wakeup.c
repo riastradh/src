@@ -341,6 +341,7 @@ acpi_md_sleep(int state)
 	 */
 
 	/* We just woke up (cpu0), execution is resumed here */
+	tsc_tc_reset();
 	cpu_init_msrs(&cpu_info_primary, false);
 	fpuinit(&cpu_info_primary);
 	if (rcr4() & CR4_OSXSAVE)

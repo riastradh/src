@@ -440,3 +440,18 @@ tsc_get_timecount(struct timecounter *tc)
 	return cpu_counter32();
 #endif
 }
+
+/*
+ * tsc has been reset; zero the cached tsc of every lwp in the system
+ * so we don't spuriously report that the tsc has gone backward.
+ * Caller must ensure all LWPs are quiescent (except the current one,
+ * obviously) and interrupts are blocked while we update this.
+ */
+void
+tsc_tc_reset(void)
+{
+	struct lwp *l;
+
+	LIST_FOREACH(l, &alllwp, l_list)
+		l->l_md.md_tsc = 0;
+}

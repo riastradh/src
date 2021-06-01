@@ -26,6 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef	_X86_TSC_H_
+#define	_X86_TSC_H_
+
 bool	tsc_is_invariant(void);
 void	tsc_setfunc(struct cpu_info *);
 void	tsc_tc_init(void);
@@ -34,3 +37,6 @@ void	tsc_sync_bp(struct cpu_info *);
 void	tsc_sync_drift(int64_t);
 void	tsc_user_enable(void);
 void	tsc_user_disable(void);
+void	tsc_tc_reset(void);
+
+#endif	/* _X86_TSC_H_ */
