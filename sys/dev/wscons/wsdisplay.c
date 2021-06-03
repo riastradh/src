@@ -733,7 +733,7 @@ wsdisplay_swdone_cb(void *arg, int error, int waitok)
 	mutex_exit(&sc->sc_flagsmtx);
 }
 
-static int
+static int __unused
 wsdisplay_dosync(struct wsdisplay_softc *sc, int attach)
 {
 	struct wsscreen *scr;
@@ -774,6 +774,7 @@ wsdisplay_dosync(struct wsdisplay_softc *sc, int attach)
 int
 wsdisplay_handlex(int resume)
 {
+#if 0
 	int i, res;
 	device_t dv;
 
@@ -785,12 +786,16 @@ wsdisplay_handlex(int resume)
 		if (res)
 			return (res);
 	}
+#endif
 	return (0);
 }
 
 static bool
 wsdisplay_suspend(device_t dv, const pmf_qual_t *qual)
 {
+#if 1
+	return true;
+#else
 	struct wsdisplay_softc *sc = device_private(dv);
 #ifdef DIAGNOSTIC
 	struct wsscreen *scr = sc->sc_focus;
@@ -813,6 +818,7 @@ wsdisplay_suspend(device_t dv, const pmf_qual_t *qual)
 	}
 #endif
 	return (!(sc->sc_flags & SC_XATTACHED));
+#endif
 }
 
 /* Print function (for parent devices). */

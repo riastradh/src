@@ -195,7 +195,7 @@ __KERNEL_RCSID(0, "$NetBSD: audio.c,v 1.104 2021/06/08 09:46:04 riastradh Exp $"
  * 3: + TRACEs except interrupt
  * 4: + TRACEs including interrupt
  */
-//#define AUDIO_DEBUG 1
+#define AUDIO_DEBUG 1
 
 #if defined(AUDIO_DEBUG)
 

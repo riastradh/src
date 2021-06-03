@@ -263,6 +263,7 @@ hdaudio_rirb_unsol(struct hdaudio_softc *sc, struct rirb_entry *entry)
 	}
 }
 
+#include <ddb/ddb.h>
 static uint32_t
 hdaudio_rirb_dequeue(struct hdaudio_softc *sc, bool unsol)
 {
@@ -286,6 +287,7 @@ hdaudio_rirb_dequeue(struct hdaudio_softc *sc, bool unsol)
 		}
 		if (retry == 0) {
 			hda_error(sc, "RIRB timeout\n");
+			db_stacktrace();
 			return 0xffffffff;
 		}
 
@@ -915,6 +917,7 @@ hdaudio_resume(struct hdaudio_softc *sc)
 		return false;
 
 	hda_delay(HDAUDIO_CODEC_DELAY);
+	hda_delay(HDAUDIO_CODEC_DELAY);
 
 	/*
 	 * Ensure that the device is in a known state
@@ -927,6 +930,9 @@ hdaudio_resume(struct hdaudio_softc *sc)
 	hda_write4(sc, HDAUDIO_MMIO_DPLBASE, 0);
 	hda_write4(sc, HDAUDIO_MMIO_DPUBASE, 0);
 
+	hda_delay(HDAUDIO_CODEC_DELAY);
+	hda_delay(HDAUDIO_CODEC_DELAY);
+
 	if (hdaudio_corb_config(sc) != 0)
 		return false;
 	if (hdaudio_rirb_config(sc) != 0)
@@ -936,7 +942,13 @@ hdaudio_resume(struct hdaudio_softc *sc)
 	if (hdaudio_rirb_start(sc) != 0)
 		return false;
 
+	hda_delay(HDAUDIO_CODEC_DELAY);
+	hda_delay(HDAUDIO_CODEC_DELAY);
+
 	hdaudio_intr_enable(sc);
+
+	hda_delay(HDAUDIO_CODEC_DELAY);
+	hda_delay(HDAUDIO_CODEC_DELAY);
 
 	return true;
 }

@@ -311,7 +311,9 @@ struct hdafg_softc {
 	int				sc_pchan, sc_rchan;
 	audio_params_t			sc_pparam, sc_rparam;
 
+	kmutex_t			sc_jack_lock;
 	struct callout			sc_jack_callout;
+	volatile unsigned		sc_jack_suspended;
 	bool				sc_jack_polling;
 
 	struct {
@@ -3577,7 +3579,11 @@ hdafg_hp_switch_handler(void *opaque)
 	}
 
 resched:
-	callout_schedule(&sc->sc_jack_callout, HDAUDIO_HP_SENSE_PERIOD);
+	mutex_enter(&sc->sc_jack_lock);
+	if (!sc->sc_jack_suspended)
+		callout_schedule(&sc->sc_jack_callout,
+		    HDAUDIO_HP_SENSE_PERIOD);
+	mutex_exit(&sc->sc_jack_lock);
 }
 
 static void
@@ -3670,7 +3676,7 @@ hdafg_attach(device_t parent, device_t self, void *opaque)
 
 	mutex_init(&sc->sc_lock, MUTEX_DEFAULT, IPL_NONE);
 	mutex_init(&sc->sc_intr_lock, MUTEX_DEFAULT, IPL_SCHED);
-
+	mutex_init(&sc->sc_jack_lock, MUTEX_DEFAULT, IPL_SOFTCLOCK);
 	callout_init(&sc->sc_jack_callout, 0);
 	callout_setfunc(&sc->sc_jack_callout,
 	    hdafg_hp_switch_handler, sc);
@@ -3828,7 +3834,10 @@ hdafg_detach(device_t self, int flags)
 	struct hdaudio_mixer *mx = sc->sc_mixers;
 	int nid;
 
-	callout_halt(&sc->sc_jack_callout, NULL);
+	mutex_enter(&sc->sc_jack_lock);
+	sc->sc_jack_suspended = true;
+	callout_halt(&sc->sc_jack_callout, &sc->sc_jack_lock);
+	mutex_exit(&sc->sc_jack_lock);
 	callout_destroy(&sc->sc_jack_callout);
 
 	if (sc->sc_config)
@@ -3859,6 +3868,7 @@ hdafg_detach(device_t self, int flags)
 
 	mutex_destroy(&sc->sc_lock);
 	mutex_destroy(&sc->sc_intr_lock);
+	mutex_destroy(&sc->sc_jack_lock);
 
 	pmf_device_deregister(self);
 
@@ -3879,7 +3889,10 @@ hdafg_suspend(device_t self, const pmf_qual_t *qual)
 {
 	struct hdafg_softc *sc = device_private(self);
 
-	callout_halt(&sc->sc_jack_callout, NULL);
+	mutex_enter(&sc->sc_jack_lock);
+	sc->sc_jack_suspended = true;
+	callout_halt(&sc->sc_jack_callout, &sc->sc_jack_lock);
+	mutex_exit(&sc->sc_jack_lock);
 
 	return true;
 }
@@ -3910,6 +3923,9 @@ hdafg_resume(device_t self, const pmf_qual_t *qual)
 	hdafg_stream_connect(sc, AUMODE_PLAY);
 	hdafg_stream_connect(sc, AUMODE_RECORD);
 
+	mutex_enter(&sc->sc_jack_lock);
+	sc->sc_jack_suspended = 0;
+	mutex_exit(&sc->sc_jack_lock);
 	if (sc->sc_jack_polling)
 		hdafg_hp_switch_handler(sc);
 

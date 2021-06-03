@@ -1674,6 +1674,7 @@ module_thread(void *cookie)
 			 * Example: exec_script.
 			 */
 			mi = mod->mod_info;
+			printf("autounload %s\n", mi->mi_name);
 			error = (*mi->mi_modcmd)(MODULE_CMD_AUTOUNLOAD, NULL);
 			if (error == 0 || error == ENOTTY) {
 				(void)module_do_unload(mi->mi_name, false);

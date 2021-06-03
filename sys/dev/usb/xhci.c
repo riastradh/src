@@ -707,7 +707,8 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	usbd_status err;
 	bool ok = false;
 
-	XHCIHIST_FUNC(); XHCIHIST_CALLED();
+	XHCIHIST_FUNC();
+	XHCIHIST_CALLARGS("xhci%jd", (intmax_t)device_unit(self), 0, 0, 0);
 
 	mutex_enter(&sc->sc_lock);
 
@@ -791,11 +792,13 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			 *  information about PED and PLS).'
 			 */
 			v = xhci_op_read_4(sc, port);
+			aprint_debug_dev(self, "%s: bus %zu port %zu: read portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 			if (((v & XHCI_PS_PED) == 0) ||
 			    XHCI_PS_PLS_GET(v) >= XHCI_PS_PLS_U3)
 				continue;
 			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU3);
+			aprint_debug_dev(self, "%s: bus %zu port %zu: write portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 			xhci_op_write_4(sc, port, v);
 
 			/*
@@ -817,6 +820,7 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 			 */
 			for (j = 0; j < XHCI_WAIT_PLS_U3; j++) {
 				v = xhci_op_read_4(sc, port);
+				aprint_debug_dev(self, "%s: bus %zu port %zu: read portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U3)
 					break;
 				usb_delay_ms(&sc->sc_bus, 1);
@@ -900,6 +904,8 @@ xhci_suspend(device_t self, const pmf_qual_t *qual)
 	ok = true;
 
 out:	mutex_exit(&sc->sc_lock);
+	DPRINTF("xhci%jd: ok=%jd", (intmax_t)device_unit(self), (intmax_t)ok,
+	    0, 0);
 	return ok;
 }
 
@@ -912,7 +918,8 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	uint32_t v;
 	bool ok = false;
 
-	XHCIHIST_FUNC(); XHCIHIST_CALLED();
+	XHCIHIST_FUNC();
+	XHCIHIST_CALLARGS("xhci%jd", (intmax_t)device_unit(self), 0, 0, 0);
 
 	mutex_enter(&sc->sc_lock);
 	KASSERT(sc->sc_suspender);
@@ -1006,6 +1013,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 
 			/* `When a port is in the U3 state: ...' */
 			v = xhci_op_read_4(sc, port);
+			aprint_debug_dev(self, "%s: bus %zu port %zu: read portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 			if (XHCI_PS_PLS_GET(v) != XHCI_PS_PLS_U3)
 				continue;
 
@@ -1026,6 +1034,7 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 				v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 				v |= XHCI_PS_LWS;
 				v |= XHCI_PS_PLS_SET(XHCI_PS_PLS_SETRESUME);
+				aprint_debug_dev(self, "%s: bus %zu port %zu: write portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 				xhci_op_write_4(sc, port, v);
 				usb_delay_ms(&sc->sc_bus, USB_RESUME_WAIT);
 			} else {
@@ -1039,12 +1048,15 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 			 *  to the PLS field...'
 			 */
 			v = xhci_op_read_4(sc, port);
+			aprint_debug_dev(self, "%s: bus %zu port %zu: read portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 			v &= ~(XHCI_PS_PLS_MASK | XHCI_PS_CLEAR);
 			v |= XHCI_PS_LWS | XHCI_PS_PLS_SET(XHCI_PS_PLS_SETU0);
+			aprint_debug_dev(self, "%s: bus %zu port %zu: write portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 			xhci_op_write_4(sc, port, v);
 
 			for (j = 0; j < XHCI_WAIT_PLS_U0; j++) {
 				v = xhci_op_read_4(sc, port);
+				aprint_debug_dev(self, "%s: bus %zu port %zu: read portsc=0x%08x (pls=%d)\n", __func__, bn, i, v, (int)XHCI_PS_PLS_GET(v));
 				if (XHCI_PS_PLS_GET(v) == XHCI_PS_PLS_U0)
 					break;
 				usb_delay_ms(&sc->sc_bus, 1);
@@ -1099,6 +1111,8 @@ xhci_resume(device_t self, const pmf_qual_t *qual)
 	ok = true;
 
 out:	mutex_exit(&sc->sc_lock);
+	DPRINTF("xhci%jd: ok=%jd", (intmax_t)device_unit(self), (intmax_t)ok,
+	    0, 0);
 	return ok;
 }
 

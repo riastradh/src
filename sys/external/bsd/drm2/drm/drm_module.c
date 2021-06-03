@@ -115,8 +115,10 @@ drm_init(void)
 	}
 #endif
 
+#if 0
 	if (ISSET(boothowto, AB_DEBUG))
 		drm_debug = DRM_UT_CORE | DRM_UT_DRIVER | DRM_UT_KMS;
+#endif
 
 	spin_lock_init(&drm_minor_lock);
 	idr_init(&drm_minors_idr);
