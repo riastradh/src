@@ -1068,8 +1068,6 @@ usbd_probe_and_attach(device_t parent, struct usbd_device *dev,
 		nifaces = dev->ud_cdesc->bNumInterface;
 		dev->ud_subdevs = kmem_zalloc(nifaces * sizeof(device_t),
 		    KM_SLEEP);
-		if (dev->ud_subdevs == NULL)
-			return USBD_NOMEM;
 		dev->ud_subdevlen = nifaces;
 
 		err = usbd_attachinterfaces(parent, dev, port, NULL);
