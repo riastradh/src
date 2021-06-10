@@ -518,7 +518,7 @@ usb_create_event_thread(device_t self)
 {
 	struct usb_softc *sc = device_private(self);
 
-	if (kthread_create(PRI_NONE, KTHREAD_MPSAFE, NULL,
+	if (kthread_create(PRI_NONE, 0, NULL,
 	    usb_event_thread, sc, &sc->sc_event_thread,
 	    "%s", device_xname(self))) {
 		printf("%s: unable to create event thread for\n",
