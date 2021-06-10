@@ -195,6 +195,8 @@ pmdevbyname(u_long cmd, struct devpmargs *a)
 {
 	device_t d;
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	if ((d = device_find_by_xname(a->devname)) == NULL)
 		return ENXIO;
 
@@ -220,6 +222,8 @@ listdevbyname(struct devlistargs *l)
 	device_t d, child;
 	deviter_t di;
 	int cnt = 0, idx, error = 0;
+
+	KASSERT(KERNEL_LOCKED_P());
 
 	if (*l->l_devname == '\0')
 		d = NULL;
@@ -251,6 +255,8 @@ detachdevbyname(const char *devname)
 {
 	device_t d;
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	if ((d = device_find_by_xname(devname)) == NULL)
 		return ENXIO;
 
@@ -274,6 +280,8 @@ rescanbus(const char *busname, const char *ifattr,
 	int i, rc;
 	device_t d;
 	const struct cfiattrdata * const *ap;
+
+	KASSERT(KERNEL_LOCKED_P());
 
 	/* XXX there should be a way to get limits and defaults (per device)
 	   from config generated data */
