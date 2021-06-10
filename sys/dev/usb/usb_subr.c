@@ -1072,7 +1072,7 @@ usbd_probe_and_attach(device_t parent, struct usbd_device *dev,
 
 		err = usbd_attachinterfaces(parent, dev, port, NULL);
 
-		if (!dev->ud_nifaces_claimed) {
+		if (dev->ud_subdevs && dev->ud_nifaces_claimed == 0) {
 			kmem_free(dev->ud_subdevs,
 			    dev->ud_subdevlen * sizeof(device_t));
 			dev->ud_subdevs = 0;
