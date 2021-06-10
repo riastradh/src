@@ -1116,6 +1116,10 @@ usbd_reattach_device(device_t parent, struct usbd_device *dev,
 {
 	int i, loc;
 
+	USBHIST_FUNC();
+	USBHIST_CALLARGS(usbdebug, "uhub%jd port=%jd",
+	    device_unit(parent), port, 0, 0);
+
 	KASSERT(KERNEL_LOCKED_P());
 
 	if (locators != NULL) {

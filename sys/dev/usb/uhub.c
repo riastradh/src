@@ -932,6 +932,9 @@ uhub_rescan(device_t self, const char *ifattr, const int *locators)
 	struct usbd_device *dev;
 	int port;
 
+	UHUBHIST_FUNC();
+	UHUBHIST_CALLARGS("uhub%jd", device_unit(sc->sc_dev), 0, 0, 0);
+
 	KASSERT(KERNEL_LOCKED_P());
 
 	if (uhub_explore_enter(sc) != 0)
