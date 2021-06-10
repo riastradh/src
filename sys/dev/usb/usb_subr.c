@@ -957,6 +957,9 @@ usbd_attachinterfaces(device_t parent, struct usbd_device *dev,
 	int i, j, loc;
 	device_t dv;
 
+	/* Needed for access to dev->ud_subdevs.  */
+	KASSERT(KERNEL_LOCKED_P());
+
 	nifaces = dev->ud_cdesc->bNumInterface;
 	ifaces = kmem_zalloc(nifaces * sizeof(*ifaces), KM_SLEEP);
 	for (i = 0; i < nifaces; i++) {
@@ -1047,6 +1050,8 @@ usbd_probe_and_attach(device_t parent, struct usbd_device *dev,
 	int confi, nifaces;
 	usbd_status err;
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	/* First try with device specific drivers. */
 	err = usbd_attachwholedevice(parent, dev, port, 0);
 	if (dev->ud_nifaces_claimed || err)
@@ -1111,6 +1116,8 @@ usbd_reattach_device(device_t parent, struct usbd_device *dev,
 {
 	int i, loc;
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	if (locators != NULL) {
 		loc = locators[USBIFIFCF_PORT];
 		if (loc != USBIFIFCF_PORT_DEFAULT && loc != port)
@@ -1168,6 +1175,8 @@ usbd_new_device(device_t parent, struct usbd_bus *bus, int depth, int speed,
 	int addr;
 	int i;
 	int p;
+
+	KASSERT(KERNEL_LOCKED_P());
 
 	if (bus->ub_methods->ubm_newdev != NULL)
 		return (bus->ub_methods->ubm_newdev)(parent, bus, depth, speed,

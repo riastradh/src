@@ -453,6 +453,8 @@ usb_doattach(device_t self)
 
 	USBHIST_FUNC(); USBHIST_CALLED(usbdebug);
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	/* Protected by KERNEL_LOCK */
 	nusbbusses++;
 
@@ -689,6 +691,8 @@ usb_event_thread(void *arg)
 	struct usbd_bus *bus = sc->sc_bus;
 
 	USBHIST_FUNC(); USBHIST_CALLED(usbdebug);
+
+	KASSERT(KERNEL_LOCKED_P());
 
 	/*
 	 * In case this controller is a companion controller to an
@@ -1146,6 +1150,7 @@ usb_discover(struct usb_softc *sc)
 
 	USBHIST_FUNC(); USBHIST_CALLED(usbdebug);
 
+	KASSERT(KERNEL_LOCKED_P());
 	KASSERT(mutex_owned(bus->ub_lock));
 
 	if (usb_noexplore > 1)

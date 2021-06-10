@@ -2792,6 +2792,8 @@ xhci_new_device(device_t parent, struct usbd_bus *bus, int depth,
 	XHCIHIST_CALLARGS("port %ju depth %ju speed %ju up %#jx",
 	    port, depth, speed, (uintptr_t)up);
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	dev = kmem_zalloc(sizeof(*dev), KM_SLEEP);
 	dev->ud_bus = bus;
 	dev->ud_quirks = &usbd_no_quirk;

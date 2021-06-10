@@ -533,6 +533,8 @@ uhub_explore(struct usbd_device *dev)
 	    device_unit(sc->sc_dev), (uintptr_t)dev, dev->ud_addr,
 	    dev->ud_speed);
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	if (!sc->sc_running)
 		return USBD_NOT_STARTED;
 
@@ -930,6 +932,8 @@ uhub_rescan(device_t self, const char *ifattr, const int *locators)
 	struct usbd_device *dev;
 	int port;
 
+	KASSERT(KERNEL_LOCKED_P());
+
 	if (uhub_explore_enter(sc) != 0)
 		return EBUSY;
 	for (port = 1; port <= hub->uh_hubdesc.bNbrPorts; port++) {
@@ -952,6 +956,8 @@ uhub_childdet(device_t self, device_t child)
 	int nports;
 	int port;
 	int i;
+
+	KASSERT(KERNEL_LOCKED_P());
 
 	if (!devhub->ud_hub)
 		/* should never happen; children are only created after init */
