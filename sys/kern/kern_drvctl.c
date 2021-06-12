@@ -254,11 +254,21 @@ static int
 detachdevbyname(const char *devname)
 {
 	device_t d;
+	deviter_t di;
+	int error;
 
 	KASSERT(KERNEL_LOCKED_P());
 
-	if ((d = device_find_by_xname(devname)) == NULL)
-		return ENXIO;
+	for (d = deviter_first(&di, DEVITER_F_RW);
+	     d != NULL;
+	     d = deviter_next(&di)) {
+		if (strcmp(device_xname(d), devname) == 0)
+			break;
+	}
+	if (d == NULL) {
+		error = ENXIO;
+		goto out;
+	}
 
 #ifndef XXXFULLRISK
 	/*
@@ -267,10 +277,15 @@ detachdevbyname(const char *devname)
 	 * There might be a private notification mechanism,
 	 * but better play it safe here.
 	 */
-	if (d->dv_parent && !d->dv_parent->dv_cfattach->ca_childdetached)
-		return ENOTSUP;
+	if (d->dv_parent && !d->dv_parent->dv_cfattach->ca_childdetached) {
+		error = ENOTSUP;
+		goto out;
+	}
 #endif
-	return config_detach(d, 0);
+
+	error = config_detach(d, 0);
+out:	deviter_release(&di);
+	return error;
 }
 
 static int
