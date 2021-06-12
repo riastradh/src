@@ -652,8 +652,7 @@ bad2:
 bad:
 	if (ah)
 		ath_hal_detach(ah);
-	/* XXX don't get under the abstraction like this */
-	sc->sc_dev->dv_flags &= ~DVF_ACTIVE;
+	(void)config_deactivate(sc->sc_dev);
 	return error;
 }
 
