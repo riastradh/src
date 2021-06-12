@@ -1891,6 +1891,43 @@ config_dump_garbage(struct devicelist *garbage)
 	}
 }
 
+static int
+config_detach_enter(device_t dev)
+{
+	int error;
+
+	mutex_enter(&config_misc_lock);
+	for (;;) {
+		if (dev->dv_pending) {
+			error = EBUSY;
+			break;
+		}
+		if ((dev->dv_flags & DVF_DETACHING) == 0) {
+			dev->dv_flags |= DVF_DETACHING;
+			error = 0;
+			break;
+		}
+		error = cv_wait_sig(&config_misc_cv, &config_misc_lock);
+		if (error)
+			break;
+	}
+	KASSERT(error || dev->dv_flags & DVF_DETACHING);
+	mutex_exit(&config_misc_lock);
+
+	return error;
+}
+
+static void
+config_detach_exit(device_t dev)
+{
+
+	mutex_enter(&config_misc_lock);
+	KASSERT(dev->dv_flags & DVF_DETACHING);
+	dev->dv_flags &= ~DVF_DETACHING;
+	cv_broadcast(&config_misc_cv);
+	mutex_exit(&config_misc_lock);
+}
+
 /*
  * Detach a device.  Optionally forced (e.g. because of hardware
  * removal) and quiet.  Returns zero if successful, non-zero
@@ -1929,22 +1966,7 @@ config_detach(device_t dev, int flags)
 	 * Only one detach at a time, please -- and not until fully
 	 * attached.
 	 */
-	mutex_enter(&config_misc_lock);
-	for (;;) {
-		if (dev->dv_pending) {
-			rv = EBUSY;
-			break;
-		}
-		if ((dev->dv_flags & DVF_DETACHING) == 0) {
-			dev->dv_flags |= DVF_DETACHING;
-			rv = 0;
-			break;
-		}
-		rv = cv_wait_sig(&config_misc_cv, &config_misc_lock);
-		if (rv)
-			break;
-	}
-	mutex_exit(&config_misc_lock);
+	rv = config_detach_enter(dev);
 	if (rv)
 		return rv;
 
@@ -1955,11 +1977,7 @@ config_detach(device_t dev, int flags)
 		printf("%s: %s is already detached\n", __func__,
 		    device_xname(dev));
 #endif /* DIAGNOSTIC */
-		mutex_enter(&config_misc_lock);
-		KASSERT(dev->dv_flags & DVF_DETACHING);
-		dev->dv_flags &= ~DVF_DETACHING;
-		cv_broadcast(&config_misc_cv);
-		mutex_exit(&config_misc_lock);
+		config_detach_exit(dev);
 		return ENOENT;
 	}
 	alldevs_nwrite++;
@@ -2039,11 +2057,7 @@ config_detach(device_t dev, int flags)
 		aprint_normal_dev(dev, "detached\n");
 
 out:
-	mutex_enter(&config_misc_lock);
-	KASSERT(dev->dv_flags & DVF_DETACHING);
-	dev->dv_flags &= ~DVF_DETACHING;
-	cv_broadcast(&config_misc_cv);
-	mutex_exit(&config_misc_lock);
+	config_detach_exit(dev);
 
 	config_alldevs_enter(&af);
 	KASSERT(alldevs_nwrite != 0);
