@@ -274,6 +274,8 @@ struct device {
 	int		dv_pending;	/* config_pending count */
 	TAILQ_ENTRY(device) dv_pending_list;
 
+	struct lwp	*dv_detaching;	/* detach lock (config_misc_lock/cv) */
+
 	size_t		dv_activity_count;
 	void		(**dv_activity_handlers)(device_t, devactive_t);
 
@@ -313,7 +315,6 @@ struct device {
 #define	DVF_BUS_SUSPENDED	0x0020	/* device bus suspend was called */
 #define	DVF_ATTACH_INPROGRESS	0x0040	/* device attach is in progress */
 #define	DVF_DETACH_SHUTDOWN	0x0080	/* device detaches safely at shutdown */
-#define	DVF_DETACHING		0x0100	/* device is detaching */
 
 #ifdef _KERNEL
 TAILQ_HEAD(devicelist, device);

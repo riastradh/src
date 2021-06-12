@@ -1902,8 +1902,8 @@ config_detach_enter(device_t dev)
 			error = EBUSY;
 			break;
 		}
-		if ((dev->dv_flags & DVF_DETACHING) == 0) {
-			dev->dv_flags |= DVF_DETACHING;
+		if (dev->dv_detaching == NULL) {
+			dev->dv_detaching = curlwp;
 			error = 0;
 			break;
 		}
@@ -1911,7 +1911,7 @@ config_detach_enter(device_t dev)
 		if (error)
 			break;
 	}
-	KASSERT(error || dev->dv_flags & DVF_DETACHING);
+	KASSERT(error || dev->dv_detaching == curlwp);
 	mutex_exit(&config_misc_lock);
 
 	return error;
@@ -1922,8 +1922,8 @@ config_detach_exit(device_t dev)
 {
 
 	mutex_enter(&config_misc_lock);
-	KASSERT(dev->dv_flags & DVF_DETACHING);
-	dev->dv_flags &= ~DVF_DETACHING;
+	KASSERT(dev->dv_detaching == curlwp);
+	dev->dv_detaching = NULL;
 	cv_broadcast(&config_misc_cv);
 	mutex_exit(&config_misc_lock);
 }
