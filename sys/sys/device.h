@@ -313,6 +313,8 @@ struct device {
 #define	DVF_BUS_SUSPENDED	0x0020	/* device bus suspend was called */
 #define	DVF_ATTACH_INPROGRESS	0x0040	/* device attach is in progress */
 #define	DVF_DETACH_SHUTDOWN	0x0080	/* device detaches safely at shutdown */
+#define	DVF_ATTACHING		0x0100	/* device is attaching */
+#define	DVF_DETACHING		0x0200	/* device is detaching */
 
 #ifdef _KERNEL
 TAILQ_HEAD(devicelist, device);
