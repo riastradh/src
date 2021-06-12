@@ -471,8 +471,6 @@ config_interrupts_thread(void *cookie)
 		kmem_free(dc, sizeof(*dc));
 
 		mutex_enter(&config_misc_lock);
-		dev->dv_flags &= ~DVF_ATTACH_INPROGRESS;
-		cv_broadcast(&config_misc_cv);
 	}
 	mutex_exit(&config_misc_lock);
 
@@ -1778,20 +1776,12 @@ config_vattach(device_t parent, cfdata_t cf, void *aux, cfprint_t print,
 	/* Let userland know */
 	devmon_report_device(dev, true);
 
-	mutex_enter(&config_misc_lock);
-	KASSERT((dev->dv_flags & DVF_ATTACHING) == 0);
-	dev->dv_flags |= DVF_ATTACHING;
-	mutex_exit(&config_misc_lock);
-
+	config_pending_incr(dev);
 	(*dev->dv_cfattach->ca_attach)(parent, dev, aux);
+	config_pending_decr(dev);
 
 	mutex_enter(&config_misc_lock);
-	KASSERT(dev->dv_flags & DVF_ATTACHING);
-	KASSERT((dev->dv_flags & DVF_DETACHING) == 0);
-	dev->dv_flags &= ~DVF_ATTACHING;
-	deferred = dev->dv_flags & DVF_ATTACH_INPROGRESS;
-	if (!deferred)
-		cv_broadcast(&config_misc_cv);
+	deferred = (dev->dv_pending != 0);
 	mutex_exit(&config_misc_lock);
 
 	if (!deferred && !device_pmf_is_registered(dev))
@@ -1833,7 +1823,6 @@ device_t
 config_attach_pseudo(cfdata_t cf)
 {
 	device_t dev;
-	bool deferred;
 
 	KASSERT(KERNEL_LOCKED_P());
 
@@ -1857,21 +1846,9 @@ config_attach_pseudo(cfdata_t cf)
 	/* Let userland know */
 	devmon_report_device(dev, true);
 
-	mutex_enter(&config_misc_lock);
-	KASSERT((dev->dv_flags & DVF_ATTACHING) == 0);
-	dev->dv_flags |= DVF_ATTACHING;
-	mutex_exit(&config_misc_lock);
-
+	config_pending_incr(dev);
 	(*dev->dv_cfattach->ca_attach)(ROOT, dev, NULL);
-
-	mutex_enter(&config_misc_lock);
-	KASSERT(dev->dv_flags & DVF_ATTACHING);
-	KASSERT((dev->dv_flags & DVF_DETACHING) == 0);
-	dev->dv_flags &= ~DVF_ATTACHING;
-	deferred = dev->dv_flags & DVF_ATTACH_INPROGRESS;
-	if (!deferred)
-		cv_broadcast(&config_misc_cv);
-	mutex_exit(&config_misc_lock);
+	config_pending_decr(dev);
 
 	config_process_deferred(&deferred_config_queue, dev);
 	return dev;
@@ -1954,7 +1931,7 @@ config_detach(device_t dev, int flags)
 	 */
 	mutex_enter(&config_misc_lock);
 	for (;;) {
-		if (dev->dv_flags & (DVF_ATTACHING|DVF_ATTACH_INPROGRESS)) {
+		if (dev->dv_pending) {
 			rv = EBUSY;
 			break;
 		}
@@ -2268,7 +2245,6 @@ config_interrupts(device_t dev, void (*func)(device_t))
 	dc->dc_dev = dev;
 	dc->dc_func = func;
 	TAILQ_INSERT_TAIL(&interrupt_config_queue, dc, dc_queue);
-	dev->dv_flags |= DVF_ATTACH_INPROGRESS;
 	mutex_exit(&config_misc_lock);
 }
 
@@ -2362,13 +2338,13 @@ config_pending_decr(device_t dev)
 	mutex_enter(&config_misc_lock);
 	KASSERTMSG(dev->dv_pending > 0,
 	    "%s: excess config_pending_decr", device_xname(dev));
-	if (--dev->dv_pending == 0)
+	if (--dev->dv_pending == 0) {
 		TAILQ_REMOVE(&config_pending, dev, dv_pending_list);
+		cv_broadcast(&config_misc_cv);
+	}
 #ifdef DEBUG_AUTOCONF
 	printf("%s: %s %d\n", __func__, device_xname(dev), dev->dv_pending);
 #endif
-	if (TAILQ_EMPTY(&config_pending))
-		cv_broadcast(&config_misc_cv);
 	mutex_exit(&config_misc_lock);
 }
 
