@@ -472,6 +472,7 @@ config_interrupts_thread(void *cookie)
 
 		mutex_enter(&config_misc_lock);
 		dev->dv_flags &= ~DVF_ATTACH_INPROGRESS;
+		cv_broadcast(&config_misc_cv);
 	}
 	mutex_exit(&config_misc_lock);
 
@@ -1721,6 +1722,7 @@ config_vattach(device_t parent, cfdata_t cf, void *aux, cfprint_t print,
 	device_t dev;
 	struct cftable *ct;
 	const char *drvname;
+	bool deferred;
 
 	KASSERT(KERNEL_LOCKED_P());
 
@@ -1776,14 +1778,23 @@ config_vattach(device_t parent, cfdata_t cf, void *aux, cfprint_t print,
 	/* Let userland know */
 	devmon_report_device(dev, true);
 
+	mutex_enter(&config_misc_lock);
+	KASSERT((dev->dv_flags & DVF_ATTACHING) == 0);
 	dev->dv_flags |= DVF_ATTACHING;
+	mutex_exit(&config_misc_lock);
+
 	(*dev->dv_cfattach->ca_attach)(parent, dev, aux);
+
+	mutex_enter(&config_misc_lock);
 	KASSERT(dev->dv_flags & DVF_ATTACHING);
 	KASSERT((dev->dv_flags & DVF_DETACHING) == 0);
 	dev->dv_flags &= ~DVF_ATTACHING;
+	deferred = dev->dv_flags & DVF_ATTACH_INPROGRESS;
+	if (!deferred)
+		cv_broadcast(&config_misc_cv);
+	mutex_exit(&config_misc_lock);
 
-	if (((dev->dv_flags & DVF_ATTACH_INPROGRESS) == 0)
-	    && !device_pmf_is_registered(dev))
+	if (!deferred && !device_pmf_is_registered(dev))
 		aprint_debug_dev(dev,
 		    "WARNING: power management not supported\n");
 
@@ -1822,6 +1833,7 @@ device_t
 config_attach_pseudo(cfdata_t cf)
 {
 	device_t dev;
+	bool deferred;
 
 	KASSERT(KERNEL_LOCKED_P());
 
@@ -1845,11 +1857,21 @@ config_attach_pseudo(cfdata_t cf)
 	/* Let userland know */
 	devmon_report_device(dev, true);
 
+	mutex_enter(&config_misc_lock);
+	KASSERT((dev->dv_flags & DVF_ATTACHING) == 0);
 	dev->dv_flags |= DVF_ATTACHING;
+	mutex_exit(&config_misc_lock);
+
 	(*dev->dv_cfattach->ca_attach)(ROOT, dev, NULL);
+
+	mutex_enter(&config_misc_lock);
 	KASSERT(dev->dv_flags & DVF_ATTACHING);
 	KASSERT((dev->dv_flags & DVF_DETACHING) == 0);
 	dev->dv_flags &= ~DVF_ATTACHING;
+	deferred = dev->dv_flags & DVF_ATTACH_INPROGRESS;
+	if (!deferred)
+		cv_broadcast(&config_misc_cv);
+	mutex_exit(&config_misc_lock);
 
 	config_process_deferred(&deferred_config_queue, dev);
 	return dev;
