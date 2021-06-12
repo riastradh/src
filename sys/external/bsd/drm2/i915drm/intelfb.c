@@ -119,7 +119,7 @@ intelfb_attach(device_t parent, device_t self, void *aux)
 		    error);
 		goto fail1;
 	}
-	self->dv_flags |= DVF_ATTACH_INPROGRESS;
+	config_pending_incr(self);
 	sc->sc_scheduled = true;
 
 	/* Success!  */
@@ -189,7 +189,7 @@ intelfb_attach_task(struct i915drmkms_task *task)
 
 	sc->sc_attached = true;
 out:
-	sc->sc_dev->dv_flags &= ~DVF_ATTACH_INPROGRESS;
+	config_pending_decr(sc->sc_dev);
 }
 
 static bool

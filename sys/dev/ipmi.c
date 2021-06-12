@@ -2108,7 +2108,7 @@ ipmi_thread(void *cookie)
 		    SENSOR_REFRESH_RATE);
 	}
 	mutex_exit(&sc->sc_poll_mtx);
-	self->dv_flags &= ~DVF_ATTACH_INPROGRESS;
+	config_pending_decr(self);
 	kthread_exit(0);
 }
 
@@ -2135,7 +2135,7 @@ ipmi_attach(device_t parent, device_t self, void *aux)
 	    &sc->sc_kthread, "%s", device_xname(self)) != 0) {
 		aprint_error_dev(self, "unable to create thread, disabled\n");
 	} else
-		self->dv_flags |= DVF_ATTACH_INPROGRESS;
+		config_pending_incr(self);
 }
 
 static int
