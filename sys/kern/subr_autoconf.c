@@ -1907,6 +1907,8 @@ config_detach_enter(device_t dev)
 			error = 0;
 			break;
 		}
+		KASSERTMSG(dev->dv_detaching != curlwp,
+		    "recursively detaching %s", device_xname(dev));
 		error = cv_wait_sig(&config_misc_cv, &config_misc_lock);
 		if (error)
 			break;
