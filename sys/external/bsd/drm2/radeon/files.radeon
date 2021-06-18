@@ -11,6 +11,10 @@ device	radeondrmkmsfb: radeonfbbus, drmfb, drmfb_pci, wsemuldisplaydev
 attach	radeondrmkmsfb at radeonfbbus
 makeoptions	radeondrmkmsfb	"CPPFLAGS.radeondrmkmsfb"+="${CPPFLAGS.radeon}"
 
+# This code comes from the Linux kernel, which assumes signed
+# overflow is OK.
+makeoptions	radeon	"COPTS.radeon"+="-fwrapv"
+
 # Our overrides first.
 makeoptions	radeon	"CPPFLAGS.radeon"+="-I$S/external/bsd/drm2/include/radeon"
 makeoptions	radeon	"CPPFLAGS.radeon"+="-I$S/external/bsd/drm2/radeon"

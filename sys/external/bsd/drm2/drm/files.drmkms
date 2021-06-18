@@ -12,6 +12,10 @@ define	drmkms_i2c: drmkms_linux
 
 define	drmkms: drmkms_linux, drmkms_i2c, linux
 
+# This code comes from the Linux kernel, which assumes signed
+# overflow is OK.
+makeoptions	drmkms	"COPTS.drmkms"+="-fwrapv"
+
 # Overrides first.
 makeoptions 	drmkms	CPPFLAGS+="-I$S/external/bsd/drm2/include"
 makeoptions 	drmkms	CPPFLAGS+="-I$S/external/bsd/drm2/include/drm"
