@@ -32,6 +32,8 @@
 #ifndef _LINUX_PERF_EVENT_H_
 #define _LINUX_PERF_EVENT_H_
 
+#include <linux/rculist.h>
+
 struct pmu {
 };
 
