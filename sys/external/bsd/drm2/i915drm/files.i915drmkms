@@ -65,6 +65,7 @@ file	external/bsd/drm2/i915drm/i915_sysfs.c	i915drmkms
 file	external/bsd/drm2/i915drm/icl_dsi.c		i915drmkms
 file	external/bsd/drm2/i915drm/intel_gtt_subr.c	i915drmkms
 file	external/bsd/drm2/i915drm/intel_lpe_audio.c	i915drmkms
+file	external/bsd/drm2/i915drm/intel_region_lmem.c	i915drmkms
 file	external/bsd/drm2/i915drm/vlv_dsi.c	i915drmkms
 
 # Generated from i915drmkms2netbsd.
@@ -231,7 +232,7 @@ file	external/bsd/drm2/dist/drm/i915/intel_device_info.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_memory_region.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_pch.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_pm.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/intel_region_lmem.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/intel_region_lmem.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_runtime_pm.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_sideband.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/intel_uncore.c	i915drmkms
