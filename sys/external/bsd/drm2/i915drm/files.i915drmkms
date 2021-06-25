@@ -34,6 +34,7 @@ makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_HEARTBEAT_INTER
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_STOP_TIMEOUT=100" # milliseconds
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_PREEMPT_TIMEOUT=640" # milliseconds
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_CAPTURE_ERROR=1"
+makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_SELFTEST=0"
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_PM=1"
 
 makeoptions	i915drmkms	"CWARNFLAGS.i915drmkms"+="-Wno-missing-field-initializers"
