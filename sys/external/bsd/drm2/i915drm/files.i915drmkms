@@ -50,16 +50,20 @@ makeoptions 	i915drmkms 	"CWARNFLAGS.intel_sdvo.c"+="${${ACTIVE_CC} == gcc && ${
 makeoptions	intelfb		"CPPFLAGS.intelfb"+="${CPPFLAGS.i915drmkms}"
 makeoptions	intelfb		"CWARNFLAGS.intelfb"+="${CWARNFLAGS.i915drmkms}"
 
-file	external/bsd/drm2/i915drm/i915_gem_userptr.c	i915drmkms
-file	external/bsd/drm2/i915drm/i915_gemfs.c	i915drmkms
+# Local additions
 file	external/bsd/drm2/i915drm/i915_module.c		i915drmkms
 file	external/bsd/drm2/i915drm/i915_pci_autoconf.c	i915drmkms
+file	external/bsd/drm2/i915drm/intelfb.c		intelfb
+
+# Local overrides
+file	external/bsd/drm2/i915drm/i915_gem_userptr.c	i915drmkms
+file	external/bsd/drm2/i915drm/i915_gemfs.c	i915drmkms
 file	external/bsd/drm2/i915drm/i915_perf.c	i915drmkms
-file	external/bsd/drm2/i915drm/i915_sysfs.c	i915drmkms
 file	external/bsd/drm2/i915drm/i915_switcheroo.c	i915drmkms
+file	external/bsd/drm2/i915drm/i915_sysfs.c	i915drmkms
 file	external/bsd/drm2/i915drm/icl_dsi.c		i915drmkms
 file	external/bsd/drm2/i915drm/intel_gtt_subr.c	i915drmkms
-file	external/bsd/drm2/i915drm/intelfb.c		intelfb
+file	external/bsd/drm2/i915drm/intel_lpe_audio.c	i915drmkms
 file	external/bsd/drm2/i915drm/vlv_dsi.c	i915drmkms
 
 # Generated from i915drmkms2netbsd.
@@ -100,10 +104,10 @@ file	external/bsd/drm2/dist/drm/i915/display/intel_fbdev.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_fifo_underrun.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_frontbuffer.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_gmbus.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/display/intel_hdcp.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/display/intel_hdmi.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/display/intel_hdcp.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/display/intel_hdmi.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_hotplug.c	i915drmkms
-file	external/bsd/drm2/dist/drm/i915/display/intel_lpe_audio.c	i915drmkms
+#file	external/bsd/drm2/dist/drm/i915/display/intel_lpe_audio.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_lspcon.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_lvds.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_opregion.c	i915drmkms
