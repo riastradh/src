@@ -29,6 +29,13 @@
 #ifndef _LINUX_ASM_IOSF_MBI_H_
 #define _LINUX_ASM_IOSF_MBI_H_
 
+struct notifier_block;
+
+enum {
+	MBI_PMIC_BUS_ACCESS_BEGIN,
+	MBI_PMIC_BUS_ACCESS_END,
+};
+
 static inline void
 iosf_mbi_punit_acquire(void)
 {
@@ -41,6 +48,17 @@ iosf_mbi_punit_release(void)
 
 static inline void
 iosf_mbi_assert_punit_acquired(void)
+{
+}
+
+static inline void
+iosf_mbi_register_pmic_bus_access_notifier(struct notifier_block *notifier)
+{
+}
+
+static inline void
+iosf_mbi_unregister_pmic_bus_access_notifier_unlocked(
+    struct notifier_block *notifier)
 {
 }
 
