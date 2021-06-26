@@ -36,6 +36,7 @@ makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_PREEMPT_TIMEOUT
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_CAPTURE_ERROR=1"
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_DRM_I915_SELFTEST=0"
 makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_PM=1"
+makeoptions	i915drmkms	"CPPFLAGS.i915drmkms"+="-DCONFIG_INTEL_MEI_HDCP=0"
 
 makeoptions	i915drmkms	"CWARNFLAGS.i915drmkms"+="-Wno-missing-field-initializers"
 makeoptions	i915drmkms	"CWARNFLAGS.i915drmkms"+="-Wno-pointer-arith"
@@ -109,7 +110,7 @@ file	external/bsd/drm2/dist/drm/i915/display/intel_fbdev.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_fifo_underrun.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_frontbuffer.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_gmbus.c	i915drmkms
-#file	external/bsd/drm2/dist/drm/i915/display/intel_hdcp.c	i915drmkms
+file	external/bsd/drm2/dist/drm/i915/display/intel_hdcp.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_hdmi.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_hotplug.c	i915drmkms
 #file	external/bsd/drm2/dist/drm/i915/display/intel_lpe_audio.c	i915drmkms
