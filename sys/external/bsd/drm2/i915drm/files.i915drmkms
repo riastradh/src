@@ -68,6 +68,7 @@ file	external/bsd/drm2/i915drm/i915_sysfs.c	i915drmkms
 file	external/bsd/drm2/i915drm/i915_trace_points.c	i915drmkms
 file	external/bsd/drm2/i915drm/icl_dsi.c		i915drmkms
 file	external/bsd/drm2/i915drm/intel_gtt_subr.c	i915drmkms
+file	external/bsd/drm2/i915drm/intel_guc_log.c	i915drmkms
 file	external/bsd/drm2/i915drm/intel_lpe_audio.c	i915drmkms
 file	external/bsd/drm2/i915drm/intel_region_lmem.c	i915drmkms
 file	external/bsd/drm2/i915drm/vlv_dsi.c	i915drmkms
