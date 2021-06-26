@@ -110,7 +110,7 @@ file	external/bsd/drm2/dist/drm/i915/display/intel_fifo_underrun.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_frontbuffer.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_gmbus.c	i915drmkms
 #file	external/bsd/drm2/dist/drm/i915/display/intel_hdcp.c	i915drmkms
-#file	external/bsd/drm2/dist/drm/i915/display/intel_hdmi.c	i915drmkms
+file	external/bsd/drm2/dist/drm/i915/display/intel_hdmi.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_hotplug.c	i915drmkms
 #file	external/bsd/drm2/dist/drm/i915/display/intel_lpe_audio.c	i915drmkms
 file	external/bsd/drm2/dist/drm/i915/display/intel_lspcon.c	i915drmkms
