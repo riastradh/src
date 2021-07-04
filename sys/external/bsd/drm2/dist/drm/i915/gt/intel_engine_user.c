@@ -299,8 +299,8 @@ void intel_engines_driver_register(struct drm_i915_private *i915)
 #endif
 	}
 
-	if (IS_ENABLED(CONFIG_DRM_I915_SELFTEST) &&
-	    IS_ENABLED(CONFIG_DRM_I915_DEBUG_GEM)) {
+	if (1 || (IS_ENABLED(CONFIG_DRM_I915_SELFTEST) &&
+	    IS_ENABLED(CONFIG_DRM_I915_DEBUG_GEM))) {
 		struct intel_engine_cs *engine;
 		unsigned int isolation;
 		int class, inst;
