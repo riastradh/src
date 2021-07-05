@@ -52,6 +52,7 @@ makeoptions	amdgpu	"CWARNFLAGS.amdgpu_bo_list.c"+="-Wno-type-limits"
 makeoptions	amdgpu	"CWARNFLAGS.amdgpu_hw_ddc.c"+="-Wno-type-limits"
 makeoptions	amdgpu	"CWARNFLAGS.amdgpu_hw_generic.c"+="-Wno-type-limits"
 makeoptions	amdgpu	"CWARNFLAGS.amdgpu_hw_hpd.c"+="-Wno-type-limits"
+makeoptions	amdgpu	"CWARNFLAGS.amdgpu_navi10_ppt.c"+="-Wno-type-limits"
 
 ifdef amd64
 makeoptions	amdgpu	"COPTS.amdgpu_dcn20_resource.c"+="-mhard-float -msse -msse2"
