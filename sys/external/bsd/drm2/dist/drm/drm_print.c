@@ -378,6 +378,8 @@ void __drm_dbg(enum drm_debug_category category, const char *format, ...)
 	char symbuf[128];
 	va_list va;
 
+	printf("%s:%d\n", __func__, __LINE__);
+
 	if (!(__drm_debug & category))
 		return;
 
@@ -411,6 +413,8 @@ void __drm_err(const char *format, ...)
 #ifdef __NetBSD__
 	char symbuf[128];
 	va_list va;
+
+	printf("%s:%d\n", __func__, __LINE__);
 
 	drm_symstr((vaddr_t)__builtin_return_address(0), symbuf, sizeof symbuf);
 	printf("[" DRM_NAME ":%s] *ERROR* ", symbuf);

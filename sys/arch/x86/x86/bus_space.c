@@ -245,6 +245,7 @@ _x86_memio_map(bus_space_tag_t t, bus_addr_t bpa, bus_size_t size,
 	return x86_mem_add_mapping(bpa, size, flags, bshp);
 }
 
+#include <ddb/ddb.h>
 int
 bus_space_reserve(bus_space_tag_t t,
     bus_addr_t bpa,
@@ -254,6 +255,14 @@ bus_space_reserve(bus_space_tag_t t,
 	struct extent *ex;
 	int error;
 	bus_space_tag_t it;
+
+	if (x86_bus_space_is_mem(t) &&
+	    bpa <= 0xbc965018 &&
+	    bpa + size < 0xbc965018) {
+		printf("%s: tag=%p addr=0x%jx size=0x%jx flags=0x%x\n",
+		    __func__, t, (uintmax_t)bpa, (uintmax_t)size, flags);
+		db_stacktrace();
+	}
 
 	if ((t->bst_exists & BUS_SPACE_OVERRIDE_RESERVE) == 0)
 		;	/* skip override */

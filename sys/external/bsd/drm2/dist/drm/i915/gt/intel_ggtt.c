@@ -873,6 +873,7 @@ void i915_ggtt_driver_release(struct drm_i915_private *i915)
 
 static unsigned int gen6_get_total_gtt_size(u16 snb_gmch_ctl)
 {
+	printf("%s:%d snb_gmch_ctl=0x%x\n", __func__, __LINE__, snb_gmch_ctl);
 	snb_gmch_ctl >>= SNB_GMCH_GGMS_SHIFT;
 	snb_gmch_ctl &= SNB_GMCH_GGMS_MASK;
 	return snb_gmch_ctl << 20;
@@ -880,6 +881,7 @@ static unsigned int gen6_get_total_gtt_size(u16 snb_gmch_ctl)
 
 static unsigned int gen8_get_total_gtt_size(u16 bdw_gmch_ctl)
 {
+	printf("%s:%d bdw_gmch_ctl=0x%x\n", __func__, __LINE__, bdw_gmch_ctl);
 	bdw_gmch_ctl >>= BDW_GMCH_GGMS_SHIFT;
 	bdw_gmch_ctl &= BDW_GMCH_GGMS_MASK;
 	if (bdw_gmch_ctl)
@@ -896,6 +898,7 @@ static unsigned int gen8_get_total_gtt_size(u16 bdw_gmch_ctl)
 
 static unsigned int chv_get_total_gtt_size(u16 gmch_ctrl)
 {
+	printf("%s:%d gmch_ctrl=0x%x\n", __func__, __LINE__, gmch_ctrl);
 	gmch_ctrl >>= SNB_GMCH_GGMS_SHIFT;
 	gmch_ctrl &= SNB_GMCH_GGMS_MASK;
 
@@ -1013,6 +1016,8 @@ static int gen8_gmch_probe(struct i915_ggtt *ggtt)
 	unsigned int size;
 	u16 snb_gmch_ctl;
 	int err;
+
+	printf("%s:%d\n", __func__, __LINE__);
 
 	/* TODO: We're not aware of mappable constraints on gen8 yet */
 	if (!IS_DGFX(i915)) {
@@ -1168,6 +1173,8 @@ static int gen6_gmch_probe(struct i915_ggtt *ggtt)
 	u16 snb_gmch_ctl;
 	int err;
 
+	printf("%s:%d\n", __func__, __LINE__);
+
 	ggtt->gmadr = pci_resource(pdev, 2);
 	ggtt->mappable_end = resource_size(&ggtt->gmadr);
 
@@ -1234,6 +1241,8 @@ static int i915_gmch_probe(struct i915_ggtt *ggtt)
 	phys_addr_t gmadr_base;
 	int ret;
 
+	printf("%s:%d\n", __func__, __LINE__);
+
 	ret = intel_gmch_probe(i915->bridge_dev, i915->drm.pdev, NULL);
 	if (!ret) {
 		DRM_ERROR("failed to set up gmch\n");
@@ -1241,6 +1250,11 @@ static int i915_gmch_probe(struct i915_ggtt *ggtt)
 	}
 
 	intel_gtt_get(&ggtt->vm.total, &gmadr_base, &ggtt->mappable_end);
+	printf("%s:%d intel gtt got total=0x%jx base=0x%jx end=0x%jx\n",
+	    __func__, __LINE__,
+	    (uintmax_t)ggtt->vm.total,
+	    (uintmax_t)gmadr_base,
+	    (uintmax_t)ggtt->mappable_end);
 
 	ggtt->gmadr =
 		(struct resource)DEFINE_RES_MEM(gmadr_base, ggtt->mappable_end);
