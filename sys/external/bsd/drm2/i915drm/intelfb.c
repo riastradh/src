@@ -176,6 +176,7 @@ intelfb_shutdown(device_t self, int flags)
 {
 	struct intelfb_softc *const sc = device_private(self);
 
+	printf("%s: %s sc=%p\n", __func__, device_xname(self), sc);
 	return drmfb_shutdown(&sc->sc_drmfb, flags);
 }
 
