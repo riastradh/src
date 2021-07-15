@@ -171,6 +171,7 @@ ok:
 		iodev = dev;
 		btinfo_console.addr = getcomaddr(iodev - CONSDEV_COM0);
 		printf("set consaddr=0x%x\n", btinfo_console.addr);
+		wait_sec(5);
 		if (!btinfo_console.addr)
 			goto nocom;
 		cominit_x();
