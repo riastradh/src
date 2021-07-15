@@ -168,10 +168,10 @@ ok:
 	case CONSDEV_COM2:
 	case CONSDEV_COM3:
 		printf("set iodev=0x%x\n", dev);
+		printf("set consaddr=0x%x\n", getcomaddr(dev - CONSDEV_COM0));
+		wait_sec(5);
 		iodev = dev;
 		btinfo_console.addr = getcomaddr(iodev - CONSDEV_COM0);
-		printf("set consaddr=0x%x\n", btinfo_console.addr);
-		wait_sec(5);
 		if (!btinfo_console.addr)
 			goto nocom;
 		cominit_x();
