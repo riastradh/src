@@ -156,7 +156,9 @@ drmfb_pci_is_vga_console(struct drm_device *dev)
 {
 
 #if NVGA > 0
-	return vga_is_console(dev->pdev->pd_pa.pa_iot, -1);
+	bool is_console = vga_is_console(dev->pdev->pd_pa.pa_iot, -1);
+	printf("%s: is_console=%d\n", __func__, is_console);
+	return is_console;
 #else
 	return false;
 #endif
