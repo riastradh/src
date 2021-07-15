@@ -252,6 +252,10 @@ static int intelfb_create(struct drm_fb_helper *helper,
 		goto out_unpin;
 	}
 
+	printf("%s: fb paddr %p vaddr %p size=0x%jx\n", __func__,
+	    (void *)vma->node.start, (void *)vaddr, (uintmax_t)vma->node.size);
+	memset_io(vaddr, 0x53, vma->node.size);
+
         if (vma->obj->stolen && !prealloc)
 		memset_io(vaddr, 0, vma->node.size);
 
