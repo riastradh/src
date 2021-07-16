@@ -348,8 +348,10 @@ static void contexts_free_all(struct llist_node *list)
 	printf("%s: %d\n", __func__, __LINE__);
 }
 
+#include <ddb/ddb.h>
 static void contexts_flush_free(struct i915_gem_contexts *gc)
 {
+	db_stacktrace();
 	printf("%s: %d\n", __func__, __LINE__);
 	contexts_free_all(llist_del_all(&gc->free_list));
 	printf("%s: %d\n", __func__, __LINE__);
@@ -361,6 +363,11 @@ static void contexts_free_worker(struct work_struct *work)
 		container_of(work, typeof(*gc), free_work);
 
 	contexts_flush_free(gc);
+	__insn_barrier();
+	static int x;
+	x = 1;
+	(void)x;
+	return;
 }
 
 void i915_gem_context_release(struct kref *ref)
