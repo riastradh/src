@@ -311,7 +311,7 @@ static void i915_gem_context_free(struct i915_gem_context *ctx)
 {
 	GEM_BUG_ON(!i915_gem_context_is_closed(ctx));
 
-	printf("%s:%d ctx=%p\n", __func__, __LINE__, ctx);
+	printf("%s: %d\n", __func__, __LINE__);
 	spin_lock(&ctx->i915->gem.contexts.lock);
 	list_del(&ctx->link);
 	spin_unlock(&ctx->i915->gem.contexts.lock);
@@ -348,8 +348,10 @@ static void contexts_free_all(struct llist_node *list)
 	printf("%s: %d\n", __func__, __LINE__);
 }
 
+#include <ddb/ddb.h>
 static void contexts_flush_free(struct i915_gem_contexts *gc)
 {
+	db_stacktrace();
 	printf("%s: %d\n", __func__, __LINE__);
 	contexts_free_all(llist_del_all(&gc->free_list));
 	printf("%s: %d\n", __func__, __LINE__);
@@ -536,13 +538,11 @@ static void set_closed_name(struct i915_gem_context *ctx)
 		*s = '>';
 }
 
-#include <ddb/ddb.h>
 static void context_close(struct i915_gem_context *ctx)
 {
 	struct i915_address_space *vm;
 
-	printf("%s:%d ctx=%p\n", __func__, __LINE__, ctx);
-	db_stacktrace();
+	printf("%s: %d\n", __func__, __LINE__);
 	i915_gem_context_set_closed(ctx);
 	printf("%s: %d\n", __func__, __LINE__);
 	set_closed_name(ctx);
@@ -629,7 +629,6 @@ static int __context_set_persistence(struct i915_gem_context *ctx, bool state)
 	return 0;
 }
 
-#include <ddb/ddb.h>
 static struct i915_gem_context *
 __create_context(struct drm_i915_private *i915)
 {
@@ -672,9 +671,6 @@ __create_context(struct drm_i915_private *i915)
 	spin_lock(&i915->gem.contexts.lock);
 	list_add_tail(&ctx->link, &i915->gem.contexts.list);
 	spin_unlock(&i915->gem.contexts.lock);
-
-	printf("%s:%d ctx=%p\n", __func__, __LINE__, ctx);
-	db_stacktrace();
 
 	return ctx;
 
@@ -864,10 +860,6 @@ static int gem_context_register(struct i915_gem_context *ctx,
 	if (ret)
 		put_pid(fetch_and_zero(&ctx->pid));
 #endif
-
-	if (ret == 0)
-		printf("%s:%d idx=%lu ctx=%p\n", __func__, __LINE__,
-		    (unsigned long)*id, ctx);
 
 	return ret;
 }
@@ -2343,8 +2335,6 @@ int i915_gem_context_destroy_ioctl(struct drm_device *dev, void *data,
 	ctx = xa_erase(&file_priv->context_xa, args->ctx_id);
 	if (!ctx)
 		return -ENOENT;
-	printf("%s:%d idx=%lu ctx=%p\n", __func__, __LINE__,
-	    (unsigned long)args->ctx_id, ctx);
 
 	context_close(ctx);
 	return 0;
