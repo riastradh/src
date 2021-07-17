@@ -127,11 +127,9 @@ drmfb_attach(struct drmfb_softc *sc, const struct drmfb_attach_args *da)
 		} else
 #endif
 		if (genfb_is_console() && genfb_is_enabled()) {
-			printf("%s: genfb is console\n", __func__);
 			what_was_cons = CONS_GENFB;
 			prop_dictionary_set_bool(dict, "is_console", true);
 		} else {
-			printf("%s: am not console, boo\n", __func__);
 			what_was_cons = CONS_NONE;
 			prop_dictionary_set_bool(dict, "is_console", false);
 		}
@@ -311,8 +309,6 @@ bool
 drmfb_shutdown(struct drmfb_softc *sc, int flags __unused)
 {
 
-	printf("%s: sc=%p\n", __func__, sc);
-	printf("%s: dev=%p\n", __func__, sc->sc_da.da_dev);
 	genfb_enable_polling(sc->sc_da.da_dev);
 	return true;
 }
