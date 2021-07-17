@@ -908,8 +908,10 @@ void i915_gem_context_close(struct drm_file *file)
 
 	printf("%s: %d\n", __func__, __LINE__);
 
-	xa_for_each(&file_priv->context_xa, idx, ctx)
+	xa_for_each(&file_priv->context_xa, idx, ctx) {
+		printf("%s:%d idx=%lu ctx=%p\n", __func__, __LINE__, idx, ctx);
 		context_close(ctx);
+	}
 	printf("%s: %d\n", __func__, __LINE__);
 	xa_destroy(&file_priv->context_xa);
 
