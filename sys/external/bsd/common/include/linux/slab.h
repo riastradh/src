@@ -146,7 +146,7 @@ krealloc(void *ptr, size_t size, gfp_t gfp)
 	lm1->lm_size = size;
 	memcpy(lm1 + 1, lm + 1, MIN(lm1->lm_size, lm->lm_size));
 	kmem_free(lm, sizeof(*lm) + lm->lm_size);
-	return lm1;
+	return lm1 + 1;
 }
 
 static inline void
