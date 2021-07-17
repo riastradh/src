@@ -132,21 +132,23 @@ kcalloc(size_t n, size_t size, gfp_t gfp)
 static inline void *
 krealloc(void *ptr, size_t size, gfp_t gfp)
 {
-	struct linux_malloc *lm = (struct linux_malloc *)ptr - 1;
-	struct linux_malloc *lm1;
+	struct linux_malloc *olm, *nlm;
 	int kmflags = linux_gfp_to_kmem(gfp);
 
 	if (gfp & __GFP_ZERO)
-		lm1 = kmem_zalloc(sizeof(*lm1) + size, kmflags);
+		nlm = kmem_zalloc(sizeof(*nlm) + size, kmflags);
 	else
-		lm1 = kmem_alloc(sizeof(*lm1) + size, kmflags);
-	if (lm1 == NULL)
+		nlm = kmem_alloc(sizeof(*nlm) + size, kmflags);
+	if (nlm == NULL)
 		return NULL;
 
-	lm1->lm_size = size;
-	memcpy(lm1 + 1, lm + 1, MIN(lm1->lm_size, lm->lm_size));
-	kmem_free(lm, sizeof(*lm) + lm->lm_size);
-	return lm1 + 1;
+	nlm->lm_size = size;
+	if (ptr) {
+		olm = (struct linux_malloc *)ptr - 1;
+		memcpy(nlm + 1, olm + 1, MIN(nlm->lm_size, olm->lm_size));
+		kmem_free(olm, sizeof(*olm) + olm->lm_size);
+	}
+	return nlm + 1;
 }
 
 static inline void
