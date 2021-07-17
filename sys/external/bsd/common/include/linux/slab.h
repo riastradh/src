@@ -33,7 +33,6 @@
 #define _LINUX_SLAB_H_
 
 #include <sys/kmem.h>
-#include <sys/malloc.h>
 
 #include <machine/limits.h>
 
@@ -44,10 +43,12 @@
 
 #define	ARCH_KMALLOC_MINALIGN	4 /* XXX ??? */
 
-/* XXX Should use kmem, but Linux kfree doesn't take the size.  */
+struct linux_malloc {
+	size_t	lm_size;
+} __aligned(ALIGNBYTES + 1);
 
 static inline int
-linux_gfp_to_malloc(gfp_t gfp)
+linux_gfp_to_kmem(gfp_t gfp)
 {
 	int flags = 0;
 
@@ -62,7 +63,6 @@ linux_gfp_to_malloc(gfp_t gfp)
 	}
 
 	if (ISSET(gfp, __GFP_ZERO)) {
-		flags |= M_ZERO;
 		gfp &= ~__GFP_ZERO;
 	}
 
@@ -75,10 +75,10 @@ linux_gfp_to_malloc(gfp_t gfp)
 	    ((gfp & ~__GFP_WAIT) == (GFP_KERNEL & ~__GFP_WAIT)));
 
 	if (ISSET(gfp, __GFP_WAIT)) {
-		flags |= M_WAITOK;
+		flags |= KM_SLEEP;
 		gfp &= ~__GFP_WAIT;
 	} else {
-		flags |= M_NOWAIT;
+		flags |= KM_NOSLEEP;
 	}
 
 	return flags;
@@ -93,13 +93,26 @@ linux_gfp_to_malloc(gfp_t gfp)
 static inline void *
 kmalloc(size_t size, gfp_t gfp)
 {
-	return malloc(size, M_TEMP, linux_gfp_to_malloc(gfp));
+	struct linux_malloc *lm;
+	int kmflags = linux_gfp_to_kmem(gfp);
+
+	KASSERTMSG(size < SIZE_MAX - sizeof(*lm), "size=%zu", size);
+
+	if (gfp & __GFP_ZERO)
+		lm = kmem_zalloc(sizeof(*lm) + size, kmflags);
+	else
+		lm = kmem_alloc(sizeof(*lm) + size, kmflags);
+	if (lm == NULL)
+		return NULL;
+
+	lm->lm_size = size;
+	return lm + 1;
 }
 
 static inline void *
 kzalloc(size_t size, gfp_t gfp)
 {
-	return malloc(size, M_TEMP, (linux_gfp_to_malloc(gfp) | M_ZERO));
+	return kmalloc(size, gfp | __GFP_ZERO);
 }
 
 static inline void *
@@ -107,7 +120,7 @@ kmalloc_array(size_t n, size_t size, gfp_t gfp)
 {
 	if ((size != 0) && (n > (SIZE_MAX / size)))
 		return NULL;
-	return malloc((n * size), M_TEMP, linux_gfp_to_malloc(gfp));
+	return kmalloc(n * size, gfp);
 }
 
 static inline void *
@@ -119,14 +132,33 @@ kcalloc(size_t n, size_t size, gfp_t gfp)
 static inline void *
 krealloc(void *ptr, size_t size, gfp_t gfp)
 {
-	return realloc(ptr, size, M_TEMP, linux_gfp_to_malloc(gfp));
+	struct linux_malloc *lm = (struct linux_malloc *)ptr - 1;
+	struct linux_malloc *lm1;
+	int kmflags = linux_gfp_to_kmem(gfp);
+
+	if (gfp & __GFP_ZERO)
+		lm1 = kmem_zalloc(sizeof(*lm1) + size, kmflags);
+	else
+		lm1 = kmem_alloc(sizeof(*lm1) + size, kmflags);
+	if (lm1 == NULL)
+		return NULL;
+
+	lm1->lm_size = size;
+	memcpy(lm1 + 1, lm + 1, MIN(lm1->lm_size, lm->lm_size));
+	kmem_free(lm, sizeof(*lm) + lm->lm_size);
+	return lm1;
 }
 
 static inline void
 kfree(void *ptr)
 {
-	if (ptr != NULL)
-		free(ptr, M_TEMP);
+	struct linux_malloc *lm;
+
+	if (ptr == NULL)
+		return;
+
+	lm = (struct linux_malloc *)ptr - 1;
+	kmem_free(lm, sizeof(*lm) + lm->lm_size);
 }
 
 #define	SLAB_HWCACHE_ALIGN	__BIT(0)
