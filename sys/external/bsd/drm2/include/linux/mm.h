@@ -132,6 +132,12 @@ kvmalloc_array(size_t nelem, size_t elemsize, gfp_t gfp)
 	return kmalloc(nelem * elemsize, gfp);
 }
 
+/*
+ * XXX kvfree must additionally work on kmalloc (linux/slab.h) and
+ * vmalloc (linux/vmalloc.h).  If you change either of those, be sure
+ * to change this too.
+ */
+
 static inline void
 kvfree(void *ptr)
 {

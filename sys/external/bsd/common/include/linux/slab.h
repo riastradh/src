@@ -85,9 +85,8 @@ linux_gfp_to_kmem(gfp_t gfp)
 }
 
 /*
- * XXX vmalloc and kmalloc both use malloc(9).  If you change this, be
- * sure to update vmalloc in <linux/vmalloc.h> and kvfree in
- * <linux/mm.h>.
+ * XXX vmalloc and kmalloc both use this.  If you change that, be sure
+ * to update vmalloc in <linux/vmalloc.h> and kvfree in <linux/mm.h>.
  */
 
 static inline void *

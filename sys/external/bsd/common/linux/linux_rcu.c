@@ -267,6 +267,11 @@ gc_thread(void *cookie)
 			void *obj = head->rcuh_u.obj;
 			next = head->rcuh_next;
 			SDT_PROBE2(sdt, linux, rcu, kfree__free,  head, obj);
+#ifdef LOCKDEBUG
+			struct linux_malloc *lm =
+			    (struct linux_malloc *)obj - 1;
+			LOCKDEBUG_MEM_CHECK(obj, lm->lm_size);
+#endif
 			kfree(obj);
 			/* Can't dereference head or obj after this point.  */
 			SDT_PROBE2(sdt, linux, rcu, kfree__done,  head, obj);

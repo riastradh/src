@@ -43,6 +43,12 @@
 
 struct notifier_block;
 
+/*
+ * XXX vmalloc and kvmalloc both use kmalloc.  If you change that, be
+ * sure to update this so kvfree in <linux/mm.h> still works on vmalloc
+ * addresses.
+ */
+
 static inline bool
 is_vmalloc_addr(void *addr)
 {
