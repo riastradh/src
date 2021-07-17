@@ -87,10 +87,8 @@ getcomaddr(int idx)
 {
 	short addr;
 #ifdef CONSADDR
-	if (CONSADDR != 0) {
-		printf("%s: CONSADDR=0x%x\n", __func__, CONSADDR);
+	if (CONSADDR != 0)
 		return CONSADDR;
-	}
 #endif
 	/* read in BIOS data area */
 	pvbcopy((void *)(0x400 + 2 * idx), &addr, 2);
@@ -167,10 +165,8 @@ ok:
 	case CONSDEV_COM1:
 	case CONSDEV_COM2:
 	case CONSDEV_COM3:
-		printf("set iodev=0x%x\n", dev);
 		iodev = dev;
 		btinfo_console.addr = getcomaddr(iodev - CONSDEV_COM0);
-		printf("set consaddr=0x%x\n", btinfo_console.addr);
 		if (!btinfo_console.addr)
 			goto nocom;
 		cominit_x();
