@@ -279,6 +279,8 @@ drmfb_genfb_enable_polling(void *cookie)
 	struct drmfb_softc *const sc = container_of(genfb, struct drmfb_softc,
 	    sc_genfb);
 
+	printf("%s: genfb=%p sc=%p fb_helper=%p\n", __func__,
+	    genfb, sc, sc->sc_da.da_fb_helper);
 	return drm_fb_helper_debug_enter_fb(sc->sc_da.da_fb_helper);
 }
 
