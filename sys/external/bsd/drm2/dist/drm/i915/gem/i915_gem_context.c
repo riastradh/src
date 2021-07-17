@@ -311,48 +311,35 @@ static void i915_gem_context_free(struct i915_gem_context *ctx)
 {
 	GEM_BUG_ON(!i915_gem_context_is_closed(ctx));
 
-	printf("%s: %d\n", __func__, __LINE__);
 	spin_lock(&ctx->i915->gem.contexts.lock);
 	list_del(&ctx->link);
 	spin_unlock(&ctx->i915->gem.contexts.lock);
 
-	printf("%s: %d\n", __func__, __LINE__);
 	free_engines(rcu_access_pointer(ctx->engines));
 	mutex_destroy(&ctx->engines_mutex);
 
-	printf("%s: %d\n", __func__, __LINE__);
 	if (ctx->timeline)
 		intel_timeline_put(ctx->timeline);
-	printf("%s: %d\n", __func__, __LINE__);
 
 #ifndef __NetBSD__
 	put_pid(ctx->pid);
 #endif
 	mutex_destroy(&ctx->mutex);
 
-	printf("%s: %d\n", __func__, __LINE__);
 	kfree_rcu(ctx, rcu);
-	printf("%s: %d\n", __func__, __LINE__);
 }
 
 static void contexts_free_all(struct llist_node *list)
 {
 	struct i915_gem_context *ctx, *cn;
 
-	printf("%s: %d\n", __func__, __LINE__);
-	llist_for_each_entry_safe(ctx, cn, list, free_link) {
-		printf("%s: %d ctx=%p cn=%p\n", __func__, __LINE__, ctx, cn);
+	llist_for_each_entry_safe(ctx, cn, list, free_link)
 		i915_gem_context_free(ctx);
-		printf("%s: %d ctx=%p cn=%p\n", __func__, __LINE__, ctx, cn);
-	}
-	printf("%s: %d\n", __func__, __LINE__);
 }
 
 static void contexts_flush_free(struct i915_gem_contexts *gc)
 {
-	printf("%s: %d\n", __func__, __LINE__);
 	contexts_free_all(llist_del_all(&gc->free_list));
-	printf("%s: %d\n", __func__, __LINE__);
 }
 
 static void contexts_free_worker(struct work_struct *work)
@@ -535,23 +522,16 @@ static void context_close(struct i915_gem_context *ctx)
 {
 	struct i915_address_space *vm;
 
-	printf("%s: %d\n", __func__, __LINE__);
 	i915_gem_context_set_closed(ctx);
-	printf("%s: %d\n", __func__, __LINE__);
 	set_closed_name(ctx);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	mutex_lock(&ctx->mutex);
 
-	printf("%s: %d\n", __func__, __LINE__);
 	vm = i915_gem_context_vm(ctx);
-	printf("%s: %d\n", __func__, __LINE__);
 	if (vm)
 		i915_vm_close(vm);
 
-	printf("%s: %d\n", __func__, __LINE__);
 	ctx->file_priv = ERR_PTR(-EBADF);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	/*
 	 * The LUT uses the VMA as a backpointer to unref the object,
@@ -559,10 +539,8 @@ static void context_close(struct i915_gem_context *ctx)
 	 * the ppgtt).
 	 */
 	lut_close(ctx);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	mutex_unlock(&ctx->mutex);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	/*
 	 * If the user has disabled hangchecking, we can not be sure that
@@ -574,10 +552,8 @@ static void context_close(struct i915_gem_context *ctx)
 	if (!i915_gem_context_is_persistent(ctx) ||
 	    !i915_modparams.enable_hangcheck)
 		kill_context(ctx);
-	printf("%s: %d\n", __func__, __LINE__);
 
 	i915_gem_context_put(ctx);
-	printf("%s: %d\n", __func__, __LINE__);
 }
 
 static int __context_set_persistence(struct i915_gem_context *ctx, bool state)
@@ -814,7 +790,6 @@ void i915_gem_driver_release__contexts(struct drm_i915_private *i915)
 
 static int vm_idr_cleanup(int id, void *p, void *data)
 {
-	printf("%s: %d\n", __func__, __LINE__);
 	i915_vm_put(p);
 	return 0;
 }
@@ -899,23 +874,15 @@ void i915_gem_context_close(struct drm_file *file)
 	struct i915_gem_context *ctx;
 	unsigned long idx;
 
-	printf("%s: %d\n", __func__, __LINE__);
-
 	xa_for_each(&file_priv->context_xa, idx, ctx)
 		context_close(ctx);
-	printf("%s: %d\n", __func__, __LINE__);
 	xa_destroy(&file_priv->context_xa);
 
-	printf("%s: %d\n", __func__, __LINE__);
 	idr_for_each(&file_priv->vm_idr, vm_idr_cleanup, NULL);
-	printf("%s: %d\n", __func__, __LINE__);
 	idr_destroy(&file_priv->vm_idr);
-	printf("%s: %d\n", __func__, __LINE__);
 	mutex_destroy(&file_priv->vm_idr_lock);
 
-	printf("%s: %d\n", __func__, __LINE__);
 	contexts_flush_free(&i915->gem.contexts);
-	printf("%s: %d\n", __func__, __LINE__);
 }
 
 int i915_gem_vm_create_ioctl(struct drm_device *dev, void *data,

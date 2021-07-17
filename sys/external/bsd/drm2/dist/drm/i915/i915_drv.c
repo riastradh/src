@@ -1707,19 +1707,13 @@ static void i915_driver_postclose(struct drm_device *dev, struct drm_file *file)
 {
 	struct drm_i915_file_private *file_priv = file->driver_priv;
 
-	printf("%s\n", __func__);
-
 	i915_gem_context_close(file);
-	printf("%s: gem context closed\n", __func__);
 	i915_gem_release(dev, file);
-	printf("%s: gem released\n", __func__);
 
 	kfree_rcu(file_priv, rcu);
-	printf("%s: kfreed\n", __func__);
 
 	/* Catch up with all the deferred frees from "this" client */
 	i915_gem_flush_free_objects(to_i915(dev));
-	printf("%s: flushed free objects\n", __func__);
 }
 
 static void intel_suspend_encoders(struct drm_i915_private *dev_priv)
