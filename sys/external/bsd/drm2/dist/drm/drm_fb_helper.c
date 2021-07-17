@@ -172,10 +172,13 @@ int drm_fb_helper_debug_enter_fb(struct drm_fb_helper *helper)
 
 	list_for_each_entry(helper, &kernel_fb_helper_list, kernel_fb_list) {
 		drm_client_for_each_modeset_unlocked(mode_set, &helper->client) {
+			printf("%s: mode_set=%p\n", __func__, mode_set);
+			printf("%s: mode_set->crtc=%p\n", __func__, mode_set->crtc);
 			if (!mode_set->crtc->enabled)
 				continue;
 
 			funcs =	mode_set->crtc->helper_private;
+			printf("%s: mode_set->crtc->helper_private=%p\n", __func__, mode_set->crtc->helper_private);
 			if (funcs->mode_set_base_atomic == NULL)
 				continue;
 
