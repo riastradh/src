@@ -267,47 +267,35 @@ void drm_file_free(struct drm_file *file)
 	if (drm_core_check_feature(dev, DRIVER_LEGACY) &&
 	    dev->driver->preclose)
 		dev->driver->preclose(dev, file);
-	DRM_DEBUG("preclosed\n");
 
 	if (drm_core_check_feature(dev, DRIVER_LEGACY))
 		drm_legacy_lock_release(dev, file->filp);
-	DRM_DEBUG("legacy lock released\n");
 
 	if (drm_core_check_feature(dev, DRIVER_HAVE_DMA))
 		drm_legacy_reclaim_buffers(dev, file);
-	DRM_DEBUG("legacy buffers reclaimed\n");
 
 	drm_events_release(file);
-	DRM_DEBUG("events released\n");
 
 	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
 		drm_fb_release(file);
-		DRM_DEBUG("fb released\n");
 		drm_property_destroy_user_blobs(dev, file);
-		DRM_DEBUG("user blobs destroyed\n");
 	}
 
 	if (drm_core_check_feature(dev, DRIVER_SYNCOBJ))
 		drm_syncobj_release(file);
-	DRM_DEBUG("syncobj released\n");
 
 	if (drm_core_check_feature(dev, DRIVER_GEM))
 		drm_gem_release(dev, file);
-	DRM_DEBUG("gem released\n");
 
 	drm_legacy_ctxbitmap_flush(dev, file);
-	DRM_DEBUG("legacy ctxbitmap flushed\n");
 
 	if (drm_is_primary_client(file))
 		drm_master_release(file);
-	DRM_DEBUG("master released\n");
 
 	if (dev->driver->postclose)
 		dev->driver->postclose(dev, file);
-	DRM_DEBUG("postclosed\n");
 
 	drm_prime_destroy_file_private(&file->prime);
-	DRM_DEBUG("prime file privates destroyed\n");
 
 	WARN_ON(!list_empty(&file->event_list));
 
@@ -321,7 +309,6 @@ void drm_file_free(struct drm_file *file)
 #endif
 	mutex_destroy(&file->fbs_lock);
 	kfree(file);
-	DRM_DEBUG("stuff freed -- and we're done\n");
 }
 
 #ifndef __NetBSD__
