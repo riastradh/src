@@ -99,9 +99,9 @@ kmalloc(size_t size, gfp_t gfp)
 	KASSERTMSG(size < SIZE_MAX - sizeof(*lm), "size=%zu", size);
 
 	if (gfp & __GFP_ZERO)
-		lm = kmem_zalloc(sizeof(*lm) + size, kmflags);
+		lm = kmem_intr_zalloc(sizeof(*lm) + size, kmflags);
 	else
-		lm = kmem_alloc(sizeof(*lm) + size, kmflags);
+		lm = kmem_intr_alloc(sizeof(*lm) + size, kmflags);
 	if (lm == NULL)
 		return NULL;
 
@@ -136,9 +136,9 @@ krealloc(void *ptr, size_t size, gfp_t gfp)
 	int kmflags = linux_gfp_to_kmem(gfp);
 
 	if (gfp & __GFP_ZERO)
-		nlm = kmem_zalloc(sizeof(*nlm) + size, kmflags);
+		nlm = kmem_intr_zalloc(sizeof(*nlm) + size, kmflags);
 	else
-		nlm = kmem_alloc(sizeof(*nlm) + size, kmflags);
+		nlm = kmem_intr_alloc(sizeof(*nlm) + size, kmflags);
 	if (nlm == NULL)
 		return NULL;
 
@@ -146,7 +146,7 @@ krealloc(void *ptr, size_t size, gfp_t gfp)
 	if (ptr) {
 		olm = (struct linux_malloc *)ptr - 1;
 		memcpy(nlm + 1, olm + 1, MIN(nlm->lm_size, olm->lm_size));
-		kmem_free(olm, sizeof(*olm) + olm->lm_size);
+		kmem_intr_free(olm, sizeof(*olm) + olm->lm_size);
 	}
 	return nlm + 1;
 }
@@ -160,7 +160,7 @@ kfree(void *ptr)
 		return;
 
 	lm = (struct linux_malloc *)ptr - 1;
-	kmem_free(lm, sizeof(*lm) + lm->lm_size);
+	kmem_intr_free(lm, sizeof(*lm) + lm->lm_size);
 }
 
 #define	SLAB_HWCACHE_ALIGN	__BIT(0)

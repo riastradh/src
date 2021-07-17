@@ -32,8 +32,6 @@
 #ifndef _LINUX_MM_H_
 #define _LINUX_MM_H_
 
-#include <sys/malloc.h>
-
 #include <uvm/uvm_extern.h>
 #include <uvm/uvm_object.h>
 
@@ -134,17 +132,10 @@ kvmalloc_array(size_t nelem, size_t elemsize, gfp_t gfp)
 	return kmalloc(nelem * elemsize, gfp);
 }
 
-/*
- * XXX Requires that kmalloc in <linux/slab.h> and vmalloc in
- * <linux/vmalloc.h> both use malloc(9).  If you change either of
- * those, be sure to update this.
- */
 static inline void
 kvfree(void *ptr)
 {
-
-	if (ptr != NULL)
-		free(ptr, M_TEMP);
+	kfree(ptr);
 }
 
 static inline void

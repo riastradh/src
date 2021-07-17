@@ -32,22 +32,16 @@
 #ifndef _LINUX_VMALLOC_H_
 #define _LINUX_VMALLOC_H_
 
-#include <sys/malloc.h>
-
 #include <uvm/uvm_extern.h>
 
 #include <linux/mm.h>
 #include <linux/mm_types.h>
 #include <linux/overflow.h>
+#include <linux/slab.h>
 
 #include <asm/page.h>
 
 struct notifier_block;
-
-/*
- * XXX vmalloc and kmalloc both use malloc(9).  If you change this, be
- * sure to update kmalloc in <linux/slab.h> and kvfree in <linux/mm.h>.
- */
 
 static inline bool
 is_vmalloc_addr(void *addr)
@@ -58,27 +52,25 @@ is_vmalloc_addr(void *addr)
 static inline void *
 vmalloc(unsigned long size)
 {
-	return malloc(size, M_TEMP, M_WAITOK);
+	return kmalloc(size, GFP_KERNEL);
 }
 
 static inline void *
 vmalloc_user(unsigned long size)
 {
-	return malloc(size, M_TEMP, (M_WAITOK | M_ZERO));
+	return kzalloc(size, GFP_KERNEL);
 }
 
 static inline void *
 vzalloc(unsigned long size)
 {
-	return malloc(size, M_TEMP, (M_WAITOK | M_ZERO));
+	return kzalloc(size, GFP_KERNEL);
 }
 
 static inline void
 vfree(void *ptr)
 {
-	if (ptr == NULL)
-		return;
-	return free(ptr, M_TEMP);
+	return kfree(ptr);
 }
 
 #define	PAGE_KERNEL	UVM_PROT_RW
