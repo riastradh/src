@@ -695,7 +695,9 @@ void i915_gem_object_release_mmap_offset(struct drm_i915_gem_object *obj)
 
 	(void)mmo;
 	(void)mn;
+	printf("%s:%d start\n", __func__, __LINE__);
 	for (t = 0; t < I915_MMAP_NTYPES; t++) {
+		printf("%s:%d t=%d\n", __func__, __LINE__, t);
 		if (t == I915_MMAP_TYPE_GTT)
 			continue;
 		for (i = 0; i < obj->base.size >> PAGE_SHIFT; i++) {
@@ -705,11 +707,15 @@ void i915_gem_object_release_mmap_offset(struct drm_i915_gem_object *obj)
 			 * XXX Why do we have to have the spin lock
 			 * here at all?
 			 */
+			printf("%s:%d unlock\n", __func__, __LINE__);
 			spin_unlock(&obj->mmo.lock);
+			printf("%s:%d page protect\n", __func__, __LINE__);
 			pmap_page_protect(vm_page, VM_PROT_NONE);
+			printf("%s:%d lock\n", __func__, __LINE__);
 			spin_lock(&obj->mmo.lock);
 		}
 	}
+	printf("%s:%d end\n", __func__, __LINE__);
 #else
 	rbtree_postorder_for_each_entry_safe(mmo, mn,
 					     &obj->mmo.offsets, offset) {
@@ -738,8 +744,11 @@ void i915_gem_object_release_mmap_offset(struct drm_i915_gem_object *obj)
  */
 void i915_gem_object_release_mmap(struct drm_i915_gem_object *obj)
 {
+	printf("%s:%d\n", __func__, __LINE__);
 	i915_gem_object_release_mmap_gtt(obj);
+	printf("%s:%d\n", __func__, __LINE__);
 	i915_gem_object_release_mmap_offset(obj);
+	printf("%s:%d\n", __func__, __LINE__);
 }
 
 static struct i915_mmap_offset *
