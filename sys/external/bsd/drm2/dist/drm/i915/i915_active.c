@@ -338,6 +338,7 @@ out:
 	return &node->base;
 }
 
+#include <ddb/ddb.h>
 void __i915_active_init(struct i915_active *ref,
 			int (*active)(struct i915_active *ref),
 			void (*retire)(struct i915_active *ref),
@@ -347,6 +348,8 @@ void __i915_active_init(struct i915_active *ref,
 	unsigned long bits;
 
 	debug_active_init(ref);
+	printf("%s: ref=%p\n", __func__, ref);
+	db_stacktrace();
 
 	ref->flags = 0;
 	ref->active = active;
@@ -577,6 +580,7 @@ int i915_request_await_active(struct i915_request *rq, struct i915_active *ref)
 
 void i915_active_fini(struct i915_active *ref)
 {
+	printf("%s: ref=%p\n", __func__, ref);
 	debug_active_fini(ref);
 	GEM_BUG_ON(atomic_read(&ref->count));
 	GEM_BUG_ON(work_pending(&ref->work));
